@@ -1,0 +1,9 @@
+source 'https://rubygems.org'
+
+group :development do
+  gem 'coffee-script'
+  gem 'sass'
+  gem 'guard'
+  gem 'guard-coffeescript'
+  gem 'guard-sass'
+end
