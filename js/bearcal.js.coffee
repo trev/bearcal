@@ -6,9 +6,8 @@
     monthFullName : ['January','February','March','April','May','June','July','August','September','October','November','December']
     days          : ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
 
-  _getRowCount: ->
-    
-  _prepDate: ->
+  # Set startdate as a Date object
+  _setDate: ->
     if typeof @options.startDate isnt "object"
       date = @options.startDate.split('/')
       @options.startDate = new Date(date[0], date[1], date[2])
@@ -21,31 +20,6 @@
   _getDaysInMonth: (year, month)  ->
     new Date(year, month, 0).getDate() 
 
-  # Generate month titles html
-  _getMonthsHtml: ->
-    monthshtml = ""
-    year = @options.startDate.getFullYear()
-    month = @options.startDate.getMonth()
-    i = 0
-    while i < @options.period
-      if month > 11
-        month = 0  
-        year++
-
-      console.log('in')
-      monthshtml += """
-                  <div class="month_box">
-                    <div class="month_header">#{@options.monthFullName[month]} #{year}</div>
-                    <div class="month_wrapper">
-                      #{@_getWeekdaysHtml()}
-                      #{@_getDaysHtml(year, month)}
-                    </div>
-                  </div>
-                  """
-      month++
-      i++
-    monthshtml
-    
   # Generate weekday titles html
   _getWeekdaysHtml: ->
     weekdayshtml = ""
@@ -56,10 +30,9 @@
   _getDaysHtml: (year, month) ->
     dayshtml = ""
     daycount = 0
-    rowcount = 0
     
-    # Find out what position to start first day on, so we can append blanks
-    blanks = @options.startDate.getDay() 
+    # Find out what position to start first day on and append blanks if needed
+    blanks = @_getDayOfWeek(year, month, 1)
     if blanks > 0
       i = 0
       while i < blanks
@@ -67,33 +40,50 @@
         daycount++
         i++
 
-    # Start adding days
+    # Start adding days and track how many rows we've made
     i = 0
     while i < @_getDaysInMonth(year,month)
-      rowcount++ if daycount % 6 is 0
-      dayshtml += "<div class=\"day_box\" rel=\"\">#{i+1}</div>\n"
+      dayshtml += "<div class=\"day_box\" rel=\"#{year}-#{month}-#{i+1}\">#{i+1}</div>\n"
       daycount++
       i++
 
-    # Ensure there are atleast 7 rows so that each month is the same size
-    if rowcount < 7
-      #Find out how many more empty days we need to add in order to achieve 7 rows
-      empties = ((6 - rowcount) * 7) + (7- @_getDayOfWeek(year, month, i))
-      j = 0
-      while j < empties
-        dayshtml += "<div class=\"empty_day_box\"></div>"
-        j++
+    # Ensure there are 42 day boxes to ensure each month is the same size
+    while daycount < 42
+      dayshtml += "<div class=\"empty_day_box\"></div>"
+      daycount++
 
     dayshtml
 
-  _buildCalendar: ->
+  _getCalendar: ->
+    calendarhtml = "<div class=\"year_box\">"
+    year = @options.startDate.getFullYear()
+    month = @options.startDate.getMonth()
+    i = 0
+    while i < @options.period
+      # Track year change and react accordingly
+      if month > 11 
+        month = 0  
+        year++
+
+      calendarhtml += """
+                  <div class="month_box">
+                    <div class="month_header">#{@options.monthFullName[month]} #{year}</div>
+                    <div class="month_wrapper">
+                      #{@_getWeekdaysHtml()}
+                      #{@_getDaysHtml(year, month)}
+                    </div>
+                  </div>
+                  """
+      month++
+      i++
+
+    calendarhtml += "</div>"
 
   _create: ->
-    console.log(@options.startDate)
-    console.log(@_getMonthsHtml())
+    @element.append(@_getCalendar())
 
   _init: ->
-    @_prepDate()
+    @_setDate()
 
   destroy: ->
 

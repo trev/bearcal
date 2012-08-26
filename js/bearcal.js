@@ -8,8 +8,7 @@
         monthFullName: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
         days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
       },
-      _getRowCount: function() {},
-      _prepDate: function() {
+      _setDate: function() {
         var date;
         if (typeof this.options.startDate !== "object") {
           date = this.options.startDate.split('/');
@@ -22,24 +21,6 @@
       _getDaysInMonth: function(year, month) {
         return new Date(year, month, 0).getDate();
       },
-      _getMonthsHtml: function() {
-        var i, month, monthshtml, year;
-        monthshtml = "";
-        year = this.options.startDate.getFullYear();
-        month = this.options.startDate.getMonth();
-        i = 0;
-        while (i < this.options.period) {
-          if (month > 11) {
-            month = 0;
-            year++;
-          }
-          console.log('in');
-          monthshtml += "<div class=\"month_box\">\n  <div class=\"month_header\">" + this.options.monthFullName[month] + " " + year + "</div>\n  <div class=\"month_wrapper\">\n    " + (this._getWeekdaysHtml()) + "\n    " + (this._getDaysHtml(year, month)) + "\n  </div>\n</div>";
-          month++;
-          i++;
-        }
-        return monthshtml;
-      },
       _getWeekdaysHtml: function() {
         var day, weekdayshtml, _i, _len, _ref;
         weekdayshtml = "";
@@ -51,11 +32,10 @@
         return weekdayshtml;
       },
       _getDaysHtml: function(year, month) {
-        var blanks, daycount, dayshtml, empties, i, j, rowcount;
+        var blanks, daycount, dayshtml, i;
         dayshtml = "";
         daycount = 0;
-        rowcount = 0;
-        blanks = this.options.startDate.getDay();
+        blanks = this._getDayOfWeek(year, month, 1);
         if (blanks > 0) {
           i = 0;
           while (i < blanks) {
@@ -66,30 +46,38 @@
         }
         i = 0;
         while (i < this._getDaysInMonth(year, month)) {
-          if (daycount % 6 === 0) {
-            rowcount++;
-          }
-          dayshtml += "<div class=\"day_box\" rel=\"\">" + (i + 1) + "</div>\n";
+          dayshtml += "<div class=\"day_box\" rel=\"" + year + "-" + month + "-" + (i + 1) + "\">" + (i + 1) + "</div>\n";
           daycount++;
           i++;
         }
-        if (rowcount < 7) {
-          empties = ((6 - rowcount) * 7) + (7 - this._getDayOfWeek(year, month, i));
-          j = 0;
-          while (j < empties) {
-            dayshtml += "<div class=\"empty_day_box\"></div>";
-            j++;
-          }
+        while (daycount < 42) {
+          dayshtml += "<div class=\"empty_day_box\"></div>";
+          daycount++;
         }
         return dayshtml;
       },
-      _buildCalendar: function() {},
+      _getCalendar: function() {
+        var calendarhtml, i, month, year;
+        calendarhtml = "<div class=\"year_box\">";
+        year = this.options.startDate.getFullYear();
+        month = this.options.startDate.getMonth();
+        i = 0;
+        while (i < this.options.period) {
+          if (month > 11) {
+            month = 0;
+            year++;
+          }
+          calendarhtml += "<div class=\"month_box\">\n  <div class=\"month_header\">" + this.options.monthFullName[month] + " " + year + "</div>\n  <div class=\"month_wrapper\">\n    " + (this._getWeekdaysHtml()) + "\n    " + (this._getDaysHtml(year, month)) + "\n  </div>\n</div>";
+          month++;
+          i++;
+        }
+        return calendarhtml += "</div>";
+      },
       _create: function() {
-        console.log(this.options.startDate);
-        return console.log(this._getMonthsHtml());
+        return this.element.append(this._getCalendar());
       },
       _init: function() {
-        return this._prepDate();
+        return this._setDate();
       },
       destroy: function() {},
       _setOption: function(key, value) {},

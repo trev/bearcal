@@ -84,6 +84,72 @@ textarea {
 /* ==========================================================================
    Author's custom styles
    ========================================================================== */
+.day_box, .empty_day_box, .upper_left_hover, .lower_right_hover, .full_day, .active_am, .active_pm {
+  background: url(/img/corner-sprites.png) #fbfbfb;
+  margin-top: 1px;
+  margin-left: 1px;
+  border: 1px solid #eee;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  float: left;
+  line-height: 20px;
+  text-align: center;
+  color: #5E5E5E; }
+
+.hover_am, .active_am, .highlight_am {
+  background-position: 60px 0;
+  color: #414141; }
+
+.hover_pm, .active_pm, .highlight_pm {
+  background-position: 40px 0;
+  color: #414141; }
+
+.hover_full_day, .full_day, .highlight_full_day {
+  background-position: 20px 0;
+  color: #414141; }
+
+.year_box {
+  width: 680px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif; }
+
+.month_header {
+  font-family: 'NobileBold', sans-serif;
+  letter-spacing: -1px;
+  width: auto;
+  text-align: center;
+  background: #E6E6E6;
+  margin: 0 0 1px 0;
+  padding: 3px 0 4px 0;
+  color: #414141;
+  font-size: 13px; }
+
+.month_box {
+  width: 162px;
+  float: left;
+  margin: 4px 4px 4px 0;
+  border: 1px solid #E0E0E0;
+  padding: 0 0 1px 0;
+  background: white; }
+
+.month_wrapper {
+  width: 161px;
+  margin: 0 auto;
+  background: white; }
+
+.wday_box {
+  border: 1px solid #eee;
+  margin-top: 1px;
+  margin-left: 1px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  float: left;
+  line-height: 20px;
+  text-align: center;
+  background: #C8C8C8; }
+
 /* ==========================================================================
    Helper classes
    ========================================================================== */
