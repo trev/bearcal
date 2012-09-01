@@ -3,8 +3,13 @@
   options:
     startDate     : new Date()
     period        : 12
+    scrollPeriod  : 4
     monthFullName : ['January','February','March','April','May','June','July','August','September','October','November','December']
     days          : ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
+
+  _options:
+    loadedMonths : [] 
+    displayPosition: []
 
   # Set startdate as a Date object
   _setDate: ->
@@ -54,10 +59,37 @@
 
     dayshtml
 
+  _getMonth: (year, month) ->
+    # Track loaded months
+    @_setLoadedMonths(year, month)
+    
+    # Prepare month
+    """
+    <div class="month_box">
+      <div class="month_header">#{@options.monthFullName[month]} #{year}</div>
+      <div class="month_wrapper">
+        #{@_getWeekdaysHtml()}
+        #{@_getDaysHtml(year, month)}
+      </div>
+    </div>
+    """
+
+  _setLoadedMonths: (year, month) ->
+    if @_options.loadedMonths.length isnt 0
+      date = @_options.loadedMonths[0].split("-")
+      if new Date(year, month).getTime() < new Date(date[0], date[1]).getTime()
+        @_options.loadedMonths.unshift(year + "-" + month)
+      else
+        @_options.loadedMonths.push(year + "-" + month)
+    else
+      @_options.loadedMonths.push(year + "-" + month)
+    
   _getCalendar: ->
-    calendarhtml = "<div class=\"year_box\">"
+    calendarhtml = "<div class=\"prev_months\">Previous #{@options.scrollPeriod} Months</div>"
+    calendarhtml += "<div class=\"year_box clearfix\">\n  <div class=\"slider_container clearfix\">\n"
     year = @options.startDate.getFullYear()
     month = @options.startDate.getMonth()
+
     i = 0
     while i < @options.period
       # Track year change and react accordingly
@@ -65,22 +97,56 @@
         month = 0  
         year++
 
-      calendarhtml += """
-                  <div class="month_box">
-                    <div class="month_header">#{@options.monthFullName[month]} #{year}</div>
-                    <div class="month_wrapper">
-                      #{@_getWeekdaysHtml()}
-                      #{@_getDaysHtml(year, month)}
-                    </div>
-                  </div>
-                  """
+      calendarhtml += @_getMonth(year, month)
       month++
       i++
 
-    calendarhtml += "</div>"
+    calendarhtml += "</div></div>"
+    calendarhtml += "<div class=\"next_months\">Next #{@options.scrollPeriod} Months</div>"
+
+  _getMonthsByPeriod: (year, month, period) -> 
+    movement = if period < 0 then -1 else 1
+    i = Math.abs(period)
+    results = []
+    html = ""
+  
+    while i isnt 0
+      month += movement
+      tmp = month % 12
+      year = if tmp is 0 then year + movement else year
+      _month = if tmp < 0 then (tmp+12) else tmp
+      results.push(year + "-" + _month)
+      --i
+
+    if movement is -1 then results.reverse()
+    
+    for result in results
+      date = result.split("-")
+      html += @_getMonth(date[0], date[1])
+
+    html
+
+  _splitDate: (index) ->
+    console.log(index)
+    date = @_options.loadedMonths[index].split("-")
+    i = 0
+    while i < date.length
+      date[i] = parseInt(date[i])
+      i++
+    date
 
   _create: ->
-    @element.append(@_getCalendar())
+    @element.append @_getCalendar()
+    $('.prev_months').click =>
+      height = parseFloat($('.slider_container').css("marginTop")) - $('.month_box').outerHeight(true)
+      animatemargin = height + $('.month_box').outerHeight(true)
+      date = @_splitDate(0)
+      $('.slider_container').prepend(@_getMonthsByPeriod(date[0],date[1],-4)).css("marginTop" : height+"px").animate({marginTop: animatemargin+"px"}, 1000)
+
+    $('.next_months').click =>
+      height = $('.month_box').outerHeight(true) - parseFloat($('.slider_container').css("marginTop"))
+      date = @_splitDate(@_options.loadedMonths.length-1)
+      $('.slider_container').append(@_getMonthsByPeriod(date[0],date[1],4)).animate({marginTop: -height+"px"}, 1000)
 
   _init: ->
     @_setDate()

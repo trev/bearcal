@@ -5,8 +5,13 @@
       options: {
         startDate: new Date(),
         period: 12,
+        scrollPeriod: 4,
         monthFullName: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
         days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+      },
+      _options: {
+        loadedMonths: [],
+        displayPosition: []
       },
       _setDate: function() {
         var date;
@@ -56,9 +61,27 @@
         }
         return dayshtml;
       },
+      _getMonth: function(year, month) {
+        this._setLoadedMonths(year, month);
+        return "<div class=\"month_box\">\n  <div class=\"month_header\">" + this.options.monthFullName[month] + " " + year + "</div>\n  <div class=\"month_wrapper\">\n    " + (this._getWeekdaysHtml()) + "\n    " + (this._getDaysHtml(year, month)) + "\n  </div>\n</div>";
+      },
+      _setLoadedMonths: function(year, month) {
+        var date;
+        if (this._options.loadedMonths.length !== 0) {
+          date = this._options.loadedMonths[0].split("-");
+          if (new Date(year, month).getTime() < new Date(date[0], date[1]).getTime()) {
+            return this._options.loadedMonths.unshift(year + "-" + month);
+          } else {
+            return this._options.loadedMonths.push(year + "-" + month);
+          }
+        } else {
+          return this._options.loadedMonths.push(year + "-" + month);
+        }
+      },
       _getCalendar: function() {
         var calendarhtml, i, month, year;
-        calendarhtml = "<div class=\"year_box\">";
+        calendarhtml = "<div class=\"prev_months\">Previous " + this.options.scrollPeriod + " Months</div>";
+        calendarhtml += "<div class=\"year_box clearfix\">\n  <div class=\"slider_container clearfix\">\n";
         year = this.options.startDate.getFullYear();
         month = this.options.startDate.getMonth();
         i = 0;
@@ -67,14 +90,70 @@
             month = 0;
             year++;
           }
-          calendarhtml += "<div class=\"month_box\">\n  <div class=\"month_header\">" + this.options.monthFullName[month] + " " + year + "</div>\n  <div class=\"month_wrapper\">\n    " + (this._getWeekdaysHtml()) + "\n    " + (this._getDaysHtml(year, month)) + "\n  </div>\n</div>";
+          calendarhtml += this._getMonth(year, month);
           month++;
           i++;
         }
-        return calendarhtml += "</div>";
+        calendarhtml += "</div></div>";
+        return calendarhtml += "<div class=\"next_months\">Next " + this.options.scrollPeriod + " Months</div>";
+      },
+      _getMonthsByPeriod: function(year, month, period) {
+        var date, html, i, movement, result, results, tmp, _i, _len, _month;
+        movement = period < 0 ? -1 : 1;
+        i = Math.abs(period);
+        results = [];
+        html = "";
+        while (i !== 0) {
+          month += movement;
+          tmp = month % 12;
+          year = tmp === 0 ? year + movement : year;
+          _month = tmp < 0 ? tmp + 12 : tmp;
+          results.push(year + "-" + _month);
+          --i;
+        }
+        if (movement === -1) {
+          results.reverse();
+        }
+        for (_i = 0, _len = results.length; _i < _len; _i++) {
+          result = results[_i];
+          date = result.split("-");
+          html += this._getMonth(date[0], date[1]);
+        }
+        return html;
+      },
+      _splitDate: function(index) {
+        var date, i;
+        console.log(index);
+        date = this._options.loadedMonths[index].split("-");
+        i = 0;
+        while (i < date.length) {
+          date[i] = parseInt(date[i]);
+          i++;
+        }
+        return date;
       },
       _create: function() {
-        return this.element.append(this._getCalendar());
+        var _this = this;
+        this.element.append(this._getCalendar());
+        $('.prev_months').click(function() {
+          var animatemargin, date, height;
+          height = parseFloat($('.slider_container').css("marginTop")) - $('.month_box').outerHeight(true);
+          animatemargin = height + $('.month_box').outerHeight(true);
+          date = _this._splitDate(0);
+          return $('.slider_container').prepend(_this._getMonthsByPeriod(date[0], date[1], -4)).css({
+            "marginTop": height + "px"
+          }).animate({
+            marginTop: animatemargin + "px"
+          }, 1000);
+        });
+        return $('.next_months').click(function() {
+          var date, height;
+          height = $('.month_box').outerHeight(true) - parseFloat($('.slider_container').css("marginTop"));
+          date = _this._splitDate(_this._options.loadedMonths.length - 1);
+          return $('.slider_container').append(_this._getMonthsByPeriod(date[0], date[1], 4)).animate({
+            marginTop: -height + "px"
+          }, 1000);
+        });
       },
       _init: function() {
         return this._setDate();

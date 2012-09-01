@@ -112,7 +112,9 @@ textarea {
 .year_box {
   width: 680px;
   margin: 0 auto;
-  font-family: Arial, sans-serif; }
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+  height: 594px; }
 
 .month_header {
   font-family: 'NobileBold', sans-serif;

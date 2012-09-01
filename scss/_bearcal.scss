@@ -20,6 +20,11 @@
   width: 680px; // (.month_box::width + .month_box::border + .month_box::margin) * amount of months per row
   margin: 0 auto;
   font-family: Arial, sans-serif;
+  overflow: hidden;
+  height: 594px;
+}
+
+.slider_container {
 }
 
 .month_header {

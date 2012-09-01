@@ -26,7 +26,10 @@
 .year_box {
   width: 680px;
   margin: 0 auto;
-  font-family: Arial, sans-serif; }
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+  height: 585px;
+  background: black; }
 
 .month_header {
   font-family: 'NobileBold', sans-serif;
