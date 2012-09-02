@@ -123,7 +123,6 @@
       },
       _splitDate: function(index) {
         var date, i;
-        console.log(index);
         date = this._options.loadedMonths[index].split("-");
         i = 0;
         while (i < date.length) {
@@ -137,22 +136,26 @@
         this.element.append(this._getCalendar());
         $('.prev_months').click(function() {
           var animatemargin, date, height;
-          height = parseFloat($('.slider_container').css("marginTop")) - $('.month_box').outerHeight(true);
-          animatemargin = height + $('.month_box').outerHeight(true);
-          date = _this._splitDate(0);
-          return $('.slider_container').prepend(_this._getMonthsByPeriod(date[0], date[1], -4)).css({
-            "marginTop": height + "px"
-          }).animate({
-            marginTop: animatemargin + "px"
-          }, 1000);
+          if (!$('.slider_container').is(':animated')) {
+            height = parseFloat($('.slider_container').css("marginTop")) - $('.month_box').outerHeight(true);
+            animatemargin = height + $('.month_box').outerHeight(true);
+            date = _this._splitDate(0);
+            return $('.slider_container').prepend(_this._getMonthsByPeriod(date[0], date[1], -4)).css({
+              "marginTop": height + "px"
+            }).animate({
+              marginTop: animatemargin + "px"
+            }, 1000);
+          }
         });
         return $('.next_months').click(function() {
           var date, height;
-          height = $('.month_box').outerHeight(true) - parseFloat($('.slider_container').css("marginTop"));
-          date = _this._splitDate(_this._options.loadedMonths.length - 1);
-          return $('.slider_container').append(_this._getMonthsByPeriod(date[0], date[1], 4)).animate({
-            marginTop: -height + "px"
-          }, 1000);
+          if (!$('.slider_container').is(':animated')) {
+            height = $('.month_box').outerHeight(true) - parseFloat($('.slider_container').css("marginTop"));
+            date = _this._splitDate(_this._options.loadedMonths.length - 1);
+            return $('.slider_container').append(_this._getMonthsByPeriod(date[0], date[1], 4)).animate({
+              marginTop: -height + "px"
+            }, 1000);
+          }
         });
       },
       _init: function() {

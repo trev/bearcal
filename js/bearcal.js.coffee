@@ -127,7 +127,6 @@
     html
 
   _splitDate: (index) ->
-    console.log(index)
     date = @_options.loadedMonths[index].split("-")
     i = 0
     while i < date.length
@@ -138,15 +137,17 @@
   _create: ->
     @element.append @_getCalendar()
     $('.prev_months').click =>
-      height = parseFloat($('.slider_container').css("marginTop")) - $('.month_box').outerHeight(true)
-      animatemargin = height + $('.month_box').outerHeight(true)
-      date = @_splitDate(0)
-      $('.slider_container').prepend(@_getMonthsByPeriod(date[0],date[1],-4)).css("marginTop" : height+"px").animate({marginTop: animatemargin+"px"}, 1000)
+      if !$('.slider_container').is(':animated')
+        height = parseFloat($('.slider_container').css("marginTop")) - $('.month_box').outerHeight(true)
+        animatemargin = height + $('.month_box').outerHeight(true)
+        date = @_splitDate(0)
+        $('.slider_container').prepend(@_getMonthsByPeriod(date[0],date[1],-4)).css("marginTop" : height+"px").animate({marginTop: animatemargin+"px"}, 1000)
 
     $('.next_months').click =>
-      height = $('.month_box').outerHeight(true) - parseFloat($('.slider_container').css("marginTop"))
-      date = @_splitDate(@_options.loadedMonths.length-1)
-      $('.slider_container').append(@_getMonthsByPeriod(date[0],date[1],4)).animate({marginTop: -height+"px"}, 1000)
+      if !$('.slider_container').is(':animated')
+        height = $('.month_box').outerHeight(true) - parseFloat($('.slider_container').css("marginTop"))
+        date = @_splitDate(@_options.loadedMonths.length-1)
+        $('.slider_container').append(@_getMonthsByPeriod(date[0],date[1],4)).animate({marginTop: -height+"px"}, 1000)
 
   _init: ->
     @_setDate()
