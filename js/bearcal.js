@@ -13,7 +13,7 @@
       },
       _options: {
         loadedMonths: [],
-        displayPosition: []
+        displayedMonths: []
       },
       _setDate: function() {
         var date;
@@ -66,12 +66,27 @@
       _getMonth: function(year, month) {
         var nth;
         this._setLoadedMonths(year, month);
+        if (this._options.displayedMonths.length < this.options.period) {
+          this._setDisplayedMonths(year, month);
+        }
         nth = this._options.loadedMonths.length % this.options.nthMonth;
         return "<div class=\"month_box " + (nth === 0 ? this.options.nthMonthClass : "") + "\">\n  <div class=\"month_header\">" + this.options.monthFullName[month] + " " + year + "</div>\n  <div class=\"month_wrapper\">\n    " + (this._getWeekdaysHtml()) + "\n    " + (this._getDaysHtml(year, month)) + "\n  </div>\n</div>";
       },
       _setLoadedMonths: function(year, month) {
         this._options.loadedMonths.push(year + "-" + month);
         return this._options.loadedMonths.sort(this._dateCompare);
+      },
+      _setDisplayedMonths: function(year, month, direction) {
+        this._options.displayedMonths.push(year + "-" + month);
+        this._options.displayedMonths.sort(this._dateCompare);
+        if (typeof direction !== "undefined") {
+          if (direction === -1) {
+            this._options.displayedMonths.pop();
+          }
+          if (direction === 1) {
+            return this._options.displayedMonths.shift();
+          }
+        }
       },
       _dateCompare: function(a, b) {
         a = a.split("-");
@@ -106,8 +121,12 @@
         while (i !== 0) {
           month += movement;
           tmp = month % 12;
-          year = tmp === 0 ? year + movement : year;
           _month = tmp < 0 ? tmp + 12 : tmp;
+          if (movement === -1) {
+            year = _month === 11 ? year + movement : year;
+          } else {
+            year = _month === 0 ? year + movement : year;
+          }
           results.push(year + "-" + _month);
           --i;
         }
@@ -117,13 +136,16 @@
         for (_i = 0, _len = results.length; _i < _len; _i++) {
           result = results[_i];
           date = result.split("-");
-          html += this._getMonth(date[0], date[1]);
+          if (~$.inArray(result, this._options.loadedMonths) === 0) {
+            html += this._getMonth(date[0], date[1]);
+          }
+          this._setDisplayedMonths(date[0], date[1], movement);
         }
         return html;
       },
-      _splitDate: function(index) {
+      _splitDate: function(index, source) {
         var date, i;
-        date = this._options.loadedMonths[index].split("-");
+        date = source[index].split("-");
         i = 0;
         while (i < date.length) {
           date[i] = parseInt(date[i]);
@@ -135,16 +157,24 @@
         var _this = this;
         this.element.append(this._getCalendar());
         $('.prev_months').click(function() {
-          var animatemargin, date, height;
+          var animatemargin, date, height, html;
           if (!$('.slider_container').is(':animated')) {
             height = parseFloat($('.slider_container').css("marginTop")) - $('.month_box').outerHeight(true);
-            animatemargin = height + $('.month_box').outerHeight(true);
-            date = _this._splitDate(0);
-            $('.slider_container').prepend(_this._getMonthsByPeriod(date[0], date[1], -4)).css({
-              "marginTop": height + "px"
-            }).animate({
-              marginTop: animatemargin + "px"
-            }, 1000);
+            animatemargin = parseFloat($('.slider_container').css("marginTop")) + $('.month_box').outerHeight(true);
+            animatemargin = animatemargin === $('.month_box').outerHeight(true) ? 0 : animatemargin;
+            date = _this._splitDate(0, _this._options.displayedMonths);
+            html = _this._getMonthsByPeriod(date[0], date[1], -4);
+            if (html.length > 0) {
+              $('.slider_container').prepend(html).css({
+                "marginTop": height + "px"
+              }).animate({
+                marginTop: animatemargin + "px"
+              }, 1000);
+            } else {
+              $('.slider_container').animate({
+                marginTop: animatemargin + "px"
+              }, 1000);
+            }
           }
           return false;
         });
@@ -152,7 +182,7 @@
           var date, height;
           if (!$('.slider_container').is(':animated')) {
             height = $('.month_box').outerHeight(true) - parseFloat($('.slider_container').css("marginTop"));
-            date = _this._splitDate(_this._options.loadedMonths.length - 1);
+            date = _this._splitDate(_this._options.displayedMonths.length - 1, _this._options.displayedMonths);
             $('.slider_container').append(_this._getMonthsByPeriod(date[0], date[1], 4)).animate({
               marginTop: -height + "px"
             }, 1000);
