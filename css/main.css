@@ -84,6 +84,9 @@ textarea {
 /* ==========================================================================
    Author's custom styles
    ========================================================================== */
+.bearcal {
+  margin: 10px 0; }
+
 .day_box, .empty_day_box, .upper_left_hover, .lower_right_hover, .full_day, .active_am, .active_pm {
   background: url(/img/corner-sprites.png) #fbfbfb;
   margin-top: 1px;
@@ -110,11 +113,25 @@ textarea {
   color: #414141; }
 
 .year_box {
-  width: 680px;
+  width: 668px;
   margin: 0 auto;
   font-family: Arial, sans-serif;
   overflow: hidden;
   height: 594px; }
+
+.prev_months, .next_months {
+  display: block;
+  width: 668px;
+  margin: 0 auto;
+  background: #E6E6E6;
+  text-align: center;
+  padding: 5px 0; }
+  .prev_months:hover, .next_months:hover {
+    background: #D1D1D1; }
+
+.slider_container .endrow {
+  padding-right: 0;
+  margin-right: 0; }
 
 .month_header {
   font-family: 'NobileBold', sans-serif;
