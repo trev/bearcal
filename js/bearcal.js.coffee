@@ -8,6 +8,7 @@
     days              : ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
     nthMonth          : 4
     nthMonthClass     : "endrow"
+    animateSpeed      : 800
 
   _options:
     loadedMonths      : [] 
@@ -162,27 +163,34 @@
 
     $('.prev_months').click =>
       if !$('.slider_container').is(':animated')
-        height = parseFloat($('.slider_container').css("marginTop")) - $('.month_box').outerHeight(true)
-        animatemargin = parseFloat($('.slider_container').css("marginTop")) + $('.month_box').outerHeight(true)
-        animatemargin = if animatemargin is $('.month_box').outerHeight(true) then 0 else animatemargin
+        currentpos = parseFloat($('.slider_container').css("marginTop"))
+        rowheight = $('.month_box').outerHeight(true)
+        rows = (@options.scrollPeriod / @options.nthMonth)
+        animatemargin = currentpos + (rowheight * rows) 
+
+        animatemargin = if animatemargin is (rowheight * rows) then 0 else animatemargin
         
         date = @_splitDate(0, @_options.displayedMonths)
-        html = @_getMonthsByPeriod(date[0],date[1],-4)
+        html = @_getMonthsByPeriod(date[0],date[1],-@options.scrollPeriod)
         if html.length > 0
           $('.slider_container').prepend(html)
-                                .css("marginTop" : height+"px")
-                                .animate(marginTop: animatemargin+"px", 1000)
+                                .css("marginTop" : (currentpos - (rowheight * rows))+"px")
+                                .animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
         else
-          $('.slider_container').animate(marginTop: animatemargin+"px", 1000)
+          $('.slider_container').animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
 
       return false
 
     $('.next_months').click =>
       if !$('.slider_container').is(':animated')
-        height = $('.month_box').outerHeight(true) - parseFloat($('.slider_container').css("marginTop"))
+        currentpos = parseFloat($('.slider_container').css("marginTop"))
+        rowheight = $('.month_box').outerHeight(true)
+        rows = (@options.scrollPeriod / @options.nthMonth)
+        animatemargin = currentpos - (rowheight * rows) 
+
         date = @_splitDate(@_options.displayedMonths.length-1, @_options.displayedMonths)
-        $('.slider_container').append(@_getMonthsByPeriod(date[0],date[1],4))
-                              .animate(marginTop: -height+"px", 1000)
+        $('.slider_container').append(@_getMonthsByPeriod(date[0],date[1],@options.scrollPeriod))
+                              .animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
       return false
 
   _init: ->
