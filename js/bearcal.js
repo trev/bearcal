@@ -154,45 +154,51 @@
         }
         return date;
       },
+      _getPrevMonths: function() {
+        var animatemargin, currentpos, date, html, rowheight, rows;
+        if (!$('.slider_container').is(':animated')) {
+          currentpos = parseFloat($('.slider_container').css("marginTop"));
+          rowheight = $('.month_box').outerHeight(true);
+          rows = this.options.scrollPeriod / this.options.nthMonth;
+          animatemargin = currentpos + (rowheight * rows);
+          animatemargin = animatemargin === (rowheight * rows) ? 0 : animatemargin;
+          date = this._splitDate(0, this._options.displayedMonths);
+          html = this._getMonthsByPeriod(date[0], date[1], -this.options.scrollPeriod);
+          if (html.length > 0) {
+            return $('.slider_container').prepend(html).css({
+              "marginTop": (currentpos - (rowheight * rows)) + "px"
+            }).animate({
+              marginTop: animatemargin + "px"
+            }, this.options.animateSpeed);
+          } else {
+            return $('.slider_container').animate({
+              marginTop: animatemargin + "px"
+            }, this.options.animateSpeed);
+          }
+        }
+      },
+      _getNextMonths: function() {
+        var animatemargin, currentpos, date, rowheight, rows;
+        if (!$('.slider_container').is(':animated')) {
+          currentpos = parseFloat($('.slider_container').css("marginTop"));
+          rowheight = $('.month_box').outerHeight(true);
+          rows = this.options.scrollPeriod / this.options.nthMonth;
+          animatemargin = currentpos - (rowheight * rows);
+          date = this._splitDate(this._options.displayedMonths.length - 1, this._options.displayedMonths);
+          return $('.slider_container').append(this._getMonthsByPeriod(date[0], date[1], this.options.scrollPeriod)).animate({
+            marginTop: animatemargin + "px"
+          }, this.options.animateSpeed);
+        }
+      },
       _create: function() {
         var _this = this;
         this.element.append(this._getCalendar());
         $('.prev_months').click(function() {
-          var animatemargin, currentpos, date, html, rowheight, rows;
-          if (!$('.slider_container').is(':animated')) {
-            currentpos = parseFloat($('.slider_container').css("marginTop"));
-            rowheight = $('.month_box').outerHeight(true);
-            rows = _this.options.scrollPeriod / _this.options.nthMonth;
-            animatemargin = currentpos + (rowheight * rows);
-            animatemargin = animatemargin === (rowheight * rows) ? 0 : animatemargin;
-            date = _this._splitDate(0, _this._options.displayedMonths);
-            html = _this._getMonthsByPeriod(date[0], date[1], -_this.options.scrollPeriod);
-            if (html.length > 0) {
-              $('.slider_container').prepend(html).css({
-                "marginTop": (currentpos - (rowheight * rows)) + "px"
-              }).animate({
-                marginTop: animatemargin + "px"
-              }, _this.options.animateSpeed);
-            } else {
-              $('.slider_container').animate({
-                marginTop: animatemargin + "px"
-              }, _this.options.animateSpeed);
-            }
-          }
+          _this._getPrevMonths();
           return false;
         });
         return $('.next_months').click(function() {
-          var animatemargin, currentpos, date, rowheight, rows;
-          if (!$('.slider_container').is(':animated')) {
-            currentpos = parseFloat($('.slider_container').css("marginTop"));
-            rowheight = $('.month_box').outerHeight(true);
-            rows = _this.options.scrollPeriod / _this.options.nthMonth;
-            animatemargin = currentpos - (rowheight * rows);
-            date = _this._splitDate(_this._options.displayedMonths.length - 1, _this._options.displayedMonths);
-            $('.slider_container').append(_this._getMonthsByPeriod(date[0], date[1], _this.options.scrollPeriod)).animate({
-              marginTop: animatemargin + "px"
-            }, _this.options.animateSpeed);
-          }
+          _this._getNextMonths();
           return false;
         });
       },
@@ -200,10 +206,7 @@
         return this._setDate();
       },
       destroy: function() {},
-      _setOption: function(key, value) {},
-      getPeriod: function() {
-        return this.options.period;
-      }
+      _setOption: function(key, value) {}
     });
   })(jQuery, window, document);
 

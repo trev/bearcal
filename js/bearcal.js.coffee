@@ -66,7 +66,7 @@
     # Track loaded months
     @_setLoadedMonths(year, month)
 
-    # Track displayed months only if there are less months then the display period
+    # Track displayed months only if there are less months then the display period (This should only happen on initial load of calendar)
     @_setDisplayedMonths(year, month) if @_options.displayedMonths.length < @options.period
 
     # Check to see if we have to add a class for the nth month
@@ -96,9 +96,8 @@
     if typeof direction isnt "undefined"
       @_options.displayedMonths.pop() if direction is -1
       @_options.displayedMonths.shift() if direction is 1
-
-
       
+  # Extends the functionality of the Array.sort() function to sort by Date.getTime()
   _dateCompare : (a, b) ->
     a = a.split("-");
     b = b.split("-");
@@ -158,50 +157,54 @@
       i++
     date
 
+  # Gets previous months and adjusts the view accordingly
+  _getPrevMonths: ->
+    if !$('.slider_container').is(':animated')
+      currentpos = parseFloat($('.slider_container').css("marginTop"))
+      rowheight = $('.month_box').outerHeight(true)
+      rows = (@options.scrollPeriod / @options.nthMonth)
+      animatemargin = currentpos + (rowheight * rows) 
+
+      animatemargin = if animatemargin is (rowheight * rows) then 0 else animatemargin
+      
+      date = @_splitDate(0, @_options.displayedMonths)
+      html = @_getMonthsByPeriod(date[0],date[1],-@options.scrollPeriod)
+      if html.length > 0
+        $('.slider_container').prepend(html)
+                              .css("marginTop" : (currentpos - (rowheight * rows))+"px")
+                              .animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
+      else
+        $('.slider_container').animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
+
+  # Gets next months and adjusts the view accordingly
+  _getNextMonths: ->
+    if !$('.slider_container').is(':animated')
+      currentpos = parseFloat($('.slider_container').css("marginTop"))
+      rowheight = $('.month_box').outerHeight(true)
+      rows = (@options.scrollPeriod / @options.nthMonth)
+      animatemargin = currentpos - (rowheight * rows) 
+
+      date = @_splitDate(@_options.displayedMonths.length-1, @_options.displayedMonths)
+      $('.slider_container').append(@_getMonthsByPeriod(date[0],date[1],@options.scrollPeriod))
+                            .animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
+
   _create: ->
     @element.append @_getCalendar()
 
     $('.prev_months').click =>
-      if !$('.slider_container').is(':animated')
-        currentpos = parseFloat($('.slider_container').css("marginTop"))
-        rowheight = $('.month_box').outerHeight(true)
-        rows = (@options.scrollPeriod / @options.nthMonth)
-        animatemargin = currentpos + (rowheight * rows) 
-
-        animatemargin = if animatemargin is (rowheight * rows) then 0 else animatemargin
-        
-        date = @_splitDate(0, @_options.displayedMonths)
-        html = @_getMonthsByPeriod(date[0],date[1],-@options.scrollPeriod)
-        if html.length > 0
-          $('.slider_container').prepend(html)
-                                .css("marginTop" : (currentpos - (rowheight * rows))+"px")
-                                .animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
-        else
-          $('.slider_container').animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
-
+      @_getPrevMonths()
       return false
 
     $('.next_months').click =>
-      if !$('.slider_container').is(':animated')
-        currentpos = parseFloat($('.slider_container').css("marginTop"))
-        rowheight = $('.month_box').outerHeight(true)
-        rows = (@options.scrollPeriod / @options.nthMonth)
-        animatemargin = currentpos - (rowheight * rows) 
-
-        date = @_splitDate(@_options.displayedMonths.length-1, @_options.displayedMonths)
-        $('.slider_container').append(@_getMonthsByPeriod(date[0],date[1],@options.scrollPeriod))
-                              .animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
+      @_getNextMonths()
       return false
 
   _init: ->
+    # We call set date to ensure a Date object is passed as the options.startDate value
     @_setDate()
 
   destroy: ->
 
   _setOption: (key, value) ->
-
-
-  getPeriod: ->
-    @options.period
 
 ) jQuery, window, document
