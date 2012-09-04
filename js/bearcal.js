@@ -10,11 +10,179 @@
         days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
         nthMonth: 4,
         nthMonthClass: "endrow",
-        animateSpeed: 800
+        animateSpeed: 800,
+        dayBoxClass: "day_box",
+        hoverStates: {
+          am: "hover_am",
+          pm: "hover_pm",
+          fullDay: "hover_full_day"
+        },
+        highlightStates: {
+          am: "highlight_am",
+          pm: "highlight_pm",
+          fullDay: "highlight_full_day"
+        },
+        setStates: {
+          activeAm: "active_am",
+          activePm: "active_pm",
+          fullDay: "full_day"
+        }
       },
       _options: {
         loadedMonths: [],
-        displayedMonths: []
+        displayedMonths: [],
+        startDate: null,
+        endDate: null
+      },
+      _compareDates: function(s_date, e_date, operator) {
+        switch (operator) {
+          case "<":
+            return new Date(s_date).getTime() < new Date(e_date).getTime();
+          case ">":
+            return new Date(s_date).getTime() > new Date(e_date).getTime();
+          case ">=":
+            return new Date(s_date).getTime() >= new Date(e_date).getTime();
+          case "<=":
+            return new Date(s_date).getTime() <= new Date(e_date).getTime();
+          case "==":
+            return new Date(s_date).getTime() === new Date(e_date).getTime();
+        }
+      },
+      _track: function() {
+        var _this;
+        _this = this;
+        return $("." + this.options.dayBoxClass).on({
+          mousemove: function(event) {
+            if (_this._getLocation(this, event)) {
+              if (!_this._highlightable()) {
+                if (~$(this).attr("class").indexOf(_this.options.setStates.activePm)) {
+                  return $(this).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.hoverStates.fullDay);
+                } else {
+                  return $(this).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.hoverStates.am);
+                }
+              } else {
+                _this._eraseHighlights();
+                return _this._trackHighlights(this, "T00:00:00");
+              }
+            } else {
+              if (!_this._highlightable()) {
+                if (~$(this).attr("class").indexOf(_this.options.setStates.activeAm)) {
+                  return $(this).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.hoverStates.fullDay);
+                } else {
+                  return $(this).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.hoverStates.pm);
+                }
+              } else {
+                _this._eraseHighlights();
+                return _this._trackHighlights(this, "T12:00:00");
+              }
+            }
+          },
+          mouseleave: function(event) {
+            return $(this).removeClass(_this._getAllClasses(_this.options.hoverStates));
+          },
+          click: function(event) {
+            if (_this._getLocation(this, event)) {
+              _this._setDates(this, "T00:00:00");
+              return $(this).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass("active_am");
+            } else {
+              _this._setDates(this, "T12:00:00");
+              return $(this).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass("active_pm");
+            }
+          }
+        });
+      },
+      _getLocation: function(that, event) {
+        var h, offset;
+        offset = $(that).offset();
+        h = $(that).height() + offset.top;
+        if ((h - event.pageY) > (event.pageX - offset.left)) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+      _highlightable: function() {
+        if (this._options.startDate && !this._options.endDate) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+      _eraseHighlights: function() {
+        return $("." + this.options.dayBoxClass).removeClass(this._getAllClasses(this.options.highlightStates));
+      },
+      _trackHighlights: function(that, pos) {
+        var cursorAdj, cursorPos, _this;
+        _this = this;
+        cursorPos = $(that).attr("rel") + pos;
+        cursorAdj = $(that).attr("rel") + "T00:00:00";
+        return $("." + this.options.dayBoxClass).each(function() {
+          var each_box;
+          each_box = $(this).attr("rel") + "T00:00:00";
+          if (cursorPos < _this._options.startDate) {
+            if (_this._compareDates(each_box, cursorAdj, ">=") && _this._compareDates(each_box, _this._options.startDate, "<")) {
+              if (_this._compareDates(each_box, cursorAdj, "==") && ~cursorPos.indexOf("T12:00:00")) {
+                $(this).addClass(_this.options.highlightStates.pm);
+              } else {
+                $(this).addClass(_this.options.highlightStates.fullDay);
+              }
+            }
+          }
+          if (cursorPos > _this._options.startDate) {
+            if (_this._compareDates(each_box, cursorAdj, "<=") && _this._compareDates(each_box, _this._options.startDate, ">=")) {
+              if (_this._compareDates(each_box, cursorAdj, "==") && ~cursorPos.indexOf("T00:00:00")) {
+                return $(this).addClass(_this.options.highlightStates.am);
+              } else {
+                return $(this).addClass(_this.options.highlightStates.fullDay);
+              }
+            }
+          }
+        });
+      },
+      _setDates: function(that, pos) {
+        var _this;
+        _this = this;
+        if (this._options.startDate && this._options.endDate) {
+          this._options.startDate = this._options.endDate = null;
+          this._options.startDate = $(that).attr("rel") + pos;
+          $("." + this.options.dayBoxClass).removeClass(this._getAllClasses(this.options.setStates));
+          return false;
+        } else if (this._options.startDate) {
+          this._options.endDate = $(that).attr("rel") + pos;
+          if (this._compareDates(this._options.startDate, this._options.endDate, "<")) {
+            $("." + this.options.dayBoxClass).each(function() {
+              if (_this._compareDates(_this._options.startDate, $(this).attr("rel") + "T00:00:00", "<=") && _this._compareDates(_this._options.endDate, $(this).attr("rel") + "T00:00:00", ">")) {
+                return $(this).attr("class", "day_box track full_day");
+              }
+            });
+            this._eraseHighlights();
+            return true;
+          } else if (this._compareDates(this._options.startDate, this._options.endDate, ">")) {
+            $("." + this.options.dayBoxClass).each(function() {
+              if (_this._compareDates(_this._options.startDate, $(this).attr("rel") + "T00:00:00", ">") && _this._compareDates(_this._options.endDate, $(this).attr("rel") + "T00:00:00", "<=")) {
+                return $(this).attr("class", "day_box track full_day");
+              }
+            });
+            this._eraseHighlights();
+            return true;
+          } else {
+            return true;
+          }
+        } else {
+          this._options.startDate = $(that).attr("rel") + pos;
+          return false;
+        }
+      },
+      _getAllClasses: function(obj) {
+        var results;
+        results = "";
+        $.each(obj, function(index, value) {
+          return results += value + " ";
+        });
+        return results;
+      },
+      _toDate: function(date) {
+        return new Date(date);
       },
       _setDate: function() {
         var date;
@@ -54,7 +222,7 @@
         }
         i = 0;
         while (i < this._getDaysInMonth(year, month)) {
-          dayshtml += "<div class=\"day_box\" rel=\"" + year + "-" + month + "-" + (i + 1) + "\">" + (i + 1) + "</div>\n";
+          dayshtml += "<div class=\"" + this.options.dayBoxClass + " track\" rel=\"" + year + "-" + (this._pad(month + 1, 2)) + "-" + (this._pad(i + 1, 2)) + "\">" + (i + 1) + "</div>\n";
           daycount++;
           i++;
         }
@@ -63,6 +231,11 @@
           daycount++;
         }
         return dayshtml;
+      },
+      _pad: function(num, places) {
+        var zero;
+        zero = places - num.toString().length + 1;
+        return Array(+(zero > 0 && zero)).join("0") + num;
       },
       _getMonth: function(year, month) {
         var nth;
@@ -197,10 +370,11 @@
           _this._getPrevMonths();
           return false;
         });
-        return $('.next_months').click(function() {
+        $('.next_months').click(function() {
           _this._getNextMonths();
           return false;
         });
+        return this._track();
       },
       _init: function() {
         return this._setDate();
