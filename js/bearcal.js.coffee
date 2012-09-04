@@ -41,7 +41,7 @@
   #  Tracks the events relating to calendar interactivity
   _track: ->
     _this = @
-    $("."+@options.dayBoxClass).on
+    $("."+@element.attr("class")).on
       mousemove: (event) ->
         if _this._getLocation(@, event) #Upper left
           unless _this._highlightable()
@@ -72,6 +72,8 @@
         else #Lower Right
           _this._setDates(this, "T12:00:00")
           $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass "active_pm"
+
+      ".day_box"
 
   # Returns event location within a square split diagonally from top-right to bottom-left
   # Params:
@@ -227,7 +229,7 @@
     # Start adding days and track how many rows we've made
     i = 0
     while i < @_getDaysInMonth(year,month)
-      dayshtml += "<div class=\"#{@options.dayBoxClass} track\" rel=\"#{year}-#{@_pad(month+1,2)}-#{@_pad(i+1,2)}\">#{i+1}</div>\n"
+      dayshtml += "<div class=\"#{@options.dayBoxClass} track\" rel=\"#{year}-#{@_pad(parseInt(month)+1,2)}-#{@_pad(i+1,2)}\">#{i+1}</div>\n"
       daycount++
       i++
 

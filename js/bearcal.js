@@ -51,7 +51,7 @@
       _track: function() {
         var _this;
         _this = this;
-        return $("." + this.options.dayBoxClass).on({
+        return $("." + this.element.attr("class")).on({
           mousemove: function(event) {
             if (_this._getLocation(this, event)) {
               if (!_this._highlightable()) {
@@ -89,7 +89,7 @@
               return $(this).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass("active_pm");
             }
           }
-        });
+        }, ".day_box");
       },
       _getLocation: function(that, event) {
         var h, offset;
@@ -222,7 +222,7 @@
         }
         i = 0;
         while (i < this._getDaysInMonth(year, month)) {
-          dayshtml += "<div class=\"" + this.options.dayBoxClass + " track\" rel=\"" + year + "-" + (this._pad(month + 1, 2)) + "-" + (this._pad(i + 1, 2)) + "\">" + (i + 1) + "</div>\n";
+          dayshtml += "<div class=\"" + this.options.dayBoxClass + " track\" rel=\"" + year + "-" + (this._pad(parseInt(month) + 1, 2)) + "-" + (this._pad(i + 1, 2)) + "\">" + (i + 1) + "</div>\n";
           daycount++;
           i++;
         }
