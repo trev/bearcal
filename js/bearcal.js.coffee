@@ -202,7 +202,7 @@
 
   # Get amount of days in a month (http://bit.ly/PaZvjH)
   _getDaysInMonth: (year, month)  ->
-    new Date(year, month, 0).getDate() 
+    new Date(year, month+1, 0).getDate() 
 
   # Generate weekday titles html
   _getWeekdaysHtml: ->
