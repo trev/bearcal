@@ -18,9 +18,11 @@ Still need to fill this out too
 
 ## Usage
 Create a DOM element to attach the plugin to:
+    
     <div class="bearcal"></div>
 
 Attach the plugin:
+    
     $('.bearcal').BearCal(); 
 
 ## License
