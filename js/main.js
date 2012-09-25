@@ -1,4 +1,6 @@
 $(function() {
 
-  $('.bearcal').BearCal();
+  $('.bearcal').BearCal({
+    scrollPeriod  : 4
+  });
 });

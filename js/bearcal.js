@@ -95,11 +95,7 @@
         var h, offset;
         offset = $(that).offset();
         h = $(that).height() + offset.top;
-        if ((h - event.pageY) > (event.pageX - offset.left)) {
-          return true;
-        } else {
-          return false;
-        }
+        return (h - event.pageY) > (event.pageX - offset.left);
       },
       _highlightable: function() {
         if (this._options.startDate && !this._options.endDate) {
@@ -269,6 +265,7 @@
       },
       _getCalendar: function() {
         var calendarhtml, i, month, year;
+        this._trigger("beforebuild");
         calendarhtml = "<a href=\"#\" class=\"prev_months\">Previous " + this.options.scrollPeriod + " Months</a>";
         calendarhtml += "<div class=\"year_box clearfix\">\n  <div class=\"slider_container clearfix\">\n";
         year = this.options.startDate.getFullYear();

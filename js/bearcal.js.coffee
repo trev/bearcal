@@ -83,7 +83,7 @@
     offset = $(that).offset()
     h = $(that).height() + offset.top
     # True means it's upper left, false means lower right
-    if (h - event.pageY) > (event.pageX - offset.left) then true else false
+    (h - event.pageY) > (event.pageX - offset.left)
 
   # Returns bool whether the days can be highlighted
   _highlightable: ->
@@ -246,6 +246,7 @@
     Array(+(zero > 0 and zero)).join("0") + num
 
   _getMonth: (year, month) ->
+
     # Track loaded months
     @_setLoadedMonths(year, month)
 
@@ -287,6 +288,9 @@
     (new Date(a[0], a[1]).getTime()) - (new Date(b[0], b[1]).getTime())
     
   _getCalendar: ->
+    # Trigger prebuild
+    @_trigger("beforebuild")
+
     calendarhtml = "<a href=\"#\" class=\"prev_months\">Previous #{@options.scrollPeriod} Months</a>"
     calendarhtml += "<div class=\"year_box clearfix\">\n  <div class=\"slider_container clearfix\">\n"
     year = @options.startDate.getFullYear()
