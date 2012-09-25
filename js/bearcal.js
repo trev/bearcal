@@ -12,6 +12,7 @@
         nthMonthClass: "endrow",
         animateSpeed: 800,
         dayBoxClass: "day_box",
+        trackClass: "track",
         hoverStates: {
           am: "hover_am",
           pm: "hover_pm",
@@ -26,9 +27,17 @@
           activeAm: "active_am",
           activePm: "active_pm",
           fullDay: "full_day"
-        }
+        },
+        availabilityTypes: {
+          available: "available",
+          unavailable: "unavailable",
+          booked: "booked"
+        },
+        json: false,
+        jsonUrl: ""
       },
       _options: {
+        loadedData: {},
         loadedMonths: [],
         displayedMonths: [],
         startDate: null,
@@ -83,10 +92,10 @@
           click: function(event) {
             if (_this._getLocation(this, event)) {
               _this._setDates(this, "T00:00:00");
-              return $(this).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass("active_am");
+              return $(this).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.setStates.activeAm);
             } else {
               _this._setDates(this, "T12:00:00");
-              return $(this).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass("active_pm");
+              return $(this).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.setStates.activePm);
             }
           }
         }, ".day_box");
@@ -148,7 +157,7 @@
           if (this._compareDates(this._options.startDate, this._options.endDate, "<")) {
             $("." + this.options.dayBoxClass).each(function() {
               if (_this._compareDates(_this._options.startDate, $(this).attr("rel") + "T00:00:00", "<=") && _this._compareDates(_this._options.endDate, $(this).attr("rel") + "T00:00:00", ">")) {
-                return $(this).attr("class", "day_box track full_day");
+                return $(this).attr("class", _this.options.dayBoxClass + " " + _this.options.trackClass + " " + _this.options.setStates.fullDay);
               }
             });
             this._eraseHighlights();
@@ -156,7 +165,7 @@
           } else if (this._compareDates(this._options.startDate, this._options.endDate, ">")) {
             $("." + this.options.dayBoxClass).each(function() {
               if (_this._compareDates(_this._options.startDate, $(this).attr("rel") + "T00:00:00", ">") && _this._compareDates(_this._options.endDate, $(this).attr("rel") + "T00:00:00", "<=")) {
-                return $(this).attr("class", "day_box track full_day");
+                return $(this).attr("class", _this.options.dayBoxClass + " " + _this.options.trackClass + " " + _this.options.setStates.fullDay);
               }
             });
             this._eraseHighlights();
@@ -204,7 +213,7 @@
         return weekdayshtml;
       },
       _getDaysHtml: function(year, month) {
-        var blanks, daycount, dayshtml, i;
+        var blanks, daycount, dayshtml, fulldate, i, status, statusclass, _i, _len, _ref;
         dayshtml = "";
         daycount = 0;
         blanks = this._getDayOfWeek(year, month, 1);
@@ -216,9 +225,21 @@
             i++;
           }
         }
+        statusclass = "";
         i = 0;
         while (i < this._getDaysInMonth(year, month)) {
-          dayshtml += "<div class=\"" + this.options.dayBoxClass + " track\" rel=\"" + year + "-" + (this._pad(parseInt(month) + 1, 2)) + "-" + (this._pad(i + 1, 2)) + "\">" + (i + 1) + "</div>\n";
+          statusclass = "";
+          fulldate = "" + year + "-" + (this._pad(parseInt(month) + 1, 2)) + "-" + (this._pad(i + 1, 2));
+          if (this._options.loadedData.availability.length > 0) {
+            _ref = this._options.loadedData.availability;
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              status = _ref[_i];
+              if (status.date === fulldate) {
+                statusclass = "" + this.options.availabilityTypes[status.type] + " " + this.options.setStates[status.span];
+              }
+            }
+          }
+          dayshtml += "<div class=\"" + this.options.dayBoxClass + " " + this.options.trackClass + " " + statusclass + "\" rel=\"" + fulldate + "\">" + (i + 1) + "</div>\n";
           daycount++;
           i++;
         }
@@ -360,7 +381,7 @@
           }, this.options.animateSpeed);
         }
       },
-      _create: function() {
+      _startup: function() {
         var _this = this;
         this.element.append(this._getCalendar());
         $('.prev_months').click(function() {
@@ -373,7 +394,21 @@
         });
         return this._track();
       },
+      _create: function() {
+        var _this;
+        _this = this;
+        if (this.options.json) {
+          return $.getJSON(this.options.jsonUrl, function(data) {
+            $.extend(_this._options.loadedData, data);
+            return _this._startup();
+          });
+        } else {
+          return _this_startup();
+        }
+      },
       _init: function() {
+        var _this;
+        _this = this;
         return this._setDate();
       },
       destroy: function() {},

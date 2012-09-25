@@ -1,0 +1,20 @@
+{
+  "user"          : "000001",
+  "availability"  : [
+    {
+      "date"        : "2013-04-13",
+      "span"        : "fullDay",
+      "type"        : "unavailable"
+    },
+    {
+      "date"        : "2013-04-14",
+      "span"        : "fullDay",
+      "type"        : "unavailable"
+    },
+    {
+      "date"        : "2013-04-15",
+      "span"        : "activeAm",
+      "type"        : "unavailable"
+    }
+  ]
+}

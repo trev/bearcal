@@ -10,6 +10,7 @@
     nthMonthClass     : "endrow"
     animateSpeed      : 800
     dayBoxClass       : "day_box"
+    trackClass        : "track"
     hoverStates       : 
       am              : "hover_am"
       pm              : "hover_pm"
@@ -22,8 +23,15 @@
       activeAm        : "active_am"
       activePm        : "active_pm"
       fullDay         : "full_day"
+    availabilityTypes : 
+      available       : "available"
+      unavailable     : "unavailable"
+      booked          : "booked"
+    json              : false
+    jsonUrl           : ""
 
   _options:
+    loadedData        : {}
     loadedMonths      : [] 
     displayedMonths   : []
     startDate         : null
@@ -68,10 +76,10 @@
       click: (event) ->
         if _this._getLocation(@, event) #Upper left
           _this._setDates(this, "T00:00:00")
-          $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass "active_am"
+          $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.setStates.activeAm
         else #Lower Right
           _this._setDates(this, "T12:00:00")
-          $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass "active_pm"
+          $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.setStates.activePm
 
       ".day_box"
 
@@ -159,7 +167,7 @@
       #Logic group 1
       if @_compareDates(@_options.startDate, @_options.endDate, "<")
         $("."+@options.dayBoxClass).each -> #Apply status classes to in-between dates
-          $(@).attr "class", "day_box track full_day"  if _this._compareDates(_this._options.startDate, $(@).attr("rel") + "T00:00:00", "<=") and _this._compareDates(_this._options.endDate, $(@).attr("rel") + "T00:00:00", ">") #Overwrite all classes and apply status class
+          $(@).attr "class", _this.options.dayBoxClass + " " + _this.options.trackClass + " " + _this.options.setStates.fullDay if _this._compareDates(_this._options.startDate, $(@).attr("rel") + "T00:00:00", "<=") and _this._compareDates(_this._options.endDate, $(@).attr("rel") + "T00:00:00", ">") #Overwrite all classes and apply status class
 
         @._eraseHighlights()
         true #Return true to let know that an end date was set
@@ -167,7 +175,7 @@
       #Logic group 2
       else if @_compareDates(@_options.startDate, @_options.endDate, ">")
         $("."+@options.dayBoxClass).each -> #Apply status classes to in-between dates
-          $(@).attr "class", "day_box track full_day"  if _this._compareDates(_this._options.startDate, $(@).attr("rel") + "T00:00:00", ">") and _this._compareDates(_this._options.endDate, $(@).attr("rel") + "T00:00:00", "<=") #Overwrite all classes and apply status class
+          $(@).attr "class", _this.options.dayBoxClass + " " + _this.options.trackClass + " " + _this.options.setStates.fullDay if _this._compareDates(_this._options.startDate, $(@).attr("rel") + "T00:00:00", ">") and _this._compareDates(_this._options.endDate, $(@).attr("rel") + "T00:00:00", "<=") #Overwrite all classes and apply status class
 
         @_eraseHighlights()
         true #Return true to let know that an end date was set
@@ -226,14 +234,30 @@
         daycount++
         i++
 
-    # Start adding days and track how many rows we've made
+    # Start adding days
+    statusclass = ""
     i = 0
     while i < @_getDaysInMonth(year,month)
-      dayshtml += "<div class=\"#{@options.dayBoxClass} track\" rel=\"#{year}-#{@_pad(parseInt(month)+1,2)}-#{@_pad(i+1,2)}\">#{i+1}</div>\n"
+      # Reset
+      statusclass = ""
+
+      # Perform some date formating modifications so that it plays nice with the Date object
+      fulldate = "#{year}-#{@_pad(parseInt(month)+1,2)}-#{@_pad(i+1,2)}"
+
+      # If JSON enabled, check to see if we have to apply any extra classes to the day
+      if @_options.loadedData.availability.length > 0
+        for status in @_options.loadedData.availability
+          if status.date is fulldate
+            statusclass = "#{@options.availabilityTypes[status.type]} #{@options.setStates[status.span]}"
+
+      # Create day DOM element
+      dayshtml += "<div class=\"#{@options.dayBoxClass} #{@options.trackClass} #{statusclass}\" rel=\"#{fulldate}\">#{i+1}</div>\n"
+
+      # Count 'em for good measure
       daycount++
       i++
 
-    # Ensure there are 42 day boxes to ensure each month is the same size
+    # Ensure there are 42 day boxes that way each month contains the same amount of boxes (Formatting goodness) 
     while daycount < 42
       dayshtml += "<div class=\"empty_day_box\"></div>"
       daycount++
@@ -375,7 +399,7 @@
       $('.slider_container').append(@_getMonthsByPeriod(date[0],date[1],@options.scrollPeriod))
                             .animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
 
-  _create: ->
+  _startup: ->
     @element.append @_getCalendar()
 
     $('.prev_months').click =>
@@ -388,7 +412,22 @@
 
     @_track()
 
+
+  _create: ->
+    _this = @
+
+    if @options.json 
+      # Testing
+      $.getJSON @options.jsonUrl, (data) ->
+        $.extend(_this._options.loadedData, data)
+        _this._startup() 
+    else
+      _this_startup()
+
+
   _init: ->
+    _this = @
+
     # We call set date to ensure a Date object is passed as the options.startDate value
     @_setDate()
 
