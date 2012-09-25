@@ -15,7 +15,11 @@ Yes, too right, but this one is a bit different.
 ## Customize
 *BearCal* has many configurable options and relies heavily on CSS for styling and interaction
 
-Still need to fill this out too
+WIP
+
+### Events
+#### beforebuild
+Triggers before the calendar gets generated
 
 ## Usage
 Create a DOM element to attach the plugin to:
