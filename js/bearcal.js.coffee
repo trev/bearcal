@@ -422,7 +422,7 @@
         $.extend(_this._options.loadedData, data)
         _this._startup() 
     else
-      _this_startup()
+      _this._startup()
 
 
   _init: ->
