@@ -107,11 +107,7 @@
         return (h - event.pageY) > (event.pageX - offset.left);
       },
       _highlightable: function() {
-        if (this._options.startDate && !this._options.endDate) {
-          return true;
-        } else {
-          return false;
-        }
+        return this._options.startDate && !this._options.endDate;
       },
       _eraseHighlights: function() {
         return $("." + this.options.dayBoxClass).removeClass(this._getAllClasses(this.options.highlightStates));

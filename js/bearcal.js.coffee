@@ -94,8 +94,9 @@
     (h - event.pageY) > (event.pageX - offset.left)
 
   # Returns bool whether the days can be highlighted
+  # Simply checks that there's a startDate and no endDate
   _highlightable: ->
-    if @_options.startDate and !@_options.endDate then true else false
+    @_options.startDate and !@_options.endDate
 
   # Remove all highlight classes
   _eraseHighlights: ->
