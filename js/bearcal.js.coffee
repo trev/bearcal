@@ -163,7 +163,6 @@
     if @_options.startDate and @_options.endDate
       @_options.startDate = @_options.endDate = null #Erase both start & end dates
       @_options.startDate = $(that).attr("rel") + pos #Set Start date
-      $("."+@options.dayBoxClass).removeClass @_getAllClasses(@options.setStates) #Remove status classes
       false
     
     #Is the start date set? YES

@@ -146,7 +146,6 @@
         if (this._options.startDate && this._options.endDate) {
           this._options.startDate = this._options.endDate = null;
           this._options.startDate = $(that).attr("rel") + pos;
-          $("." + this.options.dayBoxClass).removeClass(this._getAllClasses(this.options.setStates));
           return false;
         } else if (this._options.startDate) {
           this._options.endDate = $(that).attr("rel") + pos;
