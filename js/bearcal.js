@@ -43,6 +43,7 @@
         startDate: null,
         endDate: null
       },
+      getJSON: function() {},
       _compareDates: function(s_date, e_date, operator) {
         switch (operator) {
           case "<":
@@ -115,11 +116,11 @@
       _trackHighlights: function(that, pos) {
         var cursorAdj, cursorPos, _this;
         _this = this;
-        cursorPos = $(that).attr("rel") + pos;
-        cursorAdj = $(that).attr("rel") + "T00:00:00";
+        cursorPos = $(that).attr("data-date") + pos;
+        cursorAdj = $(that).attr("data-date") + "T00:00:00";
         return $("." + this.options.dayBoxClass).each(function() {
           var each_box;
-          each_box = $(this).attr("rel") + "T00:00:00";
+          each_box = $(this).attr("data-date") + "T00:00:00";
           if (cursorPos < _this._options.startDate) {
             if (_this._compareDates(each_box, cursorAdj, ">=") && _this._compareDates(each_box, _this._options.startDate, "<")) {
               if (_this._compareDates(each_box, cursorAdj, "==") && ~cursorPos.indexOf("T12:00:00")) {
@@ -145,13 +146,13 @@
         _this = this;
         if (this._options.startDate && this._options.endDate) {
           this._options.startDate = this._options.endDate = null;
-          this._options.startDate = $(that).attr("rel") + pos;
+          this._options.startDate = $(that).attr("data-date") + pos;
           return false;
         } else if (this._options.startDate) {
-          this._options.endDate = $(that).attr("rel") + pos;
+          this._options.endDate = $(that).attr("data-date") + pos;
           if (this._compareDates(this._options.startDate, this._options.endDate, "<")) {
             $("." + this.options.dayBoxClass).each(function() {
-              if (_this._compareDates(_this._options.startDate, $(this).attr("rel") + "T00:00:00", "<=") && _this._compareDates(_this._options.endDate, $(this).attr("rel") + "T00:00:00", ">")) {
+              if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", "<=") && _this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T00:00:00", ">")) {
                 return $(this).attr("class", _this.options.dayBoxClass + " " + _this.options.trackClass + " " + _this.options.setStates.fullDay);
               }
             });
@@ -159,7 +160,7 @@
             return true;
           } else if (this._compareDates(this._options.startDate, this._options.endDate, ">")) {
             $("." + this.options.dayBoxClass).each(function() {
-              if (_this._compareDates(_this._options.startDate, $(this).attr("rel") + "T00:00:00", ">") && _this._compareDates(_this._options.endDate, $(this).attr("rel") + "T00:00:00", "<=")) {
+              if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", ">") && _this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T00:00:00", "<=")) {
                 return $(this).attr("class", _this.options.dayBoxClass + " " + _this.options.trackClass + " " + _this.options.setStates.fullDay);
               }
             });
@@ -169,7 +170,7 @@
             return true;
           }
         } else {
-          this._options.startDate = $(that).attr("rel") + pos;
+          this._options.startDate = $(that).attr("data-date") + pos;
           return false;
         }
       },
@@ -234,7 +235,9 @@
               }
             }
           }
-          dayshtml += "<div class=\"" + this.options.dayBoxClass + " " + this.options.trackClass + " " + statusclass + "\" rel=\"" + fulldate + "\">" + (i + 1) + "</div>\n";
+          console.log(statusclass.length);
+          console.log(statusclass !== "");
+          dayshtml += "<div class=\"" + this.options.dayBoxClass + " " + this.options.trackClass + (statusclass !== "" ? " " + statusclass : "") + "\" data-date=\"" + fulldate + "\">" + (i + 1) + "</div>\n";
           daycount++;
           i++;
         }

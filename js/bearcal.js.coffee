@@ -36,6 +36,9 @@
     displayedMonths   : []
     startDate         : null
     endDate           : null
+  
+  getJSON : () ->
+    
 
   # Date comparisons
   _compareDates : (s_date, e_date, operator) ->
@@ -119,10 +122,10 @@
   #   pos:  whether the cursor is in am or pm, valid values["T00:00:00", "T12:00:00"]
   _trackHighlights: (that, pos) ->
     _this = @
-    cursorPos = $(that).attr("rel") + pos #True cursor position
-    cursorAdj = $(that).attr("rel") + "T00:00:00" #Adjusted cursor position required for logic testing
+    cursorPos = $(that).attr("data-date") + pos #True cursor position
+    cursorAdj = $(that).attr("data-date") + "T00:00:00" #Adjusted cursor position required for logic testing
     $("."+@options.dayBoxClass).each -> #Loop through all day_box(es)
-      each_box = $(@).attr("rel") + "T00:00:00"
+      each_box = $(@).attr("data-date") + "T00:00:00"
       
       #Logic group 1
       if cursorPos < _this._options.startDate
@@ -162,17 +165,17 @@
     #Are there two dates already? YES
     if @_options.startDate and @_options.endDate
       @_options.startDate = @_options.endDate = null #Erase both start & end dates
-      @_options.startDate = $(that).attr("rel") + pos #Set Start date
+      @_options.startDate = $(that).attr("data-date") + pos #Set Start date
       false
     
     #Is the start date set? YES
     else if @_options.startDate
-      @_options.endDate = $(that).attr("rel") + pos #Set end date
+      @_options.endDate = $(that).attr("data-date") + pos #Set end date
       
       #Logic group 1
       if @_compareDates(@_options.startDate, @_options.endDate, "<")
         $("."+@options.dayBoxClass).each -> #Apply status classes to in-between dates
-          $(@).attr "class", _this.options.dayBoxClass + " " + _this.options.trackClass + " " + _this.options.setStates.fullDay if _this._compareDates(_this._options.startDate, $(@).attr("rel") + "T00:00:00", "<=") and _this._compareDates(_this._options.endDate, $(@).attr("rel") + "T00:00:00", ">") #Overwrite all classes and apply status class
+          $(@).attr "class", _this.options.dayBoxClass + " " + _this.options.trackClass + " " + _this.options.setStates.fullDay if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T00:00:00", "<=") and _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T00:00:00", ">") #Overwrite all classes and apply status class
 
         @._eraseHighlights()
         true #Return true to let know that an end date was set
@@ -180,7 +183,7 @@
       #Logic group 2
       else if @_compareDates(@_options.startDate, @_options.endDate, ">")
         $("."+@options.dayBoxClass).each -> #Apply status classes to in-between dates
-          $(@).attr "class", _this.options.dayBoxClass + " " + _this.options.trackClass + " " + _this.options.setStates.fullDay if _this._compareDates(_this._options.startDate, $(@).attr("rel") + "T00:00:00", ">") and _this._compareDates(_this._options.endDate, $(@).attr("rel") + "T00:00:00", "<=") #Overwrite all classes and apply status class
+          $(@).attr "class", _this.options.dayBoxClass + " " + _this.options.trackClass + " " + _this.options.setStates.fullDay if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T00:00:00", ">") and _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T00:00:00", "<=") #Overwrite all classes and apply status class
 
         @_eraseHighlights()
         true #Return true to let know that an end date was set
@@ -191,7 +194,7 @@
     
     #Other possibilities (Fresh start)
     else
-      @_options.startDate = $(that).attr("rel") + pos #Set start date
+      @_options.startDate = $(that).attr("data-date") + pos #Set start date
       false #Return false tolet know that no end date was set
 
   # Return all values within an object literal
@@ -256,7 +259,9 @@
             statusclass = "#{@options.availabilityTypes[status.type]} #{@options.setStates[status.span]}"
 
       # Create day DOM element
-      dayshtml += "<div class=\"#{@options.dayBoxClass} #{@options.trackClass} #{statusclass}\" rel=\"#{fulldate}\">#{i+1}</div>\n"
+      console.log(statusclass.length)
+      console.log(statusclass != "")
+      dayshtml += "<div class=\"#{@options.dayBoxClass} #{@options.trackClass}#{if statusclass isnt "" then " "+statusclass else ""}\" data-date=\"#{fulldate}\">#{i+1}</div>\n"
 
       # Count 'em for good measure
       daycount++
