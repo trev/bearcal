@@ -11,6 +11,9 @@
     animateSpeed      : 800
     dayBoxClass       : "day_box"
     trackClass        : "track"
+    defaultStatus     :
+      type            : "available"
+      time            : "fullday"
     hoverStates       : 
       am              : "hover_am"
       pm              : "hover_pm"
@@ -38,7 +41,16 @@
     endDate           : null
   
   getJSON : () ->
-    
+    json = { "availability" : [] }
+    @element.find('.day_box').each () ->
+      elem = $(@)
+      json.availability.push
+        "date"        : elem.attr('data-date')
+        "classes"     : "tmp"
+        "status"      :
+          "type"      : elem.attr('data-status-type')
+          "time"      : elem.attr('data-status-time')
+    console.log(json)
 
   # Date comparisons
   _compareDates : (s_date, e_date, operator) ->
@@ -64,7 +76,7 @@
             else # If the square has no activePM class on it, we can just apply the Am hover class 
               $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.hoverStates.am
 
-          else # It's highlightable, that means we're starting a date span
+          else # It's highlightable, that means we've starting a date span
             _this._eraseHighlights() # Remove all highlight classes
             _this._trackHighlights @, "T00:00:00" # Start highlight tracking
             
@@ -74,7 +86,7 @@
               $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.hoverStates.fullDay
             else
               $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.hoverStates.pm
-          else # It's highlightable, that means we're starting a date span 
+          else # It's highlightable, that means we've starting a date span 
             _this._eraseHighlights() # Remove all highlight classes
             _this._trackHighlights @, "T12:00:00" # Start highlight tracking
 
@@ -89,7 +101,7 @@
           _this._setDates(this, "T12:00:00") # Set the date as PM
           $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.setStates.activePm # Remove all hover state classes and add the adtive state
 
-      ".day_box"
+      "."+@options.trackClass # Why not just track the each daybox instead of having an extra "track" class? Because we might not want to track previous dates to the current date for example.
 
   # Returns event location within a square split diagonally from top-right to bottom-left
   # Params:
@@ -175,7 +187,8 @@
       #Logic group 1
       if @_compareDates(@_options.startDate, @_options.endDate, "<")
         $("."+@options.dayBoxClass).each -> #Apply status classes to in-between dates
-          $(@).attr "class", _this.options.dayBoxClass + " " + _this.options.trackClass + " " + _this.options.setStates.fullDay if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T00:00:00", "<=") and _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T00:00:00", ">") #Overwrite all classes and apply status class
+          if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T00:00:00", "<=") and _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T00:00:00", ">") #Overwrite all classes and apply status class
+            $(@).attr "class", _this.options.dayBoxClass + " " + _this.options.trackClass + " " + _this.options.setStates.fullDay 
 
         @._eraseHighlights()
         true #Return true to let know that an end date was set
@@ -183,7 +196,8 @@
       #Logic group 2
       else if @_compareDates(@_options.startDate, @_options.endDate, ">")
         $("."+@options.dayBoxClass).each -> #Apply status classes to in-between dates
-          $(@).attr "class", _this.options.dayBoxClass + " " + _this.options.trackClass + " " + _this.options.setStates.fullDay if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T00:00:00", ">") and _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T00:00:00", "<=") #Overwrite all classes and apply status class
+          if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T00:00:00", ">") and _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T00:00:00", "<=") #Overwrite all classes and apply status class
+            $(@).attr "class", _this.options.dayBoxClass + " " + _this.options.trackClass + " " + _this.options.setStates.fullDay 
 
         @_eraseHighlights()
         true #Return true to let know that an end date was set
@@ -247,7 +261,9 @@
     i = 0
     while i < @_getDaysInMonth(year,month)
       # Reset
-      statusclass = ""
+      statusclass = statustype = statustime = ""
+      statustype = @options.defaultStatus.type 
+      statustime = @options.defaultStatus.time 
 
       # Perform some date formating modifications so that it plays nice with the Date object
       fulldate = "#{year}-#{@_pad(parseInt(month)+1,2)}-#{@_pad(i+1,2)}"
@@ -256,12 +272,12 @@
       if @_options.loadedData.availability.length > 0
         for status in @_options.loadedData.availability
           if status.date is fulldate
-            statusclass = "#{@options.availabilityTypes[status.type]} #{@options.setStates[status.span]}"
+            statusclass = " #{@options.setStates[status.classes]}"
+            statustype = status.status.type
+            statustime = status.status.time
 
       # Create day DOM element
-      console.log(statusclass.length)
-      console.log(statusclass != "")
-      dayshtml += "<div class=\"#{@options.dayBoxClass} #{@options.trackClass}#{if statusclass isnt "" then " "+statusclass else ""}\" data-date=\"#{fulldate}\">#{i+1}</div>\n"
+      dayshtml += "<div class=\"#{@options.dayBoxClass} #{@options.trackClass}#{if statusclass isnt "" then statusclass else ""}\" data-date=\"#{fulldate}\" data-status-type=\"#{statustype}\" data-status-time=\"#{statustime}\">#{i+1}</div>\n"
 
       # Count 'em for good measure
       daycount++
@@ -394,8 +410,7 @@
         $('.slider_container').prepend(html)
                               .css("marginTop" : (currentpos - (rowheight * rows))+"px")
                               .animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
-      else
-        $('.slider_container').animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
+      else $('.slider_container').animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
 
   # Gets next months and adjusts the view accordingly
   _getNextMonths: ->

@@ -13,6 +13,10 @@
         animateSpeed: 800,
         dayBoxClass: "day_box",
         trackClass: "track",
+        defaultStatus: {
+          type: "available",
+          time: "fullday"
+        },
         hoverStates: {
           am: "hover_am",
           pm: "hover_pm",
@@ -43,7 +47,25 @@
         startDate: null,
         endDate: null
       },
-      getJSON: function() {},
+      getJSON: function() {
+        var json;
+        json = {
+          "availability": []
+        };
+        this.element.find('.day_box').each(function() {
+          var elem;
+          elem = $(this);
+          return json.availability.push({
+            "date": elem.attr('data-date'),
+            "classes": "tmp",
+            "status": {
+              "type": elem.attr('data-status-type'),
+              "time": elem.attr('data-status-time')
+            }
+          });
+        });
+        return console.log(json);
+      },
       _compareDates: function(s_date, e_date, operator) {
         switch (operator) {
           case "<":
@@ -99,7 +121,7 @@
               return $(this).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.setStates.activePm);
             }
           }
-        }, ".day_box");
+        }, "." + this.options.trackClass);
       },
       _getLocation: function(that, event) {
         var h, offset;
@@ -209,7 +231,7 @@
         return weekdayshtml;
       },
       _getDaysHtml: function(year, month) {
-        var blanks, daycount, dayshtml, fulldate, i, status, statusclass, _i, _len, _ref;
+        var blanks, daycount, dayshtml, fulldate, i, status, statusclass, statustime, statustype, _i, _len, _ref;
         dayshtml = "";
         daycount = 0;
         blanks = this._getDayOfWeek(year, month, 1);
@@ -224,20 +246,22 @@
         statusclass = "";
         i = 0;
         while (i < this._getDaysInMonth(year, month)) {
-          statusclass = "";
+          statusclass = statustype = statustime = "";
+          statustype = this.options.defaultStatus.type;
+          statustime = this.options.defaultStatus.time;
           fulldate = "" + year + "-" + (this._pad(parseInt(month) + 1, 2)) + "-" + (this._pad(i + 1, 2));
           if (this._options.loadedData.availability.length > 0) {
             _ref = this._options.loadedData.availability;
             for (_i = 0, _len = _ref.length; _i < _len; _i++) {
               status = _ref[_i];
               if (status.date === fulldate) {
-                statusclass = "" + this.options.availabilityTypes[status.type] + " " + this.options.setStates[status.span];
+                statusclass = " " + this.options.setStates[status.classes];
+                statustype = status.status.type;
+                statustime = status.status.time;
               }
             }
           }
-          console.log(statusclass.length);
-          console.log(statusclass !== "");
-          dayshtml += "<div class=\"" + this.options.dayBoxClass + " " + this.options.trackClass + (statusclass !== "" ? " " + statusclass : "") + "\" data-date=\"" + fulldate + "\">" + (i + 1) + "</div>\n";
+          dayshtml += "<div class=\"" + this.options.dayBoxClass + " " + this.options.trackClass + (statusclass !== "" ? statusclass : "") + "\" data-date=\"" + fulldate + "\" data-status-type=\"" + statustype + "\" data-status-time=\"" + statustime + "\">" + (i + 1) + "</div>\n";
           daycount++;
           i++;
         }
