@@ -51,35 +51,40 @@
     _this = @
     $("."+@element.attr("class")).on
       mousemove: (event) ->
-        if _this._getLocation(@, event) #Upper left
-          unless _this._highlightable()
-            if ~$(@).attr("class").indexOf(_this.options.setStates.activePm)
+
+        if _this._getLocation(@, event) # We're in the upper left corner (AM)
+
+          if !_this._highlightable() #If it's not highlightable, that means we're closing a date span
+
+            if ~$(@).attr("class").indexOf(_this.options.setStates.activePm) # If the current square has an activePm class on it, and we're on currently in the AM section of the square(As determined earlier), we need to apply a fullDay hover class
               $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.hoverStates.fullDay
-            else
+            else # If the square has no activePM class on it, we can just apply the Am hover class 
               $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.hoverStates.am
-          else #Upper left and tracking enabled
-            _this._eraseHighlights()
-            _this._trackHighlights @, "T00:00:00"
-        else #Lower right
-          unless _this._highlightable()
+
+          else # It's highlightable, that means we're starting a date span
+            _this._eraseHighlights() # Remove all highlight classes
+            _this._trackHighlights @, "T00:00:00" # Start highlight tracking
+            
+        else # We're in the lower right corner (PM)
+          if !_this._highlightable() #If it's not highlightable, that means we're closing a date span
             if ~$(@).attr("class").indexOf(_this.options.setStates.activeAm)
               $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.hoverStates.fullDay
             else
               $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.hoverStates.pm
-          else
-            _this._eraseHighlights()
-            _this._trackHighlights @, "T12:00:00"
+          else # It's highlightable, that means we're starting a date span 
+            _this._eraseHighlights() # Remove all highlight classes
+            _this._trackHighlights @, "T12:00:00" # Start highlight tracking
 
       mouseleave: (event) ->
-        $(@).removeClass _this._getAllClasses(_this.options.hoverStates)
+        $(@).removeClass _this._getAllClasses(_this.options.hoverStates) # This mouse has left the box, so we remove all highlight classes for this box. Don't worry, they get readded in the mousemove.
 
       click: (event) ->
-        if _this._getLocation(@, event) #Upper left
-          _this._setDates(this, "T00:00:00")
-          $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.setStates.activeAm
-        else #Lower Right
-          _this._setDates(this, "T12:00:00")
-          $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.setStates.activePm
+        if _this._getLocation(@, event) # We're in the upper left corner (AM)
+          _this._setDates(this, "T00:00:00") # Set the date as AM
+          $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.setStates.activeAm # Remove all hover state classes and add the active state
+        else # We're in the lower right corner (PM)
+          _this._setDates(this, "T12:00:00") # Set the date as PM
+          $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.setStates.activePm # Remove all hover state classes and add the adtive state
 
       ".day_box"
 
