@@ -69,24 +69,24 @@
 
         if _this._getLocation(@, event) # We're in the upper left corner (AM)
 
-          if !_this._highlightable() #If it's not highlightable, that means we're closing a date span
+          if !_this._highlightable() #If not highlightable, that means we just have to highlight our current cursor position and not a date span
 
             if ~$(@).attr("class").indexOf(_this.options.setStates.activePm) # If the current square has an activePm class on it, and we're on currently in the AM section of the square(As determined earlier), we need to apply a fullDay hover class
               $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.hoverStates.fullDay
             else # If the square has no activePM class on it, we can just apply the Am hover class 
               $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.hoverStates.am
 
-          else # It's highlightable, that means we've starting a date span
+          else # It's highlightable, that means we're currently selecting a date span
             _this._eraseHighlights() # Remove all highlight classes
             _this._trackHighlights @, "T00:00:00" # Start highlight tracking
             
         else # We're in the lower right corner (PM)
-          if !_this._highlightable() #If it's not highlightable, that means we're closing a date span
+          if !_this._highlightable() #If not highlightable, that means we just have to highlight our current cursor position and not a date span
             if ~$(@).attr("class").indexOf(_this.options.setStates.activeAm)
               $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.hoverStates.fullDay
             else
               $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.hoverStates.pm
-          else # It's highlightable, that means we've starting a date span 
+          else # It's highlightable, that means we're currently selecting a date span
             _this._eraseHighlights() # Remove all highlight classes
             _this._trackHighlights @, "T12:00:00" # Start highlight tracking
 
