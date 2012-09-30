@@ -278,8 +278,12 @@
 
       # Create day DOM element
       dayshtml += """
-                  <div class="#{@options.dayBoxClass} #{@options.trackClass}#{if statusclass isnt "" then statusclass else ""}" data-date="#{fulldate}" data-status-type="#{statustype}" data-status-time="#{statustime}">
-                    #{i+1}
+                  <div class="#{@options.dayBoxClass} #{@options.trackClass}#{if statusclass isnt "" then statusclass else ""}">
+                    <div data-date="#{fulldate}T00:00:00" data-status-type="#{statustype}" data-status-time="#{statustime}">
+                      <div data-date="#{fulldate}T12:00:00" data-status-type="#{statustype}" data-status-time="#{statustime}">
+                        #{i+1}
+                      </div>
+                    </div>
                   </div>
                   """
 

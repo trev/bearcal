@@ -261,7 +261,7 @@
               }
             }
           }
-          dayshtml += "<div class=\"" + this.options.dayBoxClass + " " + this.options.trackClass + (statusclass !== "" ? statusclass : "") + "\" data-date=\"" + fulldate + "\" data-status-type=\"" + statustype + "\" data-status-time=\"" + statustime + "\">\n  " + (i + 1) + "\n</div>";
+          dayshtml += "<div class=\"" + this.options.dayBoxClass + " " + this.options.trackClass + (statusclass !== "" ? statusclass : "") + "\">\n  <div data-date=\"" + fulldate + "T00:00:00\" data-status-type=\"" + statustype + "\" data-status-time=\"" + statustime + "\">\n    <div data-date=\"" + fulldate + "T12:00:00\" data-status-type=\"" + statustype + "\" data-status-time=\"" + statustime + "\">\n      " + (i + 1) + "\n    </div>\n  </div>\n</div>";
           daycount++;
           i++;
         }
