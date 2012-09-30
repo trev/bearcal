@@ -88,7 +88,7 @@ textarea {
   margin: 10px 0; }
 
 .day_box, .empty_day_box, .upper_left_hover, .lower_right_hover, .full_day, .active_am, .active_pm {
-  background: url(/img/corner-sprites.png) #fbfbfb;
+  background: url(/img/corner-sprites.png) transparent;
   margin-top: 1px;
   margin-left: 1px;
   border: 1px solid #eee;
@@ -99,6 +99,9 @@ textarea {
   line-height: 20px;
   text-align: center;
   color: #5E5E5E; }
+
+.hover_am, .active_am, .highlight_am, .hover_pm, .active_pm, .highlight_pm, .hover_full_day, .full_day, .highlight_full_day {
+  background: url(/img/corner-sprites.png) transparent; }
 
 .hover_am, .active_am, .highlight_am {
   background-position: 60px 0;
