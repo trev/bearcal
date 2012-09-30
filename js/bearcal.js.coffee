@@ -277,7 +277,11 @@
             statustime = status.status.time
 
       # Create day DOM element
-      dayshtml += "<div class=\"#{@options.dayBoxClass} #{@options.trackClass}#{if statusclass isnt "" then statusclass else ""}\" data-date=\"#{fulldate}\" data-status-type=\"#{statustype}\" data-status-time=\"#{statustime}\">#{i+1}</div>\n"
+      dayshtml += """
+                  <div class="#{@options.dayBoxClass} #{@options.trackClass}#{if statusclass isnt "" then statusclass else ""}" data-date="#{fulldate}" data-status-type="#{statustype}" data-status-time="#{statustime}">
+                    #{i+1}
+                  </div>
+                  """
 
       # Count 'em for good measure
       daycount++
