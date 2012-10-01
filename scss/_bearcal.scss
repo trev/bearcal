@@ -1,7 +1,6 @@
 .bearcal { margin: 10px 0 }
 
-.day_box, .empty_day_box, .upper_left_hover, .lower_right_hover, .full_day, .active_am, .active_pm {
-  background: url(/img/corner-sprites.png) transparent;
+.day_box, .empty_day_box {
   margin-top: 1px;
   margin-left: 1px;
   border: 1px solid #eee;

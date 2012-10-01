@@ -44,15 +44,19 @@
     endDate           : null
   
   getJSON : () ->
+    _this = @
+
     json = { "availability" : [] }
-    @element.find('.day_box').each () ->
+    @element.find('.'+@options.boxClass.fullDay).each () ->
       elem = $(@)
       json.availability.push
-        "date"        : elem.attr('data-date')
-        "classes"     : "tmp"
-        "status"      :
-          "type"      : elem.attr('data-status-type')
-          "time"      : elem.attr('data-status-time')
+        "date"        : elem.find('.'+_this.options.boxClass.am).attr('data-date')
+        "classes"     : elem.find('.'+_this.options.boxClass.am).attr('class')
+        "type"        : elem.find('.'+_this.options.boxClass.am).attr('data-status-type')
+      json.availability.push
+        "date"        : elem.find('.'+_this.options.boxClass.pm).attr('data-date')
+        "classes"     : elem.find('.'+_this.options.boxClass.pm).attr('class')
+        "type"        : elem.find('.'+_this.options.boxClass.pm).attr('data-status-type')
     console.log(json)
 
   # Date comparisons
@@ -181,7 +185,8 @@
   #   pos:  whether the cursor is in am or pm, valid values["T00:00:00", "T12:00:00"]
   _setDates : (that, pos) ->
     _this = @ 
-    #Are there two dates already? YES
+    
+    # If both start and end dates are set, we reset them
     if @_options.startDate and @_options.endDate
       @_options.startDate = @_options.endDate = null #Erase both start & end dates
     
@@ -233,7 +238,7 @@
       
         true #Return true to let know that an end date was set
     
-    #Other possibilities (Fresh start)
+    # Start date not set
     else
       @_options.startDate = $(that).attr("data-date") + pos #Set start date
 

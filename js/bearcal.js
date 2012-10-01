@@ -52,20 +52,23 @@
         endDate: null
       },
       getJSON: function() {
-        var json;
+        var json, _this;
+        _this = this;
         json = {
           "availability": []
         };
-        this.element.find('.day_box').each(function() {
+        this.element.find('.' + this.options.boxClass.fullDay).each(function() {
           var elem;
           elem = $(this);
+          json.availability.push({
+            "date": elem.find('.' + _this.options.boxClass.am).attr('data-date'),
+            "classes": elem.find('.' + _this.options.boxClass.am).attr('class'),
+            "type": elem.find('.' + _this.options.boxClass.am).attr('data-status-type')
+          });
           return json.availability.push({
-            "date": elem.attr('data-date'),
-            "classes": "tmp",
-            "status": {
-              "type": elem.attr('data-status-type'),
-              "time": elem.attr('data-status-time')
-            }
+            "date": elem.find('.' + _this.options.boxClass.pm).attr('data-date'),
+            "classes": elem.find('.' + _this.options.boxClass.pm).attr('class'),
+            "type": elem.find('.' + _this.options.boxClass.pm).attr('data-status-type')
           });
         });
         return console.log(json);
