@@ -17,10 +17,7 @@
           fullDay: "day_box"
         },
         trackClass: "track",
-        defaultStatus: {
-          type: "available",
-          time: "fullday"
-        },
+        defaultStatusType: "available",
         hoverStates: {
           am: "hover_am",
           pm: "hover_pm",
@@ -32,9 +29,14 @@
           fullDay: "highlight_full_day"
         },
         setStates: {
-          activeAm: "active_am",
-          activePm: "active_pm",
-          fullDay: "full_day"
+          am: {
+            available: "",
+            unavailable: "active_am"
+          },
+          pm: {
+            available: "",
+            unavailable: "active_pm"
+          }
         },
         availabilityTypes: {
           available: "available",
@@ -62,16 +64,14 @@
           elem = $(this);
           json.availability.push({
             "date": elem.find('.' + _this.options.boxClass.am).attr('data-date'),
-            "classes": elem.find('.' + _this.options.boxClass.am).attr('class'),
             "type": elem.find('.' + _this.options.boxClass.am).attr('data-status-type')
           });
           return json.availability.push({
             "date": elem.find('.' + _this.options.boxClass.pm).attr('data-date'),
-            "classes": elem.find('.' + _this.options.boxClass.pm).attr('class'),
             "type": elem.find('.' + _this.options.boxClass.pm).attr('data-status-type')
           });
         });
-        return console.log(json);
+        return json;
       },
       _compareDates: function(s_date, e_date, operator) {
         switch (operator) {
@@ -94,22 +94,14 @@
           mousemove: function(event) {
             if (_this._getLocation(this, event)) {
               if (!_this._highlightable()) {
-                if (~$(this).attr("class").indexOf(_this.options.setStates.activePm)) {
-                  return $(this).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.hoverStates.fullDay);
-                } else {
-                  return $(this).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.hoverStates.am);
-                }
+                return $(this).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.hoverStates.am);
               } else {
                 _this._eraseHighlights();
                 return _this._trackHighlights(this, "T00:00:00");
               }
             } else {
               if (!_this._highlightable()) {
-                if (~$(this).attr("class").indexOf(_this.options.setStates.activeAm)) {
-                  return $(this).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.hoverStates.fullDay);
-                } else {
-                  return $(this).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.hoverStates.pm);
-                }
+                return $(this).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.hoverStates.pm);
               } else {
                 _this._eraseHighlights();
                 return _this._trackHighlights(this, "T12:00:00");
@@ -181,12 +173,12 @@
           if (this._compareDates(this._options.startDate, this._options.endDate, "<")) {
             $("." + this.options.boxClass.fullDay).each(function() {
               if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T12:00:00", "<") && _this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T00:00:00", ">")) {
-                $(this).find("." + _this.options.boxClass.am).attr("class", _this.options.setStates.activeAm);
-                return $(this).find("." + _this.options.boxClass.pm).attr("class", _this.options.setStates.activePm);
+                $(this).find("." + _this.options.boxClass.am).addClass(_this.options.setStates.am.unavailable);
+                return $(this).find("." + _this.options.boxClass.pm).addClass(_this.options.setStates.pm.unavailable);
               } else if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T12:00:00", "==")) {
-                return $(this).find("." + _this.options.boxClass.pm).attr("class", _this.options.setStates.activePm);
+                return $(this).find("." + _this.options.boxClass.pm).addClass(_this.options.setStates.pm.unavailable);
               } else if (_this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T00:00:00", "==")) {
-                return $(this).find("." + _this.options.boxClass.am).attr("class", _this.options.setStates.activeAm);
+                return $(this).find("." + _this.options.boxClass.am).addClass(_this.options.setStates.am.unavailable);
               }
             });
             this._eraseHighlights();
@@ -194,12 +186,12 @@
           } else if (this._compareDates(this._options.startDate, this._options.endDate, ">")) {
             $("." + this.options.boxClass.fullDay).each(function() {
               if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", ">") && _this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T12:00:00", "<")) {
-                $(this).find("." + _this.options.boxClass.am).attr("class", _this.options.setStates.activeAm);
-                return $(this).find("." + _this.options.boxClass.pm).attr("class", _this.options.setStates.activePm);
+                $(this).find("." + _this.options.boxClass.am).addClass(_this.options.setStates.am.unavailable);
+                return $(this).find("." + _this.options.boxClass.pm).addClass(_this.options.setStates.pm.unavailable);
               } else if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", "==")) {
-                return $(this).find("." + _this.options.boxClass.pm).attr("class", _this.options.setStates.activeAm);
+                return $(this).find("." + _this.options.boxClass.pm).addClass(_this.options.setStates.am.unavailable);
               } else if (_this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T12:00:00", "==")) {
-                return $(this).find("." + _this.options.boxClass.am).attr("class", _this.options.setStates.activePm);
+                return $(this).find("." + _this.options.boxClass.am).addClass(_this.options.setStates.pm.unavailable);
               }
             });
             this._eraseHighlights();
@@ -207,9 +199,9 @@
           } else {
             $("." + this.options.boxClass.fullDay).each(function() {
               if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", "==")) {
-                return $(this).find("." + _this.options.boxClass.am).attr("class", _this.options.setStates.activeAm);
+                return $(this).find("." + _this.options.boxClass.am).addClass(_this.options.setStates.am.unavailable);
               } else if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T12:00:00", "==")) {
-                return $(this).find("." + _this.options.boxClass.pm).attr("class", _this.options.setStates.activePm);
+                return $(this).find("." + _this.options.boxClass.pm).addClass(_this.options.setStates.pm.unavailable);
               }
             });
             return true;
@@ -217,9 +209,9 @@
         } else {
           this._options.startDate = $(that).attr("data-date") + pos;
           if (pos === "T00:00:00") {
-            $(that).find("." + this.options.boxClass.am).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.setStates.activeAm);
+            $(that).find("." + this.options.boxClass.am).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.setStates.am.unavailable);
           } else {
-            $(that).find("." + this.options.boxClass.pm).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.setStates.activePm);
+            $(that).find("." + this.options.boxClass.pm).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.setStates.pm.unavailable);
           }
           return false;
         }
@@ -259,7 +251,7 @@
         return weekdayshtml;
       },
       _getDaysHtml: function(year, month) {
-        var blanks, daycount, dayshtml, fulldate, i, status, statusclass, statustime, statustype, _i, _len, _ref;
+        var blanks, daycount, dayshtml, fulldate, i, states, status, _i, _len, _ref;
         dayshtml = "";
         daycount = 0;
         blanks = this._getDayOfWeek(year, month, 1);
@@ -271,25 +263,30 @@
             i++;
           }
         }
-        statusclass = "";
+        states = {};
         i = 0;
         while (i < this._getDaysInMonth(year, month)) {
-          statusclass = statustype = statustime = "";
-          statustype = this.options.defaultStatus.type;
-          statustime = this.options.defaultStatus.time;
+          states = {
+            am: {
+              type: this.options.defaultStatusType
+            },
+            pm: {
+              type: this.options.defaultStatusType
+            }
+          };
           fulldate = "" + year + "-" + (this._pad(parseInt(month) + 1, 2)) + "-" + (this._pad(i + 1, 2));
           if (this._options.loadedData.availability != null) {
             _ref = this._options.loadedData.availability;
             for (_i = 0, _len = _ref.length; _i < _len; _i++) {
               status = _ref[_i];
-              if (status.date === fulldate) {
-                statusclass = " " + this.options.setStates[status.classes];
-                statustype = status.status.type;
-                statustime = status.status.time;
+              if (status.date === fulldate + "T00:00:00") {
+                states.am.type = status.type;
+              } else if (status.date === fulldate + "T12:00:00") {
+                states.pm.type = status.type;
               }
             }
           }
-          dayshtml += "<div class=\"" + this.options.boxClass.fullDay + " " + this.options.trackClass + (statusclass !== "" ? statusclass : "") + "\" data-date=\"" + fulldate + "\">\n  <div class=\"" + this.options.boxClass.am + "\" data-date=\"" + fulldate + "T00:00:00\" data-status-type=\"" + statustype + "\">\n    <div class=\"" + this.options.boxClass.pm + "\" data-date=\"" + fulldate + "T12:00:00\" data-status-type=\"" + statustype + "\">\n      " + (i + 1) + "\n    </div>\n  </div>\n</div>";
+          dayshtml += "<div class=\"" + this.options.boxClass.fullDay + " " + this.options.trackClass + "\" data-date=\"" + fulldate + "\">\n  <div class=\"" + this.options.boxClass.am + " " + this.options.setStates.am[states.am.type] + "\" data-date=\"" + fulldate + "T00:00:00\" data-status-type=\"" + states.am.type + "\">\n    <div class=\"" + this.options.boxClass.pm + " " + this.options.setStates.pm[states.pm.type] + "\" data-date=\"" + fulldate + "T12:00:00\" data-status-type=\"" + states.pm.type + "\">\n      " + (i + 1) + "\n    </div>\n  </div>\n</div>";
           daycount++;
           i++;
         }
@@ -448,11 +445,13 @@
         var _this;
         _this = this;
         if (this.options.json) {
-          $.getJSON(this.options.jsonUrl, function(data) {
-            return $.extend(_this._options.loadedData, data);
+          return $.getJSON(this.options.jsonUrl, function(data) {
+            $.extend(_this._options.loadedData, data);
+            return _this._startup();
           });
+        } else {
+          return _this._startup();
         }
-        return _this._startup();
       },
       _init: function() {
         var _this;
