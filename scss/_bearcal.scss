@@ -13,12 +13,26 @@
   color: #5E5E5E;
 }
 
-.hover_am, .active_am, .highlight_am, .hover_pm, .active_pm, .highlight_pm, .hover_full_day, .full_day, .highlight_full_day {
-  background: url(/img/corner-sprites.png) transparent;
+.hover_am, .highlight_am, .hover_pm, .highlight_pm, .unavailable {
+  background: url(/img/corner-sprites-blue.png) transparent;
 }
-.hover_am, .active_am, .highlight_am { background-position: 60px 0; color: #414141; }
-.hover_pm, .active_pm, .highlight_pm { background-position: 40px 0; color: #414141; }
-.hover_full_day, .full_day, .highlight_full_day { background-position: 20px 0; color: #414141; }
+
+.am, .hover_am, .highlight_am {
+  background-position: 60px 0;
+  color: #414141;
+}
+.am_divided {
+  background-position: 0 0;
+  color: #414141;
+}
+.pm, .hover_pm, .highlight_pm {
+  background-position: 40px 0;
+  color: #414141;
+}
+.pm_divided {
+  background-position: 20px 0;
+  color: #414141;
+}
 
 .year_box {
   width: 668px; // (.month_box::width + .month_box::border + .month_box::margin) * amount of months per row - .endrow difference

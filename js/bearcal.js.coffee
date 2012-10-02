@@ -8,7 +8,7 @@
     days              : ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
     nthMonth          : 4
     nthMonthClass     : "endrow"
-    animateSpeed      : 800
+    animateSpeed      : 500
     boxClass          : 
       am              : "am_box"
       pm              : "pm_box"
@@ -18,18 +18,16 @@
     hoverStates       : 
       am              : "hover_am"
       pm              : "hover_pm"
-      fullDay         : "hover_full_day"
     highlightStates   :
       am              : "highlight_am"
       pm              : "highlight_pm"
-      fullDay         : "highlight_full_day"
     setStates         : 
       am              :
         available     : ""
-        unavailable   : "active_am"
+        unavailable   : "unavailable am"
       pm              :
         available     : ""
-        unavailable   : "active_pm"
+        unavailable   : "unavailable pm"
     availabilityTypes : 
       available       : "available"
       unavailable     : "unavailable"
@@ -127,6 +125,7 @@
   # There are 2 logic groups - each group requires different logic
   # Group 1: If the cursor is on the left side(<) of the start date
   # Group 2: If the cursor is on the right side(>) of the start date
+  # Group 3: If the cursor is on the start date
   #
   # Params:
   #   that: the parent event we're reacting to
@@ -134,26 +133,33 @@
   _trackHighlights: (that, pos) ->
     _this = @
     cursorPos = $(that).attr("data-date") + pos #True cursor position
-    cursorAdj = $(that).attr("data-date") + "T00:00:00" #Adjusted cursor position required for logic testing
     $("."+@options.boxClass.fullDay).each -> #Loop through all day_box(es)
-      each_box = $(@).attr("data-date") + "T00:00:00"
       
       #Logic group 1
       if cursorPos < _this._options.startDate
+        cursorAdj = $(that).attr("data-date") + "T00:00:00" #Adjusted cursor position required for logic testing
+        each_box = $(@).attr("data-date") + "T00:00:00"
         
         #Is the current each_box between the @_options.startDate and cursor
-        if _this._compareDates(each_box, cursorAdj, ">=") and _this._compareDates(each_box, _this._options.startDate, "<")
+        if _this._compareDates(each_box, cursorAdj, ">=") and _this._compareDates(each_box, _this._options.startDate, "<=")
+
           #If cursorAdj == each_box we need to look closer to see if we need to apply halfday highlighting
           if _this._compareDates(each_box, cursorAdj, "==") and ~cursorPos.indexOf("T12:00:00")
             # Add pm highlight class to the pm div
             $(@).find("."+_this.options.boxClass.pm).addClass _this.options.highlightStates.pm 
+
+          #If  each_box is equal to the startdate then we just apply a halday highlight
+          else if _this._compareDates(each_box, _this._options.startDate, "==")
+            $(@).find("."+_this.options.boxClass.am).addClass _this.options.highlightStates.am 
           else
             # Add both am and pm highlight class to am and pm div respectively
             $(@).find("."+_this.options.boxClass.am).addClass _this.options.highlightStates.am 
             $(@).find("."+_this.options.boxClass.pm).addClass _this.options.highlightStates.pm 
       
       #Logic group 2
-      if cursorPos > _this._options.startDate
+      else if cursorPos > _this._options.startDate
+        cursorAdj = $(that).attr("data-date") + "T12:00:00" #Adjusted cursor position required for logic testing
+        each_box = $(@).attr("data-date") + "T12:00:00"
         
         #Is the current each_box between the @_options.startDate and cursor
         if _this._compareDates(each_box, cursorAdj, "<=") and _this._compareDates(each_box, _this._options.startDate, ">=")
@@ -162,10 +168,25 @@
           if _this._compareDates(each_box, cursorAdj, "==") and ~cursorPos.indexOf("T00:00:00")
             # Add am highlight class to the am div
             $(@).find("."+_this.options.boxClass.am).addClass _this.options.highlightStates.am 
+            
+          #If  each_box is equal to the startdate then we just apply a halday highlight
+          else if _this._compareDates(each_box, _this._options.startDate, "==")
+            $(@).find("."+_this.options.boxClass.pm).addClass _this.options.highlightStates.pm 
           else
             # Add both am and pm highlight class to am and pm div respectively
             $(@).find("."+_this.options.boxClass.am).addClass _this.options.highlightStates.am 
             $(@).find("."+_this.options.boxClass.pm).addClass _this.options.highlightStates.pm 
+
+      # Logic group 3
+      else if cursorPos is _this._options.startDate
+        each_box = $(@).attr("data-date") + "T00:00:00"
+        if _this._compareDates(each_box, cursorPos, "==")
+          $(@).find("."+_this.options.boxClass.am).addClass _this.options.highlightStates.am 
+
+        each_box = $(@).attr("data-date") + "T12:00:00"
+        if _this._compareDates(each_box, cursorPos, "==")
+          $(@).find("."+_this.options.boxClass.pm).addClass _this.options.highlightStates.pm 
+
 
   # Logic behind whether states should be applied to date selection
   #
@@ -202,7 +223,7 @@
           else if _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T00:00:00", "==")
             $(@).find("."+_this.options.boxClass.am).addClass(_this.options.setStates.am.unavailable) 
 
-        @._eraseHighlights()
+        @_eraseHighlights()
         true #Return true to let know that an end date was set
       
       #Logic group 2
@@ -217,7 +238,7 @@
             $(@).find("."+_this.options.boxClass.pm).addClass(_this.options.setStates.am.unavailable) 
 
           else if _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T12:00:00", "==")
-            $(@).find("."+_this.options.boxClass.am).addClass(_this.options.setStates.pm.unavailable) 
+            $(@).find("."+_this.options.boxClass.pm).addClass(_this.options.setStates.pm.unavailable) 
 
         @_eraseHighlights()
         true #Return true to let know that an end date was set
@@ -235,13 +256,6 @@
     # Start date not set
     else
       @_options.startDate = $(that).attr("data-date") + pos #Set start date
-
-      if pos is "T00:00:00"
-        # Remove all hover state classes and add the active state
-        $(that).find("."+@options.boxClass.am).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.setStates.am.unavailable 
-      else
-        # Remove all hover state classes and add the active state
-        $(that).find("."+@options.boxClass.pm).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.setStates.pm.unavailable 
 
       false #Return false tolet know that no end date was set
 
@@ -442,7 +456,7 @@
   # Gets previous months and adjusts the view accordingly
   _getPrevMonths: ->
     if !$('.slider_container').is(':animated')
-      currentpos = parseFloat($('.slider_container').css("marginTop"))
+      currentpos = parseFloat($('.slider_container').css('marginTop'))
       rowheight = $('.month_box').outerHeight(true)
       rows = (@options.scrollPeriod / @options.nthMonth)
       animatemargin = currentpos + (rowheight * rows) 
@@ -460,7 +474,7 @@
   # Gets next months and adjusts the view accordingly
   _getNextMonths: ->
     if !$('.slider_container').is(':animated')
-      currentpos = parseFloat($('.slider_container').css("marginTop"))
+      currentpos = parseFloat($('.slider_container').css('marginTop'))
       rowheight = $('.month_box').outerHeight(true)
       rows = (@options.scrollPeriod / @options.nthMonth)
       animatemargin = currentpos - (rowheight * rows) 

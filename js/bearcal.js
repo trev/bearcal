@@ -10,7 +10,7 @@
         days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
         nthMonth: 4,
         nthMonthClass: "endrow",
-        animateSpeed: 800,
+        animateSpeed: 500,
         boxClass: {
           am: "am_box",
           pm: "pm_box",
@@ -20,22 +20,20 @@
         defaultStatusType: "available",
         hoverStates: {
           am: "hover_am",
-          pm: "hover_pm",
-          fullDay: "hover_full_day"
+          pm: "hover_pm"
         },
         highlightStates: {
           am: "highlight_am",
-          pm: "highlight_pm",
-          fullDay: "highlight_full_day"
+          pm: "highlight_pm"
         },
         setStates: {
           am: {
             available: "",
-            unavailable: "active_am"
+            unavailable: "unavailable am"
           },
           pm: {
             available: "",
-            unavailable: "active_pm"
+            unavailable: "unavailable pm"
           }
         },
         availabilityTypes: {
@@ -133,31 +131,45 @@
         return $("." + this.options.boxClass.am + ", ." + this.options.boxClass.pm).removeClass(this._getAllClasses(this.options.highlightStates));
       },
       _trackHighlights: function(that, pos) {
-        var cursorAdj, cursorPos, _this;
+        var cursorPos, _this;
         _this = this;
         cursorPos = $(that).attr("data-date") + pos;
-        cursorAdj = $(that).attr("data-date") + "T00:00:00";
         return $("." + this.options.boxClass.fullDay).each(function() {
-          var each_box;
-          each_box = $(this).attr("data-date") + "T00:00:00";
+          var cursorAdj, each_box;
           if (cursorPos < _this._options.startDate) {
-            if (_this._compareDates(each_box, cursorAdj, ">=") && _this._compareDates(each_box, _this._options.startDate, "<")) {
+            cursorAdj = $(that).attr("data-date") + "T00:00:00";
+            each_box = $(this).attr("data-date") + "T00:00:00";
+            if (_this._compareDates(each_box, cursorAdj, ">=") && _this._compareDates(each_box, _this._options.startDate, "<=")) {
               if (_this._compareDates(each_box, cursorAdj, "==") && ~cursorPos.indexOf("T12:00:00")) {
-                $(this).find("." + _this.options.boxClass.pm).addClass(_this.options.highlightStates.pm);
-              } else {
-                $(this).find("." + _this.options.boxClass.am).addClass(_this.options.highlightStates.am);
-                $(this).find("." + _this.options.boxClass.pm).addClass(_this.options.highlightStates.pm);
-              }
-            }
-          }
-          if (cursorPos > _this._options.startDate) {
-            if (_this._compareDates(each_box, cursorAdj, "<=") && _this._compareDates(each_box, _this._options.startDate, ">=")) {
-              if (_this._compareDates(each_box, cursorAdj, "==") && ~cursorPos.indexOf("T00:00:00")) {
+                return $(this).find("." + _this.options.boxClass.pm).addClass(_this.options.highlightStates.pm);
+              } else if (_this._compareDates(each_box, _this._options.startDate, "==")) {
                 return $(this).find("." + _this.options.boxClass.am).addClass(_this.options.highlightStates.am);
               } else {
                 $(this).find("." + _this.options.boxClass.am).addClass(_this.options.highlightStates.am);
                 return $(this).find("." + _this.options.boxClass.pm).addClass(_this.options.highlightStates.pm);
               }
+            }
+          } else if (cursorPos > _this._options.startDate) {
+            cursorAdj = $(that).attr("data-date") + "T12:00:00";
+            each_box = $(this).attr("data-date") + "T12:00:00";
+            if (_this._compareDates(each_box, cursorAdj, "<=") && _this._compareDates(each_box, _this._options.startDate, ">=")) {
+              if (_this._compareDates(each_box, cursorAdj, "==") && ~cursorPos.indexOf("T00:00:00")) {
+                return $(this).find("." + _this.options.boxClass.am).addClass(_this.options.highlightStates.am);
+              } else if (_this._compareDates(each_box, _this._options.startDate, "==")) {
+                return $(this).find("." + _this.options.boxClass.pm).addClass(_this.options.highlightStates.pm);
+              } else {
+                $(this).find("." + _this.options.boxClass.am).addClass(_this.options.highlightStates.am);
+                return $(this).find("." + _this.options.boxClass.pm).addClass(_this.options.highlightStates.pm);
+              }
+            }
+          } else if (cursorPos === _this._options.startDate) {
+            each_box = $(this).attr("data-date") + "T00:00:00";
+            if (_this._compareDates(each_box, cursorPos, "==")) {
+              $(this).find("." + _this.options.boxClass.am).addClass(_this.options.highlightStates.am);
+            }
+            each_box = $(this).attr("data-date") + "T12:00:00";
+            if (_this._compareDates(each_box, cursorPos, "==")) {
+              return $(this).find("." + _this.options.boxClass.pm).addClass(_this.options.highlightStates.pm);
             }
           }
         });
@@ -191,7 +203,7 @@
               } else if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", "==")) {
                 return $(this).find("." + _this.options.boxClass.pm).addClass(_this.options.setStates.am.unavailable);
               } else if (_this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T12:00:00", "==")) {
-                return $(this).find("." + _this.options.boxClass.am).addClass(_this.options.setStates.pm.unavailable);
+                return $(this).find("." + _this.options.boxClass.pm).addClass(_this.options.setStates.pm.unavailable);
               }
             });
             this._eraseHighlights();
@@ -208,11 +220,6 @@
           }
         } else {
           this._options.startDate = $(that).attr("data-date") + pos;
-          if (pos === "T00:00:00") {
-            $(that).find("." + this.options.boxClass.am).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.setStates.am.unavailable);
-          } else {
-            $(that).find("." + this.options.boxClass.pm).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.setStates.pm.unavailable);
-          }
           return false;
         }
       },
@@ -395,7 +402,7 @@
       _getPrevMonths: function() {
         var animatemargin, currentpos, date, html, rowheight, rows;
         if (!$('.slider_container').is(':animated')) {
-          currentpos = parseFloat($('.slider_container').css("marginTop"));
+          currentpos = parseFloat($('.slider_container').css('marginTop'));
           rowheight = $('.month_box').outerHeight(true);
           rows = this.options.scrollPeriod / this.options.nthMonth;
           animatemargin = currentpos + (rowheight * rows);
@@ -418,7 +425,7 @@
       _getNextMonths: function() {
         var animatemargin, currentpos, date, rowheight, rows;
         if (!$('.slider_container').is(':animated')) {
-          currentpos = parseFloat($('.slider_container').css("marginTop"));
+          currentpos = parseFloat($('.slider_container').css('marginTop'));
           rowheight = $('.month_box').outerHeight(true);
           rows = this.options.scrollPeriod / this.options.nthMonth;
           animatemargin = currentpos - (rowheight * rows);
