@@ -28,10 +28,6 @@
       pm              :
         available     : ""
         unavailable   : "unavailable pm"
-    availabilityTypes : 
-      available       : "available"
-      unavailable     : "unavailable"
-      booked          : "booked"
     json              : false
     jsonUrl           : ""
 
