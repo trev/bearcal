@@ -1,6 +1,6 @@
 (($, window, document) ->
   $.widget "a07.BearCal",
-  options:
+  options             :
     startDate         : new Date()
     period            : 12
     scrollPeriod      : 4
@@ -25,9 +25,11 @@
       am              :
         available     : ""
         unavailable   : "unavailable am"
+        booked        : "booked am"
       pm              :
         available     : ""
         unavailable   : "unavailable pm"
+        booked        : "booked pm"
     json              : false
     jsonUrl           : ""
 
@@ -491,8 +493,7 @@
       return false
 
     @_track()
-
-
+    
   _create: ->
     _this = @
 

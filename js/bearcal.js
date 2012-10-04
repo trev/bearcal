@@ -29,11 +29,13 @@
         setStates: {
           am: {
             available: "",
-            unavailable: "unavailable am"
+            unavailable: "unavailable am",
+            booked: "booked am"
           },
           pm: {
             available: "",
-            unavailable: "unavailable pm"
+            unavailable: "unavailable pm",
+            booked: "booked pm"
           }
         },
         json: false,
