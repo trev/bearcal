@@ -19,10 +19,12 @@
       available       : "unavailable"
       unavailable     : "available"
     hoverStates       : 
-      unavailableAm   : "hover_unavailable_am"
-      unavailablePm   : "hover_unavailable_pm"
-      availableAm     : "hover_available_am"
-      availablePm     : "hover_available_pm"
+      am              :
+        available     : "hover_available_am"
+        unavailable   : "hover_unavailable_am"
+      pm              :
+        available     : "hover_available_pm"
+        unavailable   : "hover_unavailable_pm"
     highlightStates   :
       am              :
         available     : "highlight_available_am"
@@ -41,6 +43,7 @@
         booked        : "booked pm"
     json              : false
     jsonUrl           : ""
+    dontTrackStates   : ["booked"]
 
   _options            :
     loadedData        : {}
@@ -50,6 +53,7 @@
     endDate           : null
     state             : null
   
+  # Get current calendar state in JSON format
   getJSON : () ->
     _this = @
 
@@ -73,7 +77,11 @@
       when "<=" then new Date(s_date).getTime() <= new Date(e_date).getTime()
       when "==" then new Date(s_date).getTime() is new Date(e_date).getTime()
 
-  #  Tracks the events relating to calendar interactivity
+  # States not to track
+  _trackable: (timeOfDay) ->
+    if $.inArray(timeOfDay.attr('data-status-type'), @options.dontTrackStates) is -1 then true else false 
+
+  # Tracks the events relating to calendar interactivity
   _track: ->
     _this = @
     $("."+@element.attr("class")).on
@@ -87,18 +95,18 @@
           if !_this._highlightable() #If not highlightable, that means we just have to highlight our current cursor position and not a date span
             parent.removeClass(_this._getAllClasses(_this.options.hoverStates)) # Remove all previous hover states classes
             hoverState = _this._getReverseType(amChild) # Figure out which hover state to apply
-            amChild.addClass(_this.options.hoverStates[hoverState+'Am']) # Add hover state class to am div
+            amChild.addClass(_this.options.hoverStates.am[hoverState]) # Add hover state class to am div
 
           else # It's highlightable, that means we're currently selecting a date span
             _this._eraseHighlights() # Remove all highlight classes
             _this._trackHighlights @, "T00:00:00" # Start highlight tracking
             
         else # We're in the lower right corner (PM)
-
+          
           if !_this._highlightable() #If not highlightable, that means we just have to highlight our current cursor position and not a date span
             parent.removeClass(_this._getAllClasses(_this.options.hoverStates)) # Remove all previous hover states classes
             hoverState = _this._getReverseType(pmChild) # Figure out which hover state to apply
-            pmChild.addClass(_this.options.hoverStates[hoverState+'Pm']) # Add hover state class to pm div
+            pmChild.addClass(_this.options.hoverStates.pm[hoverState]) # Add hover state class to pm div
             
           else # It's highlightable, that means we're currently selecting a date span
             _this._eraseHighlights() # Remove all highlight classes
@@ -109,10 +117,15 @@
         parent.removeClass(_this._getAllClasses(_this.options.hoverStates)) # The mouse has left the box, so we remove all remaining hover classes for this box.
 
       click: (event) ->
+        amChild = $(@).find('.'+_this.options.boxClass.am)
+        pmChild = $(@).find('.'+_this.options.boxClass.pm)
+
         if _this._getLocation(@, event) # We're in the upper left corner (AM)
-          _this._setDates(this, "T00:00:00") # Set the date as AM
+          if _this._trackable(amChild) # Check to see if it's trackable (Could be a state that we don't want to track)
+            _this._setDates(this, "T00:00:00") # Set the date as AM
         else # We're in the lower right corner (PM)
-          _this._setDates(this, "T12:00:00") # Set the date as PM
+          if _this._trackable(pmChild) # Check to see if it's trackable (Could be a state that we don't want to track)
+            _this._setDates(this, "T12:00:00") # Set the date as PM
 
       "."+@options.trackClass # Why not just track the each daybox instead of having an extra "track" class? Because we might not want to track previous dates to the current date for example.
 
@@ -164,19 +177,24 @@
         
         #Is the current each_box between the @_options.startDate and cursor
         if _this._compareDates(each_box, cursorAdj, ">=") and _this._compareDates(each_box, _this._options.startDate, "<=")
+          amChild = $(@).find('.'+_this.options.boxClass.am)
+          pmChild = $(@).find('.'+_this.options.boxClass.pm)
 
           #If cursorAdj == each_box we need to look closer to see if we need to apply halfday highlighting
           if _this._compareDates(each_box, cursorAdj, "==") and ~cursorPos.indexOf("T12:00:00")
-            # Add pm highlight class to the pm div
-            $(@).find("."+_this.options.boxClass.pm).addClass _this.options.highlightStates.pm[_this._options.state] 
+            if _this._trackable(pmChild) # Only add class if it's trackable
+              pmChild.addClass _this.options.highlightStates.pm[_this._options.state]
 
           #If  each_box is equal to the startdate then we just apply a halday highlight
           else if _this._compareDates(each_box, _this._options.startDate, "==")
-            $(@).find("."+_this.options.boxClass.am).addClass _this.options.highlightStates.am[_this._options.state] 
+            if _this._trackable(amChild) # Only add class if it's trackable
+              amChild.addClass _this.options.highlightStates.am[_this._options.state] 
           else
             # Add both am and pm highlight class to am and pm div respectively
-            $(@).find("."+_this.options.boxClass.am).addClass _this.options.highlightStates.am[_this._options.state] 
-            $(@).find("."+_this.options.boxClass.pm).addClass _this.options.highlightStates.pm[_this._options.state] 
+            if _this._trackable(amChild) # Only add class if it's trackable
+              amChild.addClass _this.options.highlightStates.am[_this._options.state] 
+            if _this._trackable(pmChild) # Only add class if it's trackable
+              pmChild.addClass _this.options.highlightStates.pm[_this._options.state] 
       
       #Logic group 2
       else if cursorPos > _this._options.startDate
@@ -185,29 +203,36 @@
         
         #Is the current each_box between the @_options.startDate and cursor
         if _this._compareDates(each_box, cursorAdj, "<=") and _this._compareDates(each_box, _this._options.startDate, ">=")
+          amChild = $(@).find('.'+_this.options.boxClass.am)
+          pmChild = $(@).find('.'+_this.options.boxClass.pm)
           
           #If cursorAdj == each_box we need to look closer to see if we need to apply halfday highlighting
           if _this._compareDates(each_box, cursorAdj, "==") and ~cursorPos.indexOf("T00:00:00")
-            # Add am highlight class to the am div
-            $(@).find("."+_this.options.boxClass.am).addClass _this.options.highlightStates.am[_this._options.state]
+            if _this._trackable(amChild) # Only add class if it's trackable
+              $(@).find("."+_this.options.boxClass.am).addClass _this.options.highlightStates.am[_this._options.state]
             
           #If  each_box is equal to the startdate then we just apply a halday highlight
           else if _this._compareDates(each_box, _this._options.startDate, "==")
-            $(@).find("."+_this.options.boxClass.pm).addClass _this.options.highlightStates.pm[_this._options.state]
+            if _this._trackable(pmChild) # Only add class if it's trackable
+              $(@).find("."+_this.options.boxClass.pm).addClass _this.options.highlightStates.pm[_this._options.state]
           else
             # Add both am and pm highlight class to am and pm div respectively
-            $(@).find("."+_this.options.boxClass.am).addClass _this.options.highlightStates.am[_this._options.state] 
-            $(@).find("."+_this.options.boxClass.pm).addClass _this.options.highlightStates.pm[_this._options.state] 
+            if _this._trackable(amChild) # Only add class if it's trackable
+              $(@).find("."+_this.options.boxClass.am).addClass _this.options.highlightStates.am[_this._options.state] 
+            if _this._trackable(pmChild) # Only add class if it's trackable
+              $(@).find("."+_this.options.boxClass.pm).addClass _this.options.highlightStates.pm[_this._options.state] 
 
       # Logic group 3
       else if cursorPos is _this._options.startDate
         each_box = $(@).attr("data-date") + "T00:00:00"
         if _this._compareDates(each_box, cursorPos, "==")
-          $(@).find("."+_this.options.boxClass.am).addClass _this.options.highlightStates.am[_this._options.state] 
+          if _this._trackable(amChild) # Only add class if it's trackable
+            $(@).find("."+_this.options.boxClass.am).addClass _this.options.highlightStates.am[_this._options.state] 
 
         each_box = $(@).attr("data-date") + "T12:00:00"
         if _this._compareDates(each_box, cursorPos, "==")
-          $(@).find("."+_this.options.boxClass.pm).addClass _this.options.highlightStates.pm[_this._options.state] 
+          if _this._trackable(pmChild) # Only add class if it's trackable
+            $(@).find("."+_this.options.boxClass.pm).addClass _this.options.highlightStates.pm[_this._options.state] 
 
 
   # Logic behind whether states should be applied to date selection
@@ -234,30 +259,32 @@
       #Logic group 1
       if @_compareDates(@_options.startDate, @_options.endDate, "<")
         $("."+@options.boxClass.fullDay).each -> #Apply status classes to in-between dates
+          amChild = $(@).find('.'+_this.options.boxClass.am)
+          pmChild = $(@).find('.'+_this.options.boxClass.pm)
 
           if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T12:00:00", "<") and _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T00:00:00", ">") 
-            $(@).find("."+_this.options.boxClass.am)
-            .removeClass(_this._getAllClasses(_this.options.setStates))
-            .addClass(_this.options.setStates.am[_this._options.state]) 
-            .attr('data-status-type', _this._options.state)
 
-            $(@).find("."+_this.options.boxClass.pm)
-            .removeClass(_this._getAllClasses(_this.options.setStates))
-            .addClass(_this.options.setStates.pm[_this._options.state]) 
-            .attr('data-status-type', _this._options.state)
+            if _this._trackable(amChild) # Only add class if it's trackable
+              amChild.removeClass(_this._getAllClasses(_this.options.setStates))
+              .addClass(_this.options.setStates.am[_this._options.state]) 
+              .attr('data-status-type', _this._options.state)
 
+            if _this._trackable(pmChild) # Only add class if it's trackable
+              pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
+              .addClass(_this.options.setStates.pm[_this._options.state]) 
+              .attr('data-status-type', _this._options.state)
 
           else if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T12:00:00", "==")
-            $(@).find("."+_this.options.boxClass.pm)
-            .removeClass(_this._getAllClasses(_this.options.setStates))
-            .addClass(_this.options.setStates.pm[_this._options.state]) 
-            .attr('data-status-type', _this._options.state)
+            if _this._trackable(pmChild) # Only add class if it's trackable
+              pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
+              .addClass(_this.options.setStates.pm[_this._options.state]) 
+              .attr('data-status-type', _this._options.state)
 
           else if _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T00:00:00", "==")
-            $(@).find("."+_this.options.boxClass.am)
-            .removeClass(_this._getAllClasses(_this.options.setStates))
-            .addClass(_this.options.setStates.am[_this._options.state]) 
-            .attr('data-status-type', _this._options.state)
+            if _this._trackable(amChild) # Only add class if it's trackable
+              amChild.removeClass(_this._getAllClasses(_this.options.setStates))
+              .addClass(_this.options.setStates.am[_this._options.state]) 
+              .attr('data-status-type', _this._options.state)
 
         @_eraseHighlights()
         true #Return true to let know that an end date was set
@@ -265,29 +292,31 @@
       #Logic group 2
       else if @_compareDates(@_options.startDate, @_options.endDate, ">")
         $("."+@options.boxClass.fullDay).each -> #Apply status classes to in-between dates
+          amChild = $(@).find('.'+_this.options.boxClass.am)
+          pmChild = $(@).find('.'+_this.options.boxClass.pm)
 
           if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T00:00:00", ">") and _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T12:00:00", "<")
-            $(@).find("."+_this.options.boxClass.am)
-            .removeClass(_this._getAllClasses(_this.options.setStates))
-            .addClass(_this.options.setStates.am[_this._options.state]) 
-            .attr('data-status-type', _this._options.state)
+            if _this._trackable(amChild) # Only add class if it's trackable
+              amChild.removeClass(_this._getAllClasses(_this.options.setStates))
+              .addClass(_this.options.setStates.am[_this._options.state]) 
+              .attr('data-status-type', _this._options.state)
 
-            $(@).find("."+_this.options.boxClass.pm)
-            .removeClass(_this._getAllClasses(_this.options.setStates))
-            .addClass(_this.options.setStates.pm[_this._options.state]) 
-            .attr('data-status-type', _this._options.state)
+            if _this._trackable(pmChild) # Only add class if it's trackable
+              pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
+              .addClass(_this.options.setStates.pm[_this._options.state]) 
+              .attr('data-status-type', _this._options.state)
 
           else if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T00:00:00", "==")
-            $(@).find("."+_this.options.boxClass.am)
-            .removeClass(_this._getAllClasses(_this.options.setStates))
-            .addClass(_this.options.setStates.am[_this._options.state]) 
-            .attr('data-status-type', _this._options.state)
+            if _this._trackable(amChild) # Only add class if it's trackable
+              amChild.removeClass(_this._getAllClasses(_this.options.setStates))
+              .addClass(_this.options.setStates.am[_this._options.state]) 
+              .attr('data-status-type', _this._options.state)
 
           else if _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T12:00:00", "==")
-            $(@).find("."+_this.options.boxClass.pm)
-            .removeClass(_this._getAllClasses(_this.options.setStates))
-            .addClass(_this.options.setStates.pm[_this._options.state]) 
-            .attr('data-status-type', _this._options.state)
+            if _this._trackable(pmChild) # Only add class if it's trackable
+              pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
+              .addClass(_this.options.setStates.pm[_this._options.state]) 
+              .attr('data-status-type', _this._options.state)
 
         @_eraseHighlights()
         true #Return true to let know that an end date was set
@@ -295,17 +324,20 @@
       #Logic group 3
       else
         $("."+@options.boxClass.fullDay).each -> #Apply status classes to in-between dates
+          amChild = $(@).find('.'+_this.options.boxClass.am)
+          pmChild = $(@).find('.'+_this.options.boxClass.pm)
+
           if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T00:00:00", "==")
-            $(@).find("."+_this.options.boxClass.am)
-            .removeClass(_this._getAllClasses(_this.options.setStates))
-            .addClass(_this.options.setStates.am[_this._options.state]) 
-            .attr('data-status-type', _this._options.state)
+            if _this._trackable(amChild) # Only add class if it's trackable
+              amChild.removeClass(_this._getAllClasses(_this.options.setStates))
+              .addClass(_this.options.setStates.am[_this._options.state]) 
+              .attr('data-status-type', _this._options.state)
 
           else if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T12:00:00", "==")
-            $(@).find("."+_this.options.boxClass.pm)
-            .removeClass(_this._getAllClasses(_this.options.setStates))
-            .addClass(_this.options.setStates.pm[_this._options.state]) 
-            .attr('data-status-type', _this._options.state)
+            if _this._trackable(pmChild) # Only add class if it's trackable
+              pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
+              .addClass(_this.options.setStates.pm[_this._options.state]) 
+              .attr('data-status-type', _this._options.state)
       
         true #Return true to let know that an end date was set
     
@@ -374,10 +406,10 @@
     while i < @_getDaysInMonth(year,month)
       # Reset
       states = {
-        am          : 
-          type      : @options.defaultStatusType
-        pm          : 
-          type      : @options.defaultStatusType
+        am     : 
+          type : @options.defaultStatusType
+        pm     : 
+          type : @options.defaultStatusType
       }
 
       # Perform some date formating modifications so that it plays nice with the Date object
