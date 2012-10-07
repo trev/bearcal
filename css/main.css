@@ -99,26 +99,32 @@ textarea {
   text-align: center;
   color: #5E5E5E; }
 
-.hover_am, .highlight_am, .hover_pm, .highlight_pm, .unavailable {
+.hover_unavailable_am, .hover_unavailable_pm, .highlight_unavailable_am, .highlight_unavailable_pm {
+  background: url(/img/corner-sprites-blue.png) transparent !important; }
+
+.hover_available_am, .hover_available_pm, .highlight_available_am, .highlight_available_pm {
+  background: none !important; }
+
+.hover_unavailable_am, .highlight_unavailable_am {
+  background-position: 60px 0 !important;
+  color: #414141 !important; }
+
+.hover_unavailable_pm, .highlight_unavailable_pm {
+  background-position: 40px 0 !important;
+  color: #414141 !important; }
+
+.unavailable {
   background: url(/img/corner-sprites-blue.png) transparent; }
 
 .booked {
   background: url(/img/corner-sprites-green.png) transparent; }
 
-.am, .hover_am, .highlight_am {
+.am {
   background-position: 60px 0;
   color: #414141; }
 
-.am_divided {
-  background-position: 0 0;
-  color: #414141; }
-
-.pm, .hover_pm, .highlight_pm {
+.pm {
   background-position: 40px 0;
-  color: #414141; }
-
-.pm_divided {
-  background-position: 20px 0;
   color: #414141; }
 
 .year_box {
