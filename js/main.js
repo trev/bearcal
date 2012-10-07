@@ -3,6 +3,6 @@ $(function() {
   $('.bearcal').BearCal({
     scrollPeriod  : 4,
     json          : true,
-    jsonUrl       : "/sample-data.json"
+    jsonUrl       : "/sample-data-large.json"
   });
 });

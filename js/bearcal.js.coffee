@@ -9,6 +9,8 @@
     nthMonth          : 4
     nthMonthClass     : "endrow"
     animateSpeed      : 500
+    nextMonthsHtml    : -> "<a href=\"#\" class=\"next_months\">Next #{@scrollPeriod} months</a>"
+    prevMonthsHtml    : -> "<a href=\"#\" class=\"prev_months\">Previous #{@scrollPeriod} months</a>"
     boxClass          : 
       am              : "am_box"
       pm              : "pm_box"
@@ -37,14 +39,12 @@
         available     : ""
         unavailable   : "unavailable am"
         booked        : "booked am"
+        delimiter     : "delimiter_am"
       pm              :
         available     : ""
         unavailable   : "unavailable pm"
         booked        : "booked pm"
-      delimiter       : 
-        start         : "delimiter"
-        null          : ""
-        end           : "delimiter"
+        delimiter     : "delimiter_pm"
     json              : false
     jsonUrl           : ""
     dontTrackStates   : ["booked"]
@@ -72,7 +72,7 @@
         "date"        : elem.find('.'+_this.options.boxClass.pm).attr('data-date')
         "type"        : elem.find('.'+_this.options.boxClass.pm).attr('data-status-type')
         "delimiter"   : elem.find('.'+_this.options.boxClass.pm).attr('data-delimiter')
-    json
+    JSON.stringify(json, null, '\t')
 
   # Date comparisons
   _compareDates : (s_date, e_date, operator) ->
@@ -263,7 +263,6 @@
     
     #Is the start date set? YES
     if @_options.startDate
-      delimiter = "start"
       @_options.endDate = $(that).attr("data-date") + pos #Set end date
       
       #Logic group 1
@@ -287,20 +286,16 @@
           else if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T12:00:00", "==")
             if _this._trackable(pmChild) # Only add class if it's trackable
               pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
-              .addClass(_this.options.setStates.delimiter[delimiter] + " " + _this.options.setStates.pm[_this._options.state]) 
+              .addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]) 
               .attr('data-status-type', _this._options.state)
-              .attr('data-delimiter', delimiter)
-          
-              delimiter = "end"
+              .attr('data-delimiter', 'true')
 
           else if _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T00:00:00", "==")
             if _this._trackable(amChild) # Only add class if it's trackable
               amChild.removeClass(_this._getAllClasses(_this.options.setStates))
-              .addClass(_this.options.setStates.delimiter[delimiter] + " " + _this.options.setStates.am[_this._options.state]) 
+              .addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]) 
               .attr('data-status-type', _this._options.state)
-              .attr('data-delimiter', delimiter)
-
-              delimiter = "end"
+              .attr('data-delimiter', 'true')
 
         @_eraseHighlights()
         true #Return true to let know that an end date was set
@@ -325,20 +320,16 @@
           else if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T00:00:00", "==")
             if _this._trackable(amChild) # Only add class if it's trackable
               amChild.removeClass(_this._getAllClasses(_this.options.setStates))
-              .addClass(_this.options.setStates.delimiter[delimiter] + " " + _this.options.setStates.am[_this._options.state]) 
+              .addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]) 
               .attr('data-status-type', _this._options.state)
-              .attr('data-delimiter', delimiter)
-
-              delimiter = "end"
+              .attr('data-delimiter', 'true')
 
           else if _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T12:00:00", "==")
             if _this._trackable(pmChild) # Only add class if it's trackable
               pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
-              .addClass(_this.options.setStates.delimiter[delimiter] + " " + _this.options.setStates.pm[_this._options.state]) 
+              .addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]) 
               .attr('data-status-type', _this._options.state)
-              .attr('data-delimiter', delimiter)
-
-              delimiter = "end"
+              .attr('data-delimiter', 'true')
 
         @_eraseHighlights()
         true #Return true to let know that an end date was set
@@ -352,20 +343,16 @@
           if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T00:00:00", "==")
             if _this._trackable(amChild) # Only add class if it's trackable
               amChild.removeClass(_this._getAllClasses(_this.options.setStates))
-              .addClass(_this.options.setStates.delimiter[delimiter] + " " + _this.options.setStates.am[_this._options.state]) 
+              .addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]) 
               .attr('data-status-type', _this._options.state)
-              .attr('data-delimiter', delimiter)
-
-              delimiter = "end"
+              .attr('data-delimiter', 'true')
 
           else if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T12:00:00", "==")
             if _this._trackable(pmChild) # Only add class if it's trackable
               pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
-              .addClass(_this.options.setStates.delimiter[delimiter] + " " + _this.options.setStates.pm[_this._options.state]) 
+              .addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]) 
               .attr('data-status-type', _this._options.state)
-              .attr('data-delimiter', delimiter)
-
-              delimiter = "end"
+              .attr('data-delimiter', 'true')
       
         true #Return true to let know that an end date was set
     
@@ -436,10 +423,10 @@
       states = {
         am          : 
           type      : @options.defaultStatusType
-          delimiter : "null"
+          delimiter : "false"
         pm          : 
           type      : @options.defaultStatusType
-          delimiter : "null"
+          delimiter : "false"
       }
 
       # Perform some date formating modifications so that it plays nice with the Date object
@@ -449,18 +436,18 @@
       if @_options.loadedData.availability?
         for status in @_options.loadedData.availability
           if status.date is fulldate+"T00:00:00"
-            states.am.type    = status.type
+            states.am.type       = status.type
             states.am.delimiter  = status.delimiter
           else if status.date is fulldate+"T12:00:00"
-            states.pm.type    = status.type
+            states.pm.type       = status.type
             states.pm.delimiter  = status.delimiter
 
 
       # Create day DOM element
       dayshtml += """
                   <div class="#{@options.boxClass.fullDay} #{@options.trackClass}" data-date="#{fulldate}">
-                    <div class="#{@options.boxClass.am} #{@options.setStates.am[states.am.type]} #{@options.setStates.delimiter[states.am.delimiter]}" data-date="#{fulldate}T00:00:00" data-status-type="#{states.am.type}" data-delimiter="#{states.am.delimiter}">
-                      <div class="#{@options.boxClass.pm} #{@options.setStates.pm[states.pm.type]} #{@options.setStates.delimiter[states.pm.delimiter]}" data-date="#{fulldate}T12:00:00" data-status-type="#{states.pm.type}" data-delimiter="#{states.pm.delimiter}">
+                    <div class="#{@options.boxClass.am} #{@options.setStates.am[states.am.type]} #{if states.am.delimiter is "true" then @options.setStates.am.delimiter else ""}" data-date="#{fulldate}T00:00:00" data-status-type="#{states.am.type}" data-delimiter="#{states.am.delimiter}">
+                      <div class="#{@options.boxClass.pm} #{@options.setStates.pm[states.pm.type]} #{if states.pm.delimiter is "true" then @options.setStates.pm.delimiter else ""}" data-date="#{fulldate}T12:00:00" data-status-type="#{states.pm.type}" data-delimiter="#{states.pm.delimiter}">
                         #{i+1}
                       </div>
                     </div>
@@ -529,7 +516,7 @@
     # Trigger prebuild
     @_trigger("beforebuild")
 
-    calendarhtml = "<a href=\"#\" class=\"prev_months\">Previous #{@options.scrollPeriod} Months</a>"
+    calendarhtml = @options.prevMonthsHtml()
     calendarhtml += "<div class=\"year_box clearfix\">\n  <div class=\"slider_container clearfix\">\n"
     year = @options.startDate.getFullYear()
     month = @options.startDate.getMonth()
@@ -546,7 +533,7 @@
       i++
 
     calendarhtml += "</div></div>"
-    calendarhtml += "<a href=\"#\" class=\"next_months\">Next #{@options.scrollPeriod} Months</a>"
+    calendarhtml += @options.nextMonthsHtml()
 
   _getMonthsByPeriod: (year, month, period) -> 
     movement = if period < 0 then -1 else 1

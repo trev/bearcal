@@ -11,6 +11,12 @@
         nthMonth: 4,
         nthMonthClass: "endrow",
         animateSpeed: 500,
+        nextMonthsHtml: function() {
+          return "<a href=\"#\" class=\"next_months\">Next " + this.scrollPeriod + " months</a>";
+        },
+        prevMonthsHtml: function() {
+          return "<a href=\"#\" class=\"prev_months\">Previous " + this.scrollPeriod + " months</a>";
+        },
         boxClass: {
           am: "am_box",
           pm: "pm_box",
@@ -46,17 +52,14 @@
           am: {
             available: "",
             unavailable: "unavailable am",
-            booked: "booked am"
+            booked: "booked am",
+            delimiter: "delimiter_am"
           },
           pm: {
             available: "",
             unavailable: "unavailable pm",
-            booked: "booked pm"
-          },
-          delimiter: {
-            start: "delimiter",
-            "null": "",
-            end: "delimiter"
+            booked: "booked pm",
+            delimiter: "delimiter_pm"
           }
         },
         json: false,
@@ -91,7 +94,7 @@
             "delimiter": elem.find('.' + _this.options.boxClass.pm).attr('data-delimiter')
           });
         });
-        return json;
+        return JSON.stringify(json, null, '\t');
       },
       _compareDates: function(s_date, e_date, operator) {
         switch (operator) {
@@ -250,13 +253,12 @@
         });
       },
       _setDates: function(that, pos) {
-        var delimiter, _this;
+        var _this;
         _this = this;
         if (this._options.startDate && this._options.endDate) {
           this._options.startDate = this._options.endDate = this._options.state = null;
         }
         if (this._options.startDate) {
-          delimiter = "start";
           this._options.endDate = $(that).attr("data-date") + pos;
           if (this._compareDates(this._options.startDate, this._options.endDate, "<")) {
             $("." + this.options.boxClass.fullDay).each(function() {
@@ -272,13 +274,11 @@
                 }
               } else if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T12:00:00", "==")) {
                 if (_this._trackable(pmChild)) {
-                  pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.delimiter[delimiter] + " " + _this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', delimiter);
-                  return delimiter = "end";
+                  return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
                 }
               } else if (_this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T00:00:00", "==")) {
                 if (_this._trackable(amChild)) {
-                  amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.delimiter[delimiter] + " " + _this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', delimiter);
-                  return delimiter = "end";
+                  return amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
                 }
               }
             });
@@ -298,13 +298,11 @@
                 }
               } else if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", "==")) {
                 if (_this._trackable(amChild)) {
-                  amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.delimiter[delimiter] + " " + _this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', delimiter);
-                  return delimiter = "end";
+                  return amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
                 }
               } else if (_this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T12:00:00", "==")) {
                 if (_this._trackable(pmChild)) {
-                  pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.delimiter[delimiter] + " " + _this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', delimiter);
-                  return delimiter = "end";
+                  return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
                 }
               }
             });
@@ -317,13 +315,11 @@
               pmChild = $(this).find('.' + _this.options.boxClass.pm);
               if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", "==")) {
                 if (_this._trackable(amChild)) {
-                  amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.delimiter[delimiter] + " " + _this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', delimiter);
-                  return delimiter = "end";
+                  return amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
                 }
               } else if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T12:00:00", "==")) {
                 if (_this._trackable(pmChild)) {
-                  pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.delimiter[delimiter] + " " + _this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', delimiter);
-                  return delimiter = "end";
+                  return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
                 }
               }
             });
@@ -393,11 +389,11 @@
           states = {
             am: {
               type: this.options.defaultStatusType,
-              delimiter: "null"
+              delimiter: "false"
             },
             pm: {
               type: this.options.defaultStatusType,
-              delimiter: "null"
+              delimiter: "false"
             }
           };
           fulldate = "" + year + "-" + (this._pad(parseInt(month) + 1, 2)) + "-" + (this._pad(i + 1, 2));
@@ -414,7 +410,7 @@
               }
             }
           }
-          dayshtml += "<div class=\"" + this.options.boxClass.fullDay + " " + this.options.trackClass + "\" data-date=\"" + fulldate + "\">\n  <div class=\"" + this.options.boxClass.am + " " + this.options.setStates.am[states.am.type] + " " + this.options.setStates.delimiter[states.am.delimiter] + "\" data-date=\"" + fulldate + "T00:00:00\" data-status-type=\"" + states.am.type + "\" data-delimiter=\"" + states.am.delimiter + "\">\n    <div class=\"" + this.options.boxClass.pm + " " + this.options.setStates.pm[states.pm.type] + " " + this.options.setStates.delimiter[states.pm.delimiter] + "\" data-date=\"" + fulldate + "T12:00:00\" data-status-type=\"" + states.pm.type + "\" data-delimiter=\"" + states.pm.delimiter + "\">\n      " + (i + 1) + "\n    </div>\n  </div>\n</div>";
+          dayshtml += "<div class=\"" + this.options.boxClass.fullDay + " " + this.options.trackClass + "\" data-date=\"" + fulldate + "\">\n  <div class=\"" + this.options.boxClass.am + " " + this.options.setStates.am[states.am.type] + " " + (states.am.delimiter === "true" ? this.options.setStates.am.delimiter : "") + "\" data-date=\"" + fulldate + "T00:00:00\" data-status-type=\"" + states.am.type + "\" data-delimiter=\"" + states.am.delimiter + "\">\n    <div class=\"" + this.options.boxClass.pm + " " + this.options.setStates.pm[states.pm.type] + " " + (states.pm.delimiter === "true" ? this.options.setStates.pm.delimiter : "") + "\" data-date=\"" + fulldate + "T12:00:00\" data-status-type=\"" + states.pm.type + "\" data-delimiter=\"" + states.pm.delimiter + "\">\n      " + (i + 1) + "\n    </div>\n  </div>\n</div>";
           daycount++;
           i++;
         }
@@ -462,7 +458,7 @@
       _getCalendar: function() {
         var calendarhtml, i, month, year;
         this._trigger("beforebuild");
-        calendarhtml = "<a href=\"#\" class=\"prev_months\">Previous " + this.options.scrollPeriod + " Months</a>";
+        calendarhtml = this.options.prevMonthsHtml();
         calendarhtml += "<div class=\"year_box clearfix\">\n  <div class=\"slider_container clearfix\">\n";
         year = this.options.startDate.getFullYear();
         month = this.options.startDate.getMonth();
@@ -477,7 +473,7 @@
           i++;
         }
         calendarhtml += "</div></div>";
-        return calendarhtml += "<a href=\"#\" class=\"next_months\">Next " + this.options.scrollPeriod + " Months</a>";
+        return calendarhtml += this.options.nextMonthsHtml();
       },
       _getMonthsByPeriod: function(year, month, period) {
         var date, html, i, movement, result, results, tmp, _i, _len, _month;
