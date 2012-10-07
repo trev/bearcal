@@ -2,55 +2,68 @@
   "availability"    : [
     {
       "date"        : "2013-04-13T00:00:00",
-      "type"        : "unavailable"
+      "type"        : "unavailable",
+      "delimiter"   : "start"
     },
     {
       "date"        : "2013-04-13T12:00:00",
-      "type"        : "unavailable"
+      "type"        : "unavailable",
+      "delimiter"   : "null"
     },
     {
       "date"        : "2013-04-14T00:00:00",
-      "type"        : "unavailable"
+      "type"        : "unavailable",
+      "delimiter"   : "null"
     },
     {
       "date"        : "2013-04-14T12:00:00",
-      "type"        : "unavailable"
+      "type"        : "unavailable",
+      "delimiter"   : "null"
     },
     {
       "date"        : "2013-04-15T00:00:00",
-      "type"        : "unavailable"
+      "type"        : "unavailable",
+      "delimiter"   : "end"
     },
     {
       "date"        : "2013-06-01T12:00:00",
-      "type"        : "booked"
+      "type"        : "booked",
+      "delimiter"   : "start"
     },
     {
       "date"        : "2013-06-02T00:00:00",
-      "type"        : "booked"
+      "type"        : "booked",
+      "delimiter"   : "null"
     },
     {
       "date"        : "2013-06-02T12:00:00",
-      "type"        : "booked"
+      "type"        : "booked",
+      "delimiter"   : "null"
     },
     {
       "date"        : "2013-06-03T00:00:00",
-      "type"        : "booked"
+      "type"        : "booked",
+      "delimiter"   : "null"
     },
     {
       "date"        : "2013-06-03T12:00:00",
-      "type"        : "booked"
+      "type"        : "booked",
+      "delimiter"   : "null"
     },
     {
       "date"        : "2013-06-04T00:00:00",
-      "type"        : "booked"
+      "type"        : "booked",
+      "delimiter"   : "null"
     },
     {
       "date"        : "2013-06-04T12:00:00",
-      "type"        : "booked"
+      "type"        : "booked",
+      "delimiter"   : "null"
     },
     {
       "date"        : "2013-06-05T00:00:00",
-      "type"        : "booked"
+      "type"        : "booked",
+      "delimiter"   : "end"
     }
   ]
 }
