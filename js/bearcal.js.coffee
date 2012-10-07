@@ -72,7 +72,7 @@
         if _this._getLocation(@, event) # We're in the upper left corner (AM)
 
           if !_this._highlightable() #If not highlightable, that means we just have to highlight our current cursor position and not a date span
-            $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.hoverStates.am
+            $(@).children().removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.hoverStates.am
 
           else # It's highlightable, that means we're currently selecting a date span
             _this._eraseHighlights() # Remove all highlight classes
@@ -81,14 +81,14 @@
         else # We're in the lower right corner (PM)
 
           if !_this._highlightable() #If not highlightable, that means we just have to highlight our current cursor position and not a date span
-            $(@).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.hoverStates.pm
+            $(@).children().removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.hoverStates.pm
             
           else # It's highlightable, that means we're currently selecting a date span
             _this._eraseHighlights() # Remove all highlight classes
             _this._trackHighlights @, "T12:00:00" # Start highlight tracking
 
       mouseleave: (event) ->
-        $(@).removeClass _this._getAllClasses(_this.options.hoverStates) # This mouse has left the box, so we remove all highlight classes for this box. Don't worry, they get readded in the mousemove.
+        $(@).children().removeClass(_this._getAllClasses(_this.options.hoverStates)) # The mouse has left the box, so we remove all remaining hover classes for this box.
 
       click: (event) ->
         if _this._getLocation(@, event) # We're in the upper left corner (AM)

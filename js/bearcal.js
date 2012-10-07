@@ -89,14 +89,14 @@
           mousemove: function(event) {
             if (_this._getLocation(this, event)) {
               if (!_this._highlightable()) {
-                return $(this).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.hoverStates.am);
+                return $(this).children().removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.hoverStates.am);
               } else {
                 _this._eraseHighlights();
                 return _this._trackHighlights(this, "T00:00:00");
               }
             } else {
               if (!_this._highlightable()) {
-                return $(this).removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.hoverStates.pm);
+                return $(this).children().removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass(_this.options.hoverStates.pm);
               } else {
                 _this._eraseHighlights();
                 return _this._trackHighlights(this, "T12:00:00");
@@ -104,7 +104,7 @@
             }
           },
           mouseleave: function(event) {
-            return $(this).removeClass(_this._getAllClasses(_this.options.hoverStates));
+            return $(this).children().removeClass(_this._getAllClasses(_this.options.hoverStates));
           },
           click: function(event) {
             if (_this._getLocation(this, event)) {
