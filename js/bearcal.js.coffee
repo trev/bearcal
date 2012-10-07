@@ -72,7 +72,8 @@
         if _this._getLocation(@, event) # We're in the upper left corner (AM)
 
           if !_this._highlightable() #If not highlightable, that means we just have to highlight our current cursor position and not a date span
-            $(@).children().removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.hoverStates.am
+            $(@).find('div').removeClass(_this._getAllClasses(_this.options.hoverStates)) # Remove all previous hover states classes
+            $(@).find('.'+_this.options.boxClass.am).addClass(_this.options.hoverStates.am) # Add hover state class to am div
 
           else # It's highlightable, that means we're currently selecting a date span
             _this._eraseHighlights() # Remove all highlight classes
@@ -81,14 +82,15 @@
         else # We're in the lower right corner (PM)
 
           if !_this._highlightable() #If not highlightable, that means we just have to highlight our current cursor position and not a date span
-            $(@).children().removeClass(_this._getAllClasses(_this.options.hoverStates)).addClass _this.options.hoverStates.pm
+            $(@).find('div').removeClass(_this._getAllClasses(_this.options.hoverStates)) # Remove all previous hover states classes
+            $(@).find('.'+_this.options.boxClass.pm).addClass(_this.options.hoverStates.pm) # Add hover state class to pm div
             
           else # It's highlightable, that means we're currently selecting a date span
             _this._eraseHighlights() # Remove all highlight classes
             _this._trackHighlights @, "T12:00:00" # Start highlight tracking
 
       mouseleave: (event) ->
-        $(@).children().removeClass(_this._getAllClasses(_this.options.hoverStates)) # The mouse has left the box, so we remove all remaining hover classes for this box.
+        $(@).find('div').removeClass(_this._getAllClasses(_this.options.hoverStates)) # The mouse has left the box, so we remove all remaining hover classes for this box.
 
       click: (event) ->
         if _this._getLocation(@, event) # We're in the upper left corner (AM)
