@@ -66,12 +66,12 @@ Animate speed for the prev/next months action
 #### nextMonthsHtml
 HTML for the next months DOM element  
 **Default:** A function returning an anchor element and *scrollPeriod* details  
-`nextMonthsHtml : function() { return "<a href=\"#\" class=\"next_months\">Next #{@scrollPeriod} months</a>" }`
+`nextMonthsHtml : function() { return "<a href=\"#\" class=\"next_months\">Next #{this.scrollPeriod} months</a>" }`
 
 #### prevMonthsHtml
 HTML for the previous months DOM element  
 **Default:** A function returning an anchor element and *scrollPeriod* details  
-`prevMonthsHtml : function() { return "<a href=\"#\" class=\"prev_months\">Previous #{@scrollPeriod} months</a>" }`
+`prevMonthsHtml : function() { return "<a href=\"#\" class=\"prev_months\">Previous #{this.scrollPeriod} months</a>" }`
 
 #### boxClass
 Object literal containing the classes to apply to the wrapper div of a single day and child divs: AM and PM
