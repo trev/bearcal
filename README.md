@@ -23,53 +23,54 @@ Yes, too right, but this one is a bit different.
 ### Options
 
 #### startDate
-What date to start the calendar from. Takes a date object or properly formated date object string.
-**Default:** Today's date
+What date to start the calendar from. Takes a date object or properly formated date object string.  
+**Default:** Today's date  
 `startDate : new Date()`
 
 #### period
-How many months to prepare initially
-**Default:** 12
+How many months to prepare initially  
+**Default:** 12  
 `period : 12`
 
 #### scrollPeriod
-How many months to load/display each time next/prev is triggered
-**Default:** 4
+How many months to load/display each time next/prev is triggered  
+**Default:** 4  
+`scrollPeriod : 4`
 
 
 #### monthFullName
-Array of month names to use
-**Default:** All 12 full months in english
+Array of month names to use  
+**Default:** All 12 full months in english  
 `monthFullName : ['January','February','March','April','May','June','July','August','September','October','November','December']`
 
 #### days
-Array of day names to use
-**Default:** All 7 days of the week in english
+Array of day names to use  
+**Default:** All 7 days of the week in english  
 `days : ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']`
 
 #### nthMonth
-Apply the class as defined in *nthMonthClass* after n many months
-**Default:** 4
+Apply the class as defined in *nthMonthClass* after n many months  
+**Default:** 4  
 `nthMonth : 4`
 
 #### nthMonthClass
-Name of the class to apply after *nthMonth*
-**Default:** endrow
+Name of the class to apply after *nthMonth*  
+**Default:** endrow  
 `nthMonthClass : "endrow"`
 
 #### animateSpeed
-Animate speed for the prev/next months action
-**Default:** 500ms
+Animate speed for the prev/next months action  
+**Default:** 500ms  
 `animateSpeed : 500`
 
 #### nextMonthsHtml
-HTML for the next months DOM element
-**Default:** A function returning an anchor element and *scrollPeriod* details
+HTML for the next months DOM element  
+**Default:** A function returning an anchor element and *scrollPeriod* details  
 `nextMonthsHtml : function() { return "<a href=\"#\" class=\"next_months\">Next #{@scrollPeriod} months</a>" }`
 
 #### prevMonthsHtml
-HTML for the previous months DOM element
-**Default:** A function returning an anchor element and *scrollPeriod* details
+HTML for the previous months DOM element  
+**Default:** A function returning an anchor element and *scrollPeriod* details  
 `prevMonthsHtml : function() { return "<a href=\"#\" class=\"prev_months\">Previous #{@scrollPeriod} months</a>" }`
 
 #### boxClass
@@ -81,13 +82,13 @@ Object literal containing the classes to apply to the wrapper div of a single da
       fullDay: "day_box"
 
 #### trackClass
-Class to add to each single day wrapper div. This class is used solely for attaching events.
-**Default:** track
+Class to add to each single day wrapper div. This class is used solely for attaching events.  
+**Default:** track  
 `trackClass : "track"`
 
 #### defaultStatusType
-The default status that is applied to the AM and PM div data-status-type attribute when none is supplied
-**Default:** available
+The default status that is applied to the AM and PM div data-status-type attribute when none is supplied  
+**Default:** available  
 `defaultStatusType : "available"`
 
 
@@ -130,7 +131,6 @@ Object literal containing which class to apply on a per period and per state bas
 #### setStates
 Object literal containing which class to apply on a per period and per state basis when we're saving a date span selection
 
-
     setStates: {
       am: {
         available: "",
@@ -147,19 +147,18 @@ Object literal containing which class to apply on a per period and per state bas
     }
 
 #### json
-Boolean whether we're preloading data into the calendar using JSON
-
-**Default:** false
+Boolean whether we're preloading data into the calendar using JSON  
+**Default:** false  
 `json : false`
 
 #### jsonUrl
-URL to json data to use for preloading the calendar
-**Default:** ""
+URL to json data to use for preloading the calendar  
+**Default:** ""  
 `jsonUrl : ""`
 
 #### dontTrackStates
-Which states not to track. I.e: You may want to remove the ability to override DOM elements set to "booked"
-**Default:** booked
+Which states not to track. I.e: You may want to remove the ability to override DOM elements set to "booked"  
+**Default:** booked  
 `dontTrackStates : ["booked"]`
 
 ### Events
