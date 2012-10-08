@@ -21,7 +21,7 @@ Yes, too right, but this one is a bit different.
 *BearCal* has many configurable options and relies heavily on CSS for styling and interaction
 
 ### Options
-* ####startDate
+* #### startDate
 What date to start the calendar from. Takes a date object or properly formated date object string.
 Default: Today's date
 period            : 12
