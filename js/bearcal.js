@@ -97,6 +97,8 @@
         return JSON.stringify(json, null, '\t');
       },
       _compareDates: function(s_date, e_date, operator) {
+        s_date = this._parseDate(s_date);
+        e_date = this._parseDate(e_date);
         switch (operator) {
           case "<":
             return new Date(s_date).getTime() < new Date(e_date).getTime();
@@ -109,6 +111,15 @@
           case "==":
             return new Date(s_date).getTime() === new Date(e_date).getTime();
         }
+      },
+      _parseDate: function(d) {
+        var day, month, months, time, year;
+        months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        year = d.slice(0, 4);
+        month = months[d.slice(5, 7) - 1];
+        day = d.slice(8, 10);
+        time = d.slice(-8, d.length);
+        return "" + month + " " + day + ", " + year + " " + time;
       },
       _trackable: function(timeOfDay) {
         if ($.inArray(timeOfDay.attr('data-status-type'), this.options.dontTrackStates) === -1) {
