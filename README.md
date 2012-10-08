@@ -148,6 +148,7 @@ Object literal containing which class to apply on a per period and per state bas
 
 #### json
 Boolean whether we're preloading data into the calendar using JSON
+
 **Default:** false
 `json : false`
 
