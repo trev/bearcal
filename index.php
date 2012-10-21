@@ -13,7 +13,12 @@
   </head>
   <body>
 
+    <h2>Full Calendar</h2>
     <div class="bearcal">
+    </div>
+
+    <h2>Input Calendar</h2>
+    <div class="minibearcal">
     </div>
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>

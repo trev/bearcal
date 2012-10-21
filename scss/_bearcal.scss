@@ -6,9 +6,125 @@
   font-style: normal;
 }
 
+// Styles specific to the full year cal example
 .bearcal { 
   margin: 10px 0;
   font-size: 12px;
+  .period_box {
+    width: 668px; // (.month_box::width + .month_box::border + .month_box::margin) * amount of months per row - .endrow difference
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    height: 594px;
+  }
+
+  .prev_months, .next_months {
+    //Start IR
+    border: 0;
+    font: 0/0 a;
+    text-shadow: none;
+    color: transparent;
+    //End IR
+    position: relative;
+    display: block;
+    width: 668px;
+    margin: 0 auto;
+    background: #E6E6E6;
+    text-align: center;
+    padding: 5px 0;
+    height: 30px;
+    transition: all .25s ease-in-out;
+    -moz-transition: all .25s ease-in-out;
+    -webkit-transition: all .25s ease-in-out;
+    &:hover { background: #D1D1D1; }
+  }
+
+  .prev_months:after {
+    position: absolute;
+    content: "";
+    width: 0px;
+    height: 0px;
+    left: 668px/2 - 46px/2;
+    top: 8px;
+    border-style: solid;
+    border-width: 0 23px 22px 23px;
+    border-color: transparent transparent #ffffff  transparent;
+  }
+
+  .next_months:after {
+    position: absolute;
+    content: "";
+    width: 0px;
+    height: 0px;
+    left: 668px/2 - 46px/2;
+    top: 8px;
+    border-style: solid;
+    border-width: 22px 23px 0 23px;
+    border-color: #ffffff transparent transparent transparent;
+  }
+}
+
+// Styles specific to the mini year cal example
+.minibearcal {
+  margin: 10px auto;
+  font-size: 12px;
+  width: 164px;
+  .period_box {
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    height: 198px;
+  }
+
+  .prev_months, .next_months {
+    //Start IR
+    border: 0;
+    font: 0/0 a;
+    text-shadow: none;
+    color: transparent;
+    //End IR
+    position: relative;
+    display: block;
+    margin: 0 auto;
+    background: #E6E6E6;
+    text-align: center;
+    padding: 5px 0;
+    height: 15px;
+    transition: all .25s ease-in-out;
+    -moz-transition: all .25s ease-in-out;
+    -webkit-transition: all .25s ease-in-out;
+    &:hover { background: #D1D1D1; }
+  }
+
+  .prev_months:after {
+    position: absolute;
+    content: "";
+    width: 0px;
+    height: 0px;
+    left: 164px/2 - 22px/2;
+    top: 8px;
+    border-style: solid;
+    border-width: 0 13px 12px 13px;
+    border-color: transparent transparent #ffffff  transparent;
+  }
+
+  .next_months:after {
+    position: absolute;
+    content: "";
+    width: 0px;
+    height: 0px;
+    left: 164px/2 - 24px/2;
+    top: 6px;
+    border-style: solid;
+    border-width: 12px 13px 0 13px;
+    border-color: #ffffff transparent transparent transparent;
+  }
+
+}
+
+// Global calendar styles
+h2 {
+  text-align: center;
 }
 
 .day_box, .empty_day_box {
@@ -64,58 +180,6 @@
   color: #414141;
 }
 
-.year_box {
-  width: 668px; // (.month_box::width + .month_box::border + .month_box::margin) * amount of months per row - .endrow difference
-  margin: 0 auto;
-  font-family: Arial, sans-serif;
-  overflow: hidden;
-  height: 594px;
-}
-
-.prev_months, .next_months {
-  //Start IR
-  border: 0;
-  font: 0/0 a;
-  text-shadow: none;
-  color: transparent;
-  //End IR
-  position: relative;
-  display: block;
-  width: 668px;
-  margin: 0 auto;
-  background: #E6E6E6;
-  text-align: center;
-  padding: 5px 0;
-  height: 30px;
-  transition: all .25s ease-in-out;
-  -moz-transition: all .25s ease-in-out;
-  -webkit-transition: all .25s ease-in-out;
-  &:hover { background: #D1D1D1; }
-}
-
-.prev_months:after {
-  position: absolute;
-  content: "";
-  width: 0px;
-  height: 0px;
-  left: 668px/2 - 46px/2;
-  top: 8px;
-  border-style: solid;
-  border-width: 0 23px 22px 23px;
-  border-color: transparent transparent #ffffff  transparent;
-}
-
-.next_months:after {
-  position: absolute;
-  content: "";
-  width: 0px;
-  height: 0px;
-  left: 668px/2 - 46px/2;
-  top: 8px;
-  border-style: solid;
-  border-width: 22px 23px 0 23px;
-  border-color: #ffffff transparent transparent transparent;
-}
 
 .slider_container .endrow {
   padding-right: 0;

@@ -131,7 +131,7 @@
       _track: function() {
         var _this;
         _this = this;
-        return $("." + this.element.attr("class")).on({
+        return this.element.on({
           mousemove: function(event) {
             var amChild, hoverState, parent, pmChild;
             parent = $(this).find('div');
@@ -197,7 +197,7 @@
         var cursorPos, _this;
         _this = this;
         cursorPos = $(that).attr("data-date") + pos;
-        return $("." + this.options.boxClass.fullDay).each(function() {
+        return this.element.find("." + this.options.boxClass.fullDay).each(function() {
           var amChild, cursorAdj, each_box, pmChild;
           if (cursorPos < _this._options.startDate) {
             cursorAdj = $(that).attr("data-date") + "T00:00:00";
@@ -272,7 +272,7 @@
         if (this._options.startDate) {
           this._options.endDate = $(that).attr("data-date") + pos;
           if (this._compareDates(this._options.startDate, this._options.endDate, "<")) {
-            $("." + this.options.boxClass.fullDay).each(function() {
+            this.element.find("." + this.options.boxClass.fullDay).each(function() {
               var amChild, pmChild;
               amChild = $(this).find('.' + _this.options.boxClass.am);
               pmChild = $(this).find('.' + _this.options.boxClass.pm);
@@ -296,7 +296,7 @@
             this._eraseHighlights();
             return true;
           } else if (this._compareDates(this._options.startDate, this._options.endDate, ">")) {
-            $("." + this.options.boxClass.fullDay).each(function() {
+            this.element.find("." + this.options.boxClass.fullDay).each(function() {
               var amChild, pmChild;
               amChild = $(this).find('.' + _this.options.boxClass.am);
               pmChild = $(this).find('.' + _this.options.boxClass.pm);
@@ -320,7 +320,7 @@
             this._eraseHighlights();
             return true;
           } else {
-            $("." + this.options.boxClass.fullDay).each(function() {
+            this.element.find("." + this.options.boxClass.fullDay).each(function() {
               var amChild, pmChild;
               amChild = $(this).find('.' + _this.options.boxClass.am);
               pmChild = $(this).find('.' + _this.options.boxClass.pm);
@@ -470,7 +470,7 @@
         var calendarhtml, i, month, year;
         this._trigger("beforebuild");
         calendarhtml = this.options.prevMonthsHtml();
-        calendarhtml += "<div class=\"year_box clearfix\">\n  <div class=\"slider_container clearfix\">\n";
+        calendarhtml += "<div class=\"period_box clearfix\">\n  <div class=\"slider_container clearfix\">\n";
         year = this.options.startDate.getFullYear();
         month = this.options.startDate.getMonth();
         i = 0;
@@ -529,22 +529,22 @@
       },
       _getPrevMonths: function() {
         var animatemargin, currentpos, date, html, rowheight, rows;
-        if (!$('.slider_container').is(':animated')) {
-          currentpos = parseFloat($('.slider_container').css('marginTop'));
-          rowheight = $('.month_box').outerHeight(true);
+        if (!this.element.find('.slider_container').is(':animated')) {
+          currentpos = parseFloat(this.element.find('.slider_container').css('marginTop'));
+          rowheight = this.element.find('.month_box').outerHeight(true);
           rows = this.options.scrollPeriod / this.options.nthMonth;
           animatemargin = currentpos + (rowheight * rows);
           animatemargin = animatemargin === (rowheight * rows) ? 0 : animatemargin;
           date = this._splitDate(0, this._options.displayedMonths);
           html = this._getMonthsByPeriod(date[0], date[1], -this.options.scrollPeriod);
           if (html.length > 0) {
-            return $('.slider_container').prepend(html).css({
+            return this.element.find('.slider_container').prepend(html).css({
               "marginTop": (currentpos - (rowheight * rows)) + "px"
             }).animate({
               marginTop: animatemargin + "px"
             }, this.options.animateSpeed);
           } else {
-            return $('.slider_container').animate({
+            return this.element.find('.slider_container').animate({
               marginTop: animatemargin + "px"
             }, this.options.animateSpeed);
           }
@@ -552,13 +552,13 @@
       },
       _getNextMonths: function() {
         var animatemargin, currentpos, date, rowheight, rows;
-        if (!$('.slider_container').is(':animated')) {
-          currentpos = parseFloat($('.slider_container').css('marginTop'));
-          rowheight = $('.month_box').outerHeight(true);
+        if (!this.element.find('.slider_container').is(':animated')) {
+          currentpos = parseFloat(this.element.find('.slider_container').css('marginTop'));
+          rowheight = this.element.find('.month_box').outerHeight(true);
           rows = this.options.scrollPeriod / this.options.nthMonth;
           animatemargin = currentpos - (rowheight * rows);
           date = this._splitDate(this._options.displayedMonths.length - 1, this._options.displayedMonths);
-          return $('.slider_container').append(this._getMonthsByPeriod(date[0], date[1], this.options.scrollPeriod)).animate({
+          return this.element.find('.slider_container').append(this._getMonthsByPeriod(date[0], date[1], this.options.scrollPeriod)).animate({
             marginTop: animatemargin + "px"
           }, this.options.animateSpeed);
         }
@@ -566,11 +566,11 @@
       _startup: function() {
         var _this = this;
         this.element.append(this._getCalendar());
-        $('.prev_months').click(function() {
+        this.element.find('.prev_months').click(function() {
           _this._getPrevMonths();
           return false;
         });
-        $('.next_months').click(function() {
+        this.element.find('.next_months').click(function() {
           _this._getNextMonths();
           return false;
         });
@@ -579,6 +579,7 @@
       _create: function() {
         var _this;
         _this = this;
+        this._options = $.extend(true, {}, this._options);
         if (this.options.json) {
           return $.getJSON(this.options.jsonUrl, function(data) {
             $.extend(_this._options.loadedData, data);

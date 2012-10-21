@@ -94,6 +94,100 @@ textarea {
 .bearcal {
   margin: 10px 0;
   font-size: 12px; }
+  .bearcal .period_box {
+    width: 668px;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    height: 594px; }
+  .bearcal .prev_months, .bearcal .next_months {
+    border: 0;
+    font: 0/0 a;
+    text-shadow: none;
+    color: transparent;
+    position: relative;
+    display: block;
+    width: 668px;
+    margin: 0 auto;
+    background: #E6E6E6;
+    text-align: center;
+    padding: 5px 0;
+    height: 30px;
+    transition: all .25s ease-in-out;
+    -moz-transition: all .25s ease-in-out;
+    -webkit-transition: all .25s ease-in-out; }
+    .bearcal .prev_months:hover, .bearcal .next_months:hover {
+      background: #D1D1D1; }
+  .bearcal .prev_months:after {
+    position: absolute;
+    content: "";
+    width: 0px;
+    height: 0px;
+    left: 311px;
+    top: 8px;
+    border-style: solid;
+    border-width: 0 23px 22px 23px;
+    border-color: transparent transparent #ffffff  transparent; }
+  .bearcal .next_months:after {
+    position: absolute;
+    content: "";
+    width: 0px;
+    height: 0px;
+    left: 311px;
+    top: 8px;
+    border-style: solid;
+    border-width: 22px 23px 0 23px;
+    border-color: #ffffff transparent transparent transparent; }
+
+.minibearcal {
+  margin: 10px auto;
+  font-size: 12px;
+  width: 164px; }
+  .minibearcal .period_box {
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    height: 198px; }
+  .minibearcal .prev_months, .minibearcal .next_months {
+    border: 0;
+    font: 0/0 a;
+    text-shadow: none;
+    color: transparent;
+    position: relative;
+    display: block;
+    margin: 0 auto;
+    background: #E6E6E6;
+    text-align: center;
+    padding: 5px 0;
+    height: 15px;
+    transition: all .25s ease-in-out;
+    -moz-transition: all .25s ease-in-out;
+    -webkit-transition: all .25s ease-in-out; }
+    .minibearcal .prev_months:hover, .minibearcal .next_months:hover {
+      background: #D1D1D1; }
+  .minibearcal .prev_months:after {
+    position: absolute;
+    content: "";
+    width: 0px;
+    height: 0px;
+    left: 71px;
+    top: 8px;
+    border-style: solid;
+    border-width: 0 13px 12px 13px;
+    border-color: transparent transparent #ffffff  transparent; }
+  .minibearcal .next_months:after {
+    position: absolute;
+    content: "";
+    width: 0px;
+    height: 0px;
+    left: 70px;
+    top: 6px;
+    border-style: solid;
+    border-width: 12px 13px 0 13px;
+    border-color: #ffffff transparent transparent transparent; }
+
+h2 {
+  text-align: center; }
 
 .day_box, .empty_day_box {
   margin-top: 1px;
@@ -142,54 +236,6 @@ textarea {
 .delimiter_pm {
   background-position: -20px 0;
   color: #414141; }
-
-.year_box {
-  width: 668px;
-  margin: 0 auto;
-  font-family: Arial, sans-serif;
-  overflow: hidden;
-  height: 594px; }
-
-.prev_months, .next_months {
-  border: 0;
-  font: 0/0 a;
-  text-shadow: none;
-  color: transparent;
-  position: relative;
-  display: block;
-  width: 668px;
-  margin: 0 auto;
-  background: #E6E6E6;
-  text-align: center;
-  padding: 5px 0;
-  height: 30px;
-  transition: all .25s ease-in-out;
-  -moz-transition: all .25s ease-in-out;
-  -webkit-transition: all .25s ease-in-out; }
-  .prev_months:hover, .next_months:hover {
-    background: #D1D1D1; }
-
-.prev_months:after {
-  position: absolute;
-  content: "";
-  width: 0px;
-  height: 0px;
-  left: 311px;
-  top: 8px;
-  border-style: solid;
-  border-width: 0 23px 22px 23px;
-  border-color: transparent transparent #ffffff  transparent; }
-
-.next_months:after {
-  position: absolute;
-  content: "";
-  width: 0px;
-  height: 0px;
-  left: 311px;
-  top: 8px;
-  border-style: solid;
-  border-width: 22px 23px 0 23px;
-  border-color: #ffffff transparent transparent transparent; }
 
 .slider_container .endrow {
   padding-right: 0;

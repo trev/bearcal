@@ -102,7 +102,7 @@
   # Tracks the events relating to calendar interactivity
   _track: ->
     _this = @
-    $("."+@element.attr("class")).on
+    @element.on
       mousemove: (event) ->
         parent = $(@).find('div')
         amChild = $(@).find('.'+_this.options.boxClass.am)
@@ -186,7 +186,7 @@
     _this = @
     cursorPos = $(that).attr("data-date") + pos #True cursor position
 
-    $("."+@options.boxClass.fullDay).each -> #Loop through all day_box(es)
+    @element.find("."+@options.boxClass.fullDay).each -> #Loop through all day_box(es)
       
       #Logic group 1
       if cursorPos < _this._options.startDate
@@ -279,7 +279,7 @@
       
       #Logic group 1
       if @_compareDates(@_options.startDate, @_options.endDate, "<")
-        $("."+@options.boxClass.fullDay).each -> #Apply status classes to in-between dates
+        @element.find("."+@options.boxClass.fullDay).each -> #Apply status classes to in-between dates
           amChild = $(@).find('.'+_this.options.boxClass.am)
           pmChild = $(@).find('.'+_this.options.boxClass.pm)
 
@@ -314,7 +314,7 @@
       
       #Logic group 2
       else if @_compareDates(@_options.startDate, @_options.endDate, ">")
-        $("."+@options.boxClass.fullDay).each -> #Apply status classes to in-between dates
+        @element.find("."+@options.boxClass.fullDay).each -> #Apply status classes to in-between dates
           amChild = $(@).find('.'+_this.options.boxClass.am)
           pmChild = $(@).find('.'+_this.options.boxClass.pm)
 
@@ -348,7 +348,7 @@
       
       #Logic group 3
       else
-        $("."+@options.boxClass.fullDay).each -> #Apply status classes to in-between dates
+        @element.find("."+@options.boxClass.fullDay).each -> #Apply status classes to in-between dates
           amChild = $(@).find('.'+_this.options.boxClass.am)
           pmChild = $(@).find('.'+_this.options.boxClass.pm)
 
@@ -529,7 +529,7 @@
     @_trigger("beforebuild")
 
     calendarhtml = @options.prevMonthsHtml()
-    calendarhtml += "<div class=\"year_box clearfix\">\n  <div class=\"slider_container clearfix\">\n"
+    calendarhtml += "<div class=\"period_box clearfix\">\n  <div class=\"slider_container clearfix\">\n"
     year = @options.startDate.getFullYear()
     month = @options.startDate.getMonth()
 
@@ -583,9 +583,9 @@
 
   # Gets previous months and adjusts the view accordingly
   _getPrevMonths: ->
-    if !$('.slider_container').is(':animated')
-      currentpos = parseFloat($('.slider_container').css('marginTop'))
-      rowheight = $('.month_box').outerHeight(true)
+    if !@element.find('.slider_container').is(':animated')
+      currentpos = parseFloat(@element.find('.slider_container').css('marginTop'))
+      rowheight = @element.find('.month_box').outerHeight(true)
       rows = (@options.scrollPeriod / @options.nthMonth)
       animatemargin = currentpos + (rowheight * rows) 
 
@@ -594,31 +594,31 @@
       date = @_splitDate(0, @_options.displayedMonths)
       html = @_getMonthsByPeriod(date[0],date[1],-@options.scrollPeriod)
       if html.length > 0
-        $('.slider_container').prepend(html)
+        @element.find('.slider_container').prepend(html)
                               .css("marginTop" : (currentpos - (rowheight * rows))+"px")
                               .animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
-      else $('.slider_container').animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
+      else @element.find('.slider_container').animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
 
   # Gets next months and adjusts the view accordingly
   _getNextMonths: ->
-    if !$('.slider_container').is(':animated')
-      currentpos = parseFloat($('.slider_container').css('marginTop'))
-      rowheight = $('.month_box').outerHeight(true)
+    if !@element.find('.slider_container').is(':animated')
+      currentpos = parseFloat(@element.find('.slider_container').css('marginTop'))
+      rowheight = @element.find('.month_box').outerHeight(true)
       rows = (@options.scrollPeriod / @options.nthMonth)
       animatemargin = currentpos - (rowheight * rows) 
 
       date = @_splitDate(@_options.displayedMonths.length-1, @_options.displayedMonths)
-      $('.slider_container').append(@_getMonthsByPeriod(date[0],date[1],@options.scrollPeriod))
+      @element.find('.slider_container').append(@_getMonthsByPeriod(date[0],date[1],@options.scrollPeriod))
                             .animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
 
   _startup: ->
     @element.append @_getCalendar()
 
-    $('.prev_months').click =>
+    @element.find('.prev_months').click =>
       @_getPrevMonths()
       return false
 
-    $('.next_months').click =>
+    @element.find('.next_months').click =>
       @_getNextMonths()
       return false
 
@@ -626,6 +626,9 @@
     
   _create: ->
     _this = @
+    
+    # Create per instance copy of object
+    @_options = $.extend(true, {}, @_options)
 
     # Check to see if we should load some JSON data
     if @options.json 
