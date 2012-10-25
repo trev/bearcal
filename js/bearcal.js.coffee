@@ -11,7 +11,7 @@
     nthMonthClass     : "endrow"
     animateSpeed      : 500
     nextPeriodHtml    : -> "<a href=\"#\" class=\"next_months\">Next #{@monthScrollPeriod} months</a><a href=\"#\" class=\"next_year\">Next #{@yearScrollPeriod} months</a>"
-    prevPeriodHtml    : -> "<a href=\"#\" class=\"prev_months\">Previous #{@monthScrollPeriod} months</a><a href=\"#\" class=\"prev_year\">Previous #{@yearScrollPeriod} months</a>"
+    prevPeriodHtml    : -> "<a href=\"#\" class=\"prev_year\">Previous #{@yearScrollPeriod} months</a><a href=\"#\" class=\"prev_months\">Previous #{@monthScrollPeriod} months</a>"
     boxClass          : 
       am              : "am_box"
       pm              : "pm_box"

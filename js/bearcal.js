@@ -16,7 +16,7 @@
           return "<a href=\"#\" class=\"next_months\">Next " + this.monthScrollPeriod + " months</a><a href=\"#\" class=\"next_year\">Next " + this.yearScrollPeriod + " months</a>";
         },
         prevPeriodHtml: function() {
-          return "<a href=\"#\" class=\"prev_months\">Previous " + this.monthScrollPeriod + " months</a><a href=\"#\" class=\"prev_year\">Previous " + this.yearScrollPeriod + " months</a>";
+          return "<a href=\"#\" class=\"prev_year\">Previous " + this.yearScrollPeriod + " months</a><a href=\"#\" class=\"prev_months\">Previous " + this.monthScrollPeriod + " months</a>";
         },
         boxClass: {
           am: "am_box",
