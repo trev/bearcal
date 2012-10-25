@@ -190,7 +190,7 @@
     @element.find("."+@options.boxClass.fullDay).each -> #Loop through all day_box(es)
       
       #Logic group 1
-      if cursorPos < _this._options.startDate
+      if cursorPos < _this._options.stnext_yearartDate
         cursorAdj = $(that).attr("data-date") + "T00:00:00" #Adjusted cursor position required for logic testing
         each_box = $(@).attr("data-date") + "T00:00:00"
         
@@ -277,6 +277,9 @@
     #Is the start date set? YES
     if @_options.startDate
       @_options.endDate = $(that).attr("data-date") + pos #Set end date
+      
+      # Trigger set end date event
+      @_trigger("endDateSet", 0, @_options.endDate)
       
       #Logic group 1
       if @_compareDates(@_options.startDate, @_options.endDate, "<")
@@ -376,6 +379,9 @@
         _this._getReverseType($(that).find('.'+_this.options.boxClass.am))
       else
         _this._getReverseType($(that).find('.'+_this.options.boxClass.pm))
+
+      # Trigger set start date event
+      @_trigger("startDateSet", 0, @_options.startDate)
 
       false #Return false to let know that no end date was set
 

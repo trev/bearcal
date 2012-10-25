@@ -200,7 +200,7 @@
         cursorPos = $(that).attr("data-date") + pos;
         return this.element.find("." + this.options.boxClass.fullDay).each(function() {
           var amChild, cursorAdj, each_box, pmChild;
-          if (cursorPos < _this._options.startDate) {
+          if (cursorPos < _this._options.stnext_yearartDate) {
             cursorAdj = $(that).attr("data-date") + "T00:00:00";
             each_box = $(this).attr("data-date") + "T00:00:00";
             if (_this._compareDates(each_box, cursorAdj, ">=") && _this._compareDates(each_box, _this._options.startDate, "<=")) {
@@ -272,6 +272,7 @@
         }
         if (this._options.startDate) {
           this._options.endDate = $(that).attr("data-date") + pos;
+          this._trigger("endDateSet", 0, this._options.endDate);
           if (this._compareDates(this._options.startDate, this._options.endDate, "<")) {
             this.element.find("." + this.options.boxClass.fullDay).each(function() {
               var amChild, pmChild;
@@ -340,6 +341,7 @@
         } else {
           this._options.startDate = $(that).attr("data-date") + pos;
           this._options.state = pos === "T00:00:00" ? _this._getReverseType($(that).find('.' + _this.options.boxClass.am)) : _this._getReverseType($(that).find('.' + _this.options.boxClass.pm));
+          this._trigger("startDateSet", 0, this._options.startDate);
           return false;
         }
       },

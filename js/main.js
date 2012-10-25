@@ -2,7 +2,13 @@ $(function() {
   $('.bearcal').BearCal({
     monthScrollPeriod  : 4,
     json          : true,
-    jsonUrl       : "/sample-data-large.json"
+    jsonUrl       : "/sample-data-large.json",
+    startDateSet  : function(event,startDate) {
+      console.log(startDate);
+    },
+    endDateSet  : function(event,endDate) {
+      console.log(endDate);
+    }
   });
 
   $('.minibearcal').BearCal({
@@ -10,6 +16,12 @@ $(function() {
     nthMonth      : 1,
     monthScrollPeriod  : 1,
     json          : true,
-    jsonUrl       : "/sample-data-large.json"
+    jsonUrl       : "/sample-data-large.json",
+    startDateSet  : function(event,startDate) {
+      console.log(startDate);
+    },
+    endDateSet  : function(event,endDate) {
+      console.log(endDate);
+    }
   });
 });
