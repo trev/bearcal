@@ -18,6 +18,7 @@
         prevPeriodHtml: function() {
           return "<a href=\"#\" class=\"prev_year\">Previous " + this.yearScrollPeriod + " months</a><a href=\"#\" class=\"prev_months\">Previous " + this.monthScrollPeriod + " months</a>";
         },
+        highlightable: true,
         boxClass: {
           am: "am_box",
           pm: "pm_box",
@@ -469,10 +470,14 @@
         b = b.split("-");
         return (new Date(a[0], a[1]).getTime()) - (new Date(b[0], b[1]).getTime());
       },
-      _getCalendar: function() {
+      _getCalendar: function(wrapperStart, wrapperEnd) {
         var calendarhtml, i, month, year;
         this._trigger("beforebuild");
-        calendarhtml = this.options.prevPeriodHtml();
+        calendarhtml = "";
+        if (typeof wrapperStart !== "undefined") {
+          calendarhtml += wrapperStart;
+        }
+        calendarhtml += this.options.prevPeriodHtml();
         calendarhtml += "<div class=\"period_box clearfix\">\n  <div class=\"slider_container clearfix\">\n";
         year = this.options.startDate.getFullYear();
         month = this.options.startDate.getMonth();
@@ -487,7 +492,11 @@
           i++;
         }
         calendarhtml += "</div></div>";
-        return calendarhtml += this.options.nextPeriodHtml();
+        calendarhtml += this.options.nextPeriodHtml();
+        if (typeof wrapperEnd !== "undefined") {
+          calendarhtml += wrapperEnd;
+        }
+        return calendarhtml;
       },
       _getMonthsByPeriod: function(year, month, period) {
         var date, html, i, movement, result, results, tmp, _i, _len, _month;
@@ -568,7 +577,19 @@
       },
       _startup: function() {
         var _this = this;
-        this.element.append(this._getCalendar());
+        if (this.element.is('input')) {
+          this.inputelem = $.extend({}, this.element);
+          this.inputelem.after(this._getCalendar("<div class=\"bearcal-wrapper\">", "</div>")).next().hide();
+          this.element = $.extend({}, $('.bearcal-wrapper'));
+          this.inputelem.focusin(function() {
+            return _this.element.show();
+          });
+          this.inputelem.focusout(function() {
+            return _this.element.hide();
+          });
+        } else {
+          this.element.append(this._getCalendar());
+        }
         this.element.find('.prev_months').click(function() {
           _this._getPrevMonths(_this.options.monthScrollPeriod);
           return false;
@@ -601,8 +622,6 @@
         }
       },
       _init: function() {
-        var _this;
-        _this = this;
         return this._setDate();
       },
       destroy: function() {},

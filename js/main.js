@@ -24,4 +24,6 @@ $(function() {
       console.log(endDate);
     }
   });
+
+  $('.inputbearcal').BearCal();
 });

@@ -17,9 +17,12 @@
     <div class="bearcal">
     </div>
 
-    <h2>Input Calendar</h2>
+    <h2>Single Month Calendar</h2>
     <div class="minibearcal">
     </div>
+
+    <h2>Input Calendar with date space disabled</h2>
+    <input type="text" name="date" class="inputbearcal">
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
     <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.0.min.js"><\/script>')</script>

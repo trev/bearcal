@@ -12,6 +12,7 @@
     animateSpeed      : 500
     nextPeriodHtml    : -> "<a href=\"#\" class=\"next_months\">Next #{@monthScrollPeriod} months</a><a href=\"#\" class=\"next_year\">Next #{@yearScrollPeriod} months</a>"
     prevPeriodHtml    : -> "<a href=\"#\" class=\"prev_year\">Previous #{@yearScrollPeriod} months</a><a href=\"#\" class=\"prev_months\">Previous #{@monthScrollPeriod} months</a>"
+    highlightable     : true
     boxClass          : 
       am              : "am_box"
       pm              : "pm_box"
@@ -101,7 +102,7 @@
     if $.inArray(timeOfDay.attr('data-status-type'), @options.dontTrackStates) is -1 then true else false 
 
   # Tracks the events relating to calendar interactivity
-  _track: ->
+  _track: () ->
     _this = @
     @element.on
       mousemove: (event) ->
@@ -531,11 +532,16 @@
     b = b.split("-")
     (new Date(a[0], a[1]).getTime()) - (new Date(b[0], b[1]).getTime())
     
-  _getCalendar: ->
+  _getCalendar: (wrapperStart, wrapperEnd) ->
     # Trigger prebuild
     @_trigger("beforebuild")
 
-    calendarhtml = @options.prevPeriodHtml()
+    calendarhtml = ""
+
+    #Start of optional wrapper
+    calendarhtml += wrapperStart if typeof wrapperStart isnt "undefined"
+
+    calendarhtml += @options.prevPeriodHtml()
     calendarhtml += "<div class=\"period_box clearfix\">\n  <div class=\"slider_container clearfix\">\n"
     year = @options.startDate.getFullYear()
     month = @options.startDate.getMonth()
@@ -553,6 +559,11 @@
 
     calendarhtml += "</div></div>"
     calendarhtml += @options.nextPeriodHtml()
+
+    # End of optional wrapper
+    calendarhtml += wrapperEnd if typeof wrapperEnd isnt "undefined" 
+
+    calendarhtml
 
   _getMonthsByPeriod: (year, month, period) -> 
     movement = if period < 0 then -1 else 1
@@ -621,7 +632,24 @@
               .animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
 
   _startup: ->
-    @element.append @_getCalendar()
+    # Check to see if it's an input and act accordingly
+    if @element.is('input')
+      # Place input element into it's own var
+      @inputelem = $.extend({}, @element)
+
+      # Add the calendar and hide it
+      @inputelem.after( @_getCalendar("<div class=\"bearcal-wrapper\">","</div>")).next().hide()
+
+      # Overwrite the element with the calendar
+      @element = $.extend({}, $('.bearcal-wrapper'))
+     
+      # Watch for focus
+      @inputelem.focusin =>
+        @element.show()
+      @inputelem.focusout =>
+        @element.hide()
+    else
+      @element.append @_getCalendar()
 
     @element.find('.prev_months').click =>
       @_getPrevMonths(@options.monthScrollPeriod)
@@ -643,7 +671,7 @@
     
   _create: ->
     _this = @
-    
+
     # Create per instance copy of object
     @_options = $.extend(true, {}, @_options)
 
@@ -657,8 +685,6 @@
 
 
   _init: ->
-    _this = @
-
     # We call set date to ensure a Date object is passed as the options.startDate value
     @_setDate()
 
