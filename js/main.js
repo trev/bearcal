@@ -1,6 +1,6 @@
 $(function() {
   $('.bearcal').BearCal({
-    scrollPeriod  : 4,
+    monthScrollPeriod  : 4,
     json          : true,
     jsonUrl       : "/sample-data-large.json"
   });
@@ -8,7 +8,7 @@ $(function() {
   $('.minibearcal').BearCal({
     period        : 1,
     nthMonth      : 1,
-    scrollPeriod  : 1,
+    monthScrollPeriod  : 1,
     json          : true,
     jsonUrl       : "/sample-data-large.json"
   });

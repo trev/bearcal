@@ -3,14 +3,15 @@
   options             :
     startDate         : new Date()
     period            : 12
-    scrollPeriod      : 4
+    monthScrollPeriod : 4
+    yearScrollPeriod  : 12
     monthFullName     : ['January','February','March','April','May','June','July','August','September','October','November','December']
     days              : ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
     nthMonth          : 4
     nthMonthClass     : "endrow"
     animateSpeed      : 500
-    nextMonthsHtml    : -> "<a href=\"#\" class=\"next_months\">Next #{@scrollPeriod} months</a>"
-    prevMonthsHtml    : -> "<a href=\"#\" class=\"prev_months\">Previous #{@scrollPeriod} months</a>"
+    nextPeriodHtml    : -> "<a href=\"#\" class=\"next_months\">Next #{@monthScrollPeriod} months</a><a href=\"#\" class=\"next_year\">Next #{@yearScrollPeriod} months</a>"
+    prevPeriodHtml    : -> "<a href=\"#\" class=\"prev_months\">Previous #{@monthScrollPeriod} months</a><a href=\"#\" class=\"prev_year\">Previous #{@yearScrollPeriod} months</a>"
     boxClass          : 
       am              : "am_box"
       pm              : "pm_box"
@@ -528,7 +529,7 @@
     # Trigger prebuild
     @_trigger("beforebuild")
 
-    calendarhtml = @options.prevMonthsHtml()
+    calendarhtml = @options.prevPeriodHtml()
     calendarhtml += "<div class=\"period_box clearfix\">\n  <div class=\"slider_container clearfix\">\n"
     year = @options.startDate.getFullYear()
     month = @options.startDate.getMonth()
@@ -545,7 +546,7 @@
       i++
 
     calendarhtml += "</div></div>"
-    calendarhtml += @options.nextMonthsHtml()
+    calendarhtml += @options.nextPeriodHtml()
 
   _getMonthsByPeriod: (year, month, period) -> 
     movement = if period < 0 then -1 else 1
@@ -582,44 +583,54 @@
     date
 
   # Gets previous months and adjusts the view accordingly
-  _getPrevMonths: ->
+  _getPrevMonths: (period) ->
     if !@element.find('.slider_container').is(':animated')
       currentpos = parseFloat(@element.find('.slider_container').css('marginTop'))
       rowheight = @element.find('.month_box').outerHeight(true)
-      rows = (@options.scrollPeriod / @options.nthMonth)
+      rows = (period / @options.nthMonth)
       animatemargin = currentpos + (rowheight * rows) 
 
       animatemargin = if animatemargin is (rowheight * rows) then 0 else animatemargin
       
       date = @_splitDate(0, @_options.displayedMonths)
-      html = @_getMonthsByPeriod(date[0],date[1],-@options.scrollPeriod)
+      html = @_getMonthsByPeriod(date[0],date[1],-period)
       if html.length > 0
-        @element.find('.slider_container').prepend(html)
-                              .css("marginTop" : (currentpos - (rowheight * rows))+"px")
-                              .animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
+        @element.find('.slider_container')
+                .prepend(html)
+                .css("marginTop" : (currentpos - (rowheight * rows))+"px")
+                .animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
       else @element.find('.slider_container').animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
 
   # Gets next months and adjusts the view accordingly
-  _getNextMonths: ->
+  _getNextMonths: (period) ->
     if !@element.find('.slider_container').is(':animated')
       currentpos = parseFloat(@element.find('.slider_container').css('marginTop'))
       rowheight = @element.find('.month_box').outerHeight(true)
-      rows = (@options.scrollPeriod / @options.nthMonth)
+      rows = (period / @options.nthMonth)
       animatemargin = currentpos - (rowheight * rows) 
 
       date = @_splitDate(@_options.displayedMonths.length-1, @_options.displayedMonths)
-      @element.find('.slider_container').append(@_getMonthsByPeriod(date[0],date[1],@options.scrollPeriod))
-                            .animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
+      @element.find('.slider_container')
+              .append(@_getMonthsByPeriod(date[0],date[1],period))
+              .animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
 
   _startup: ->
     @element.append @_getCalendar()
 
     @element.find('.prev_months').click =>
-      @_getPrevMonths()
+      @_getPrevMonths(@options.monthScrollPeriod)
       return false
 
     @element.find('.next_months').click =>
-      @_getNextMonths()
+      @_getNextMonths(@options.monthScrollPeriod)
+      return false
+
+    @element.find('.prev_year').click =>
+      @_getPrevMonths(@options.yearScrollPeriod)
+      return false
+
+    @element.find('.next_year').click =>
+      @_getNextMonths(@options.yearScrollPeriod)
       return false
 
     @_track()
