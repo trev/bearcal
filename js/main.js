@@ -26,10 +26,11 @@ $(function() {
   });
 
   $('.inputbearcal').BearCal({
-    mode        : "datePicker",
-    json          : true,
-    jsonUrl       : "/sample-data-large.json",
-    datePicked  : function(e,data) {
+    mode            : "datePicker",
+    dontTrackStates : ['booked', 'unavailable'],
+    json            : true,
+    jsonUrl         : "/sample-data-large.json",
+    datePicked      : function(e,data) {
       data.inputElem.val(data.date);
       data.parentElem.hide();
     }

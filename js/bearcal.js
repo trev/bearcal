@@ -611,16 +611,18 @@
       },
       _startup: function() {
         var _this = this;
-        if (this.element.is('input')) {
-          this.inputElem = $.extend({}, this.element);
-          this.inputElem.after(this._getCalendar("<div class=\"bearcal-wrapper\">", "</div>")).next().hide();
-          this.element = $.extend({}, this.inputElem.next('.bearcal-wrapper'));
-          this.inputElem.focusin(function() {
-            _this._placePopup(_this.inputElem, _this.element);
-            return _this.element.show();
-          });
-        } else {
-          this.element.append(this._getCalendar());
+        switch (this.options.mode) {
+          case "datePicker":
+            this.inputElem = $.extend({}, this.element);
+            this.inputElem.after(this._getCalendar("<div class=\"bearcal-wrapper\">", "</div>")).next().hide();
+            this.element = $.extend({}, this.inputElem.next('.bearcal-wrapper'));
+            this.inputElem.focusin(function() {
+              _this._placePopup(_this.inputElem, _this.element);
+              return _this.element.show();
+            });
+            break;
+          default:
+            this.element.append(this._getCalendar());
         }
         this.element.find('.prev_months').click(function() {
           _this._getPrevMonths(_this.options.monthScrollPeriod);

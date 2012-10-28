@@ -668,23 +668,23 @@
 
   _startup: ->
     # Check to see if it's an input and act accordingly
-    if @element.is('input')
-      # Place input element into it's own var
-      @inputElem = $.extend({}, @element)
+    switch @options.mode
+      when "datePicker"
+        # Place input element into it's own var
+        @inputElem = $.extend({}, @element)
 
-      # Add the calendar and hide it
-      @inputElem.after(@_getCalendar("<div class=\"bearcal-wrapper\">","</div>")).next().hide()
+        # Add the calendar and hide it
+        @inputElem.after(@_getCalendar("<div class=\"bearcal-wrapper\">","</div>")).next().hide()
 
-      # Overwrite the element with the calendar
-      @element = $.extend({}, @inputElem.next('.bearcal-wrapper'))
-     
-      # Watch for focus
-      @inputElem.focusin =>
-        @_placePopup(@inputElem, @element)
-        @element.show()
-
-    else
-      @element.append @_getCalendar()
+        # Overwrite the element with the calendar
+        @element = $.extend({}, @inputElem.next('.bearcal-wrapper'))
+       
+        # Watch for focus
+        @inputElem.focusin =>
+          @_placePopup(@inputElem, @element)
+          @element.show()
+      else
+        @element.append @_getCalendar()
 
     @element.find('.prev_months').click =>
       @_getPrevMonths(@options.monthScrollPeriod)
