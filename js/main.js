@@ -25,5 +25,13 @@ $(function() {
     }
   });
 
-  $('.inputbearcal').BearCal();
+  $('.inputbearcal').BearCal({
+    mode        : "datePicker",
+    json          : true,
+    jsonUrl       : "/sample-data-large.json",
+    datePicked  : function(e,data) {
+      data.inputElem.val(data.date);
+      data.parentElem.hide();
+    }
+  });
 });

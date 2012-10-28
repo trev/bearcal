@@ -4,6 +4,7 @@
     return $.widget("a07.BearCal", {
       options: {
         startDate: new Date(),
+        mode: "interactive",
         period: 12,
         monthScrollPeriod: 4,
         yearScrollPeriod: 12,
@@ -266,84 +267,95 @@
         });
       },
       _setDates: function(that, pos) {
-        var _this;
+        var data, _this;
         _this = this;
-        if (this._options.startDate && this._options.endDate) {
-          this._options.startDate = this._options.endDate = this._options.state = null;
-        }
-        if (this._options.startDate) {
-          this._options.endDate = $(that).attr("data-date") + pos;
-          this._trigger("endDateSet", 0, this._options.endDate);
-          if (this._compareDates(this._options.startDate, this._options.endDate, "<")) {
-            this.element.find("." + this.options.boxClass.fullDay).each(function() {
-              var amChild, pmChild;
-              amChild = $(this).find('.' + _this.options.boxClass.am);
-              pmChild = $(this).find('.' + _this.options.boxClass.pm);
-              if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T12:00:00", "<") && _this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T00:00:00", ">")) {
-                if (_this._trackable(amChild)) {
-                  amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state);
-                }
-                if (_this._trackable(pmChild)) {
-                  return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state);
-                }
-              } else if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T12:00:00", "==")) {
-                if (_this._trackable(pmChild)) {
-                  return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
-                }
-              } else if (_this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T00:00:00", "==")) {
-                if (_this._trackable(amChild)) {
-                  return amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
-                }
+        switch (this.options.mode) {
+          case "datePicker":
+            data = {
+              elem: that,
+              date: $(that).attr("data-date") + pos,
+              parentElem: this.element,
+              inputElem: this.inputElem
+            };
+            return this._trigger("datePicked", 0, data);
+          default:
+            if (this._options.startDate && this._options.endDate) {
+              this._options.startDate = this._options.endDate = this._options.state = null;
+            }
+            if (this._options.startDate) {
+              this._options.endDate = $(that).attr("data-date") + pos;
+              this._trigger("endDateSet", 0, this._options.endDate);
+              if (this._compareDates(this._options.startDate, this._options.endDate, "<")) {
+                this.element.find("." + this.options.boxClass.fullDay).each(function() {
+                  var amChild, pmChild;
+                  amChild = $(this).find('.' + _this.options.boxClass.am);
+                  pmChild = $(this).find('.' + _this.options.boxClass.pm);
+                  if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T12:00:00", "<") && _this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T00:00:00", ">")) {
+                    if (_this._trackable(amChild)) {
+                      amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state);
+                    }
+                    if (_this._trackable(pmChild)) {
+                      return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state);
+                    }
+                  } else if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T12:00:00", "==")) {
+                    if (_this._trackable(pmChild)) {
+                      return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
+                    }
+                  } else if (_this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T00:00:00", "==")) {
+                    if (_this._trackable(amChild)) {
+                      return amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
+                    }
+                  }
+                });
+                this._eraseHighlights();
+                return true;
+              } else if (this._compareDates(this._options.startDate, this._options.endDate, ">")) {
+                this.element.find("." + this.options.boxClass.fullDay).each(function() {
+                  var amChild, pmChild;
+                  amChild = $(this).find('.' + _this.options.boxClass.am);
+                  pmChild = $(this).find('.' + _this.options.boxClass.pm);
+                  if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", ">") && _this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T12:00:00", "<")) {
+                    if (_this._trackable(amChild)) {
+                      amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state);
+                    }
+                    if (_this._trackable(pmChild)) {
+                      return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state);
+                    }
+                  } else if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", "==")) {
+                    if (_this._trackable(amChild)) {
+                      return amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
+                    }
+                  } else if (_this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T12:00:00", "==")) {
+                    if (_this._trackable(pmChild)) {
+                      return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
+                    }
+                  }
+                });
+                this._eraseHighlights();
+                return true;
+              } else {
+                this.element.find("." + this.options.boxClass.fullDay).each(function() {
+                  var amChild, pmChild;
+                  amChild = $(this).find('.' + _this.options.boxClass.am);
+                  pmChild = $(this).find('.' + _this.options.boxClass.pm);
+                  if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", "==")) {
+                    if (_this._trackable(amChild)) {
+                      return amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
+                    }
+                  } else if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T12:00:00", "==")) {
+                    if (_this._trackable(pmChild)) {
+                      return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
+                    }
+                  }
+                });
+                return true;
               }
-            });
-            this._eraseHighlights();
-            return true;
-          } else if (this._compareDates(this._options.startDate, this._options.endDate, ">")) {
-            this.element.find("." + this.options.boxClass.fullDay).each(function() {
-              var amChild, pmChild;
-              amChild = $(this).find('.' + _this.options.boxClass.am);
-              pmChild = $(this).find('.' + _this.options.boxClass.pm);
-              if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", ">") && _this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T12:00:00", "<")) {
-                if (_this._trackable(amChild)) {
-                  amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state);
-                }
-                if (_this._trackable(pmChild)) {
-                  return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state);
-                }
-              } else if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", "==")) {
-                if (_this._trackable(amChild)) {
-                  return amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
-                }
-              } else if (_this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T12:00:00", "==")) {
-                if (_this._trackable(pmChild)) {
-                  return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
-                }
-              }
-            });
-            this._eraseHighlights();
-            return true;
-          } else {
-            this.element.find("." + this.options.boxClass.fullDay).each(function() {
-              var amChild, pmChild;
-              amChild = $(this).find('.' + _this.options.boxClass.am);
-              pmChild = $(this).find('.' + _this.options.boxClass.pm);
-              if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", "==")) {
-                if (_this._trackable(amChild)) {
-                  return amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
-                }
-              } else if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T12:00:00", "==")) {
-                if (_this._trackable(pmChild)) {
-                  return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
-                }
-              }
-            });
-            return true;
-          }
-        } else {
-          this._options.startDate = $(that).attr("data-date") + pos;
-          this._options.state = pos === "T00:00:00" ? _this._getReverseType($(that).find('.' + _this.options.boxClass.am)) : _this._getReverseType($(that).find('.' + _this.options.boxClass.pm));
-          this._trigger("startDateSet", 0, this._options.startDate);
-          return false;
+            } else {
+              this._options.startDate = $(that).attr("data-date") + pos;
+              this._options.state = pos === "T00:00:00" ? _this._getReverseType($(that).find('.' + _this.options.boxClass.am)) : _this._getReverseType($(that).find('.' + _this.options.boxClass.pm));
+              this._trigger("startDateSet", 0, this._options.startDate);
+              return false;
+            }
         }
       },
       _getAllClasses: function(obj) {
@@ -434,6 +446,28 @@
           daycount++;
         }
         return dayshtml;
+      },
+      _placePopup: function(base, elem) {
+        var botCalPos, botPlace, currView, elemHeight, topCalPos, topPlace;
+        currView = new Array();
+        currView['top'] = $(window).scrollTop();
+        currView['bot'] = $(window).height() + currView['top'];
+        elemHeight = elem.outerHeight(true);
+        botPlace = base.offset().top + base.outerHeight(true);
+        topPlace = base.offset().top - elemHeight;
+        botCalPos = botPlace + elemHeight;
+        topCalPos = base.offset().top - elemHeight;
+        if ((botCalPos <= currView['bot']) || (topCalPos < currView['top'])) {
+          return elem.css({
+            top: botPlace + "px",
+            left: base.offset().left + "px"
+          });
+        } else {
+          return elem.css({
+            top: topPlace + "px",
+            left: base.offset().left + "px"
+          });
+        }
       },
       _pad: function(num, places) {
         var zero;
@@ -578,14 +612,12 @@
       _startup: function() {
         var _this = this;
         if (this.element.is('input')) {
-          this.inputelem = $.extend({}, this.element);
-          this.inputelem.after(this._getCalendar("<div class=\"bearcal-wrapper\">", "</div>")).next().hide();
-          this.element = $.extend({}, $('.bearcal-wrapper'));
-          this.inputelem.focusin(function() {
+          this.inputElem = $.extend({}, this.element);
+          this.inputElem.after(this._getCalendar("<div class=\"bearcal-wrapper\">", "</div>")).next().hide();
+          this.element = $.extend({}, this.inputElem.next('.bearcal-wrapper'));
+          this.inputElem.focusin(function() {
+            _this._placePopup(_this.inputElem, _this.element);
             return _this.element.show();
-          });
-          this.inputelem.focusout(function() {
-            return _this.element.hide();
           });
         } else {
           this.element.append(this._getCalendar());

@@ -22,7 +22,10 @@
     </div>
 
     <h2>Input Calendar with date space disabled</h2>
-    <input type="text" name="date" class="inputbearcal">
+    <div class="input-example">
+      <input type="text" name="startdate" class="inputbearcal">
+      <input type="text" name="enddate" class="inputbearcal">
+    </div>
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
     <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.0.min.js"><\/script>')</script>

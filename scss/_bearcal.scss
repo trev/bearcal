@@ -88,8 +88,13 @@
   }
 }
 
-// Styles specific to the mini year cal example
-.minibearcal {
+// Styles specific to the mini year cal and input cal example
+.bearcal-wrapper {
+  position: absolute;
+  z-index: 99;
+  background: white;
+}
+.minibearcal, .bearcal-wrapper {
   margin: 10px auto;
   font-size: 12px;
   width: 164px;
@@ -167,6 +172,9 @@
     border-width: 12px 13px 0 13px;
     border-color: #5E5E5E transparent transparent transparent;
   }
+}
+.input-example {
+  text-align: center;
 }
 
 // Global calendar styles

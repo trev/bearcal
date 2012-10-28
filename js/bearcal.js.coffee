@@ -2,6 +2,7 @@
   $.widget "a07.BearCal",
   options             :
     startDate         : new Date()
+    mode              : "interactive"
     period            : 12
     monthScrollPeriod : 4
     yearScrollPeriod  : 12
@@ -270,121 +271,131 @@
   #   pos:  whether the cursor is in am or pm, valid values["T00:00:00", "T12:00:00"]
   _setDates : (that, pos) ->
     _this = @ 
-    
-    # If both start and end dates are set, we reset them
-    if @_options.startDate and @_options.endDate
-      @_options.startDate = @_options.endDate = @_options.state = null # Reset start, end dates and state
-    
-    #Is the start date set? YES
-    if @_options.startDate
-      @_options.endDate = $(that).attr("data-date") + pos #Set end date
-      
-      # Trigger set end date event
-      @_trigger("endDateSet", 0, @_options.endDate)
-      
-      #Logic group 1
-      if @_compareDates(@_options.startDate, @_options.endDate, "<")
-        @element.find("."+@options.boxClass.fullDay).each -> #Apply status classes to in-between dates
-          amChild = $(@).find('.'+_this.options.boxClass.am)
-          pmChild = $(@).find('.'+_this.options.boxClass.pm)
 
-          if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T12:00:00", "<") and _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T00:00:00", ">") 
-
-            if _this._trackable(amChild) # Only add class if it's trackable
-              amChild.removeClass(_this._getAllClasses(_this.options.setStates))
-              .addClass(_this.options.setStates.am[_this._options.state]) 
-              .attr('data-status-type', _this._options.state)
-
-            if _this._trackable(pmChild) # Only add class if it's trackable
-              pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
-              .addClass(_this.options.setStates.pm[_this._options.state]) 
-              .attr('data-status-type', _this._options.state)
-
-          else if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T12:00:00", "==")
-            if _this._trackable(pmChild) # Only add class if it's trackable
-              pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
-              .addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]) 
-              .attr('data-status-type', _this._options.state)
-              .attr('data-delimiter', 'true')
-
-          else if _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T00:00:00", "==")
-            if _this._trackable(amChild) # Only add class if it's trackable
-              amChild.removeClass(_this._getAllClasses(_this.options.setStates))
-              .addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]) 
-              .attr('data-status-type', _this._options.state)
-              .attr('data-delimiter', 'true')
-
-        @_eraseHighlights()
-        true #Return true to let know that an end date was set
-      
-      #Logic group 2
-      else if @_compareDates(@_options.startDate, @_options.endDate, ">")
-        @element.find("."+@options.boxClass.fullDay).each -> #Apply status classes to in-between dates
-          amChild = $(@).find('.'+_this.options.boxClass.am)
-          pmChild = $(@).find('.'+_this.options.boxClass.pm)
-
-          if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T00:00:00", ">") and _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T12:00:00", "<")
-            if _this._trackable(amChild) # Only add class if it's trackable
-              amChild.removeClass(_this._getAllClasses(_this.options.setStates))
-              .addClass(_this.options.setStates.am[_this._options.state]) 
-              .attr('data-status-type', _this._options.state)
-
-            if _this._trackable(pmChild) # Only add class if it's trackable
-              pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
-              .addClass(_this.options.setStates.pm[_this._options.state]) 
-              .attr('data-status-type', _this._options.state)
-
-          else if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T00:00:00", "==")
-            if _this._trackable(amChild) # Only add class if it's trackable
-              amChild.removeClass(_this._getAllClasses(_this.options.setStates))
-              .addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]) 
-              .attr('data-status-type', _this._options.state)
-              .attr('data-delimiter', 'true')
-
-          else if _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T12:00:00", "==")
-            if _this._trackable(pmChild) # Only add class if it's trackable
-              pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
-              .addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]) 
-              .attr('data-status-type', _this._options.state)
-              .attr('data-delimiter', 'true')
-
-        @_eraseHighlights()
-        true #Return true to let know that an end date was set
-      
-      #Logic group 3
+    switch @options.mode
+      when "datePicker"
+        data =    
+          elem       : that
+          date       : $(that).attr("data-date") + pos
+          parentElem : @element
+          inputElem  : @inputElem
+        
+        @_trigger("datePicked", 0, data)
       else
-        @element.find("."+@options.boxClass.fullDay).each -> #Apply status classes to in-between dates
-          amChild = $(@).find('.'+_this.options.boxClass.am)
-          pmChild = $(@).find('.'+_this.options.boxClass.pm)
+        # If both start and end dates are set, we reset them
+        if @_options.startDate and @_options.endDate
+          @_options.startDate = @_options.endDate = @_options.state = null # Reset start, end dates and state
+        
+        #Is the start date set? YES
+        if @_options.startDate
+          @_options.endDate = $(that).attr("data-date") + pos #Set end date
+          
+          # Trigger set end date event
+          @_trigger("endDateSet", 0, @_options.endDate)
+          
+          #Logic group 1
+          if @_compareDates(@_options.startDate, @_options.endDate, "<")
+            @element.find("."+@options.boxClass.fullDay).each -> #Apply status classes to in-between dates
+              amChild = $(@).find('.'+_this.options.boxClass.am)
+              pmChild = $(@).find('.'+_this.options.boxClass.pm)
 
-          if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T00:00:00", "==")
-            if _this._trackable(amChild) # Only add class if it's trackable
-              amChild.removeClass(_this._getAllClasses(_this.options.setStates))
-              .addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]) 
-              .attr('data-status-type', _this._options.state)
-              .attr('data-delimiter', 'true')
+              if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T12:00:00", "<") and _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T00:00:00", ">") 
 
-          else if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T12:00:00", "==")
-            if _this._trackable(pmChild) # Only add class if it's trackable
-              pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
-              .addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]) 
-              .attr('data-status-type', _this._options.state)
-              .attr('data-delimiter', 'true')
-      
-        true #Return true to let know that an end date was set
+                if _this._trackable(amChild) # Only add class if it's trackable
+                  amChild.removeClass(_this._getAllClasses(_this.options.setStates))
+                  .addClass(_this.options.setStates.am[_this._options.state]) 
+                  .attr('data-status-type', _this._options.state)
+
+                if _this._trackable(pmChild) # Only add class if it's trackable
+                  pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
+                  .addClass(_this.options.setStates.pm[_this._options.state]) 
+                  .attr('data-status-type', _this._options.state)
+
+              else if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T12:00:00", "==")
+                if _this._trackable(pmChild) # Only add class if it's trackable
+                  pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
+                  .addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]) 
+                  .attr('data-status-type', _this._options.state)
+                  .attr('data-delimiter', 'true')
+
+              else if _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T00:00:00", "==")
+                if _this._trackable(amChild) # Only add class if it's trackable
+                  amChild.removeClass(_this._getAllClasses(_this.options.setStates))
+                  .addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]) 
+                  .attr('data-status-type', _this._options.state)
+                  .attr('data-delimiter', 'true')
+
+            @_eraseHighlights()
+            true #Return true to let know that an end date was set
+          
+          #Logic group 2
+          else if @_compareDates(@_options.startDate, @_options.endDate, ">")
+            @element.find("."+@options.boxClass.fullDay).each -> #Apply status classes to in-between dates
+              amChild = $(@).find('.'+_this.options.boxClass.am)
+              pmChild = $(@).find('.'+_this.options.boxClass.pm)
+
+              if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T00:00:00", ">") and _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T12:00:00", "<")
+                if _this._trackable(amChild) # Only add class if it's trackable
+                  amChild.removeClass(_this._getAllClasses(_this.options.setStates))
+                  .addClass(_this.options.setStates.am[_this._options.state]) 
+                  .attr('data-status-type', _this._options.state)
+
+                if _this._trackable(pmChild) # Only add class if it's trackable
+                  pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
+                  .addClass(_this.options.setStates.pm[_this._options.state]) 
+                  .attr('data-status-type', _this._options.state)
+
+              else if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T00:00:00", "==")
+                if _this._trackable(amChild) # Only add class if it's trackable
+                  amChild.removeClass(_this._getAllClasses(_this.options.setStates))
+                  .addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]) 
+                  .attr('data-status-type', _this._options.state)
+                  .attr('data-delimiter', 'true')
+
+              else if _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T12:00:00", "==")
+                if _this._trackable(pmChild) # Only add class if it's trackable
+                  pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
+                  .addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]) 
+                  .attr('data-status-type', _this._options.state)
+                  .attr('data-delimiter', 'true')
+
+            @_eraseHighlights()
+            true #Return true to let know that an end date was set
+          
+          #Logic group 3
+          else
+            @element.find("."+@options.boxClass.fullDay).each -> #Apply status classes to in-between dates
+              amChild = $(@).find('.'+_this.options.boxClass.am)
+              pmChild = $(@).find('.'+_this.options.boxClass.pm)
+
+              if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T00:00:00", "==")
+                if _this._trackable(amChild) # Only add class if it's trackable
+                  amChild.removeClass(_this._getAllClasses(_this.options.setStates))
+                  .addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]) 
+                  .attr('data-status-type', _this._options.state)
+                  .attr('data-delimiter', 'true')
+
+              else if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T12:00:00", "==")
+                if _this._trackable(pmChild) # Only add class if it's trackable
+                  pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
+                  .addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]) 
+                  .attr('data-status-type', _this._options.state)
+                  .attr('data-delimiter', 'true')
+          
+            true #Return true to let know that an end date was set
     
-    # Start date not set
-    else
-      @_options.startDate = $(that).attr("data-date") + pos #Set start date
-      @_options.state = if pos is "T00:00:00" # Set the state to use
-        _this._getReverseType($(that).find('.'+_this.options.boxClass.am))
-      else
-        _this._getReverseType($(that).find('.'+_this.options.boxClass.pm))
+        # Start date not set
+        else
+          @_options.startDate = $(that).attr("data-date") + pos #Set start date
+          @_options.state = if pos is "T00:00:00" # Set the state to use
+            _this._getReverseType($(that).find('.'+_this.options.boxClass.am))
+          else
+            _this._getReverseType($(that).find('.'+_this.options.boxClass.pm))
 
-      # Trigger set start date event
-      @_trigger("startDateSet", 0, @_options.startDate)
+          # Trigger set start date event
+          @_trigger("startDateSet", 0, @_options.startDate)
 
-      false #Return false to let know that no end date was set
+          false #Return false to let know that no end date was set
 
   # Recursively return all values within an object literal
   _getAllClasses: (obj) ->
@@ -484,6 +495,30 @@
       daycount++
 
     dayshtml
+
+  # Find best place to popup the date picker
+  # Will always place below first, if top and below are both lacking in space, below will be used
+  # Params:
+  #   base : the jquery DOM object to to place the elem by
+  #   elem : the jquery DOM object(calendar) to position
+  _placePopup: (base, elem) ->
+    currView = new Array()
+    currView['top'] = $(window).scrollTop() # Upper limit area of the viewport that's currently in view
+    currView['bot'] = $(window).height() + currView['top'] # Bottom limit area of the viewport that's currently in view
+    elemHeight = elem.outerHeight(true) # Element height
+    botPlace = base.offset().top + base.outerHeight(true) # Where to place the element if placing below the base
+    topPlace = base.offset().top - elemHeight # Where to place the element if placing above the base
+    botCalPos = botPlace + elemHeight # Coordinates required to place the element below the base
+    topCalPos = base.offset().top - elemHeight # Coordinates require to place the element above the base
+
+    if (botCalPos <= currView['bot']) or (topCalPos < currView['top']) # Is there space to place the elememt below the base?
+      elem.css
+        top: botPlace + "px"
+        left: base.offset().left + "px" 
+    else
+      elem.css
+        top: topPlace + "px"
+        left: base.offset().left + "px" 
 
   # Helper function to pad dates
   _pad: (num, places) ->
@@ -635,19 +670,19 @@
     # Check to see if it's an input and act accordingly
     if @element.is('input')
       # Place input element into it's own var
-      @inputelem = $.extend({}, @element)
+      @inputElem = $.extend({}, @element)
 
       # Add the calendar and hide it
-      @inputelem.after( @_getCalendar("<div class=\"bearcal-wrapper\">","</div>")).next().hide()
+      @inputElem.after(@_getCalendar("<div class=\"bearcal-wrapper\">","</div>")).next().hide()
 
       # Overwrite the element with the calendar
-      @element = $.extend({}, $('.bearcal-wrapper'))
+      @element = $.extend({}, @inputElem.next('.bearcal-wrapper'))
      
       # Watch for focus
-      @inputelem.focusin =>
+      @inputElem.focusin =>
+        @_placePopup(@inputElem, @element)
         @element.show()
-      @inputelem.focusout =>
-        @element.hide()
+
     else
       @element.append @_getCalendar()
 

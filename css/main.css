@@ -159,16 +159,21 @@ textarea {
     border-width: 22px 23px 0 23px;
     border-color: #5E5E5E transparent transparent transparent; }
 
-.minibearcal {
+.bearcal-wrapper {
+  position: absolute;
+  z-index: 99;
+  background: white; }
+
+.minibearcal, .bearcal-wrapper {
   margin: 10px auto;
   font-size: 12px;
   width: 164px; }
-  .minibearcal .period_box {
+  .minibearcal .period_box, .bearcal-wrapper .period_box {
     margin: 0 auto;
     font-family: Arial, sans-serif;
     overflow: hidden;
     height: 198px; }
-  .minibearcal .prev_months, .minibearcal .next_months, .minibearcal .prev_year, .minibearcal .next_year {
+  .minibearcal .prev_months, .minibearcal .next_months, .minibearcal .prev_year, .minibearcal .next_year, .bearcal-wrapper .prev_months, .bearcal-wrapper .next_months, .bearcal-wrapper .prev_year, .bearcal-wrapper .next_year {
     border: 0;
     font: 0/0 a;
     text-shadow: none;
@@ -183,9 +188,9 @@ textarea {
     transition: all .25s ease-in-out;
     -moz-transition: all .25s ease-in-out;
     -webkit-transition: all .25s ease-in-out; }
-    .minibearcal .prev_months:hover, .minibearcal .next_months:hover, .minibearcal .prev_year:hover, .minibearcal .next_year:hover {
+    .minibearcal .prev_months:hover, .minibearcal .next_months:hover, .minibearcal .prev_year:hover, .minibearcal .next_year:hover, .bearcal-wrapper .prev_months:hover, .bearcal-wrapper .next_months:hover, .bearcal-wrapper .prev_year:hover, .bearcal-wrapper .next_year:hover {
       background: #D1D1D1; }
-  .minibearcal .prev_months:after {
+  .minibearcal .prev_months:after, .bearcal-wrapper .prev_months:after {
     position: absolute;
     content: "";
     width: 0px;
@@ -195,7 +200,7 @@ textarea {
     border-style: solid;
     border-width: 0 13px 12px 13px;
     border-color: transparent transparent #ffffff  transparent; }
-  .minibearcal .next_months:after {
+  .minibearcal .next_months:after, .bearcal-wrapper .next_months:after {
     position: absolute;
     content: "";
     width: 0px;
@@ -205,7 +210,7 @@ textarea {
     border-style: solid;
     border-width: 12px 13px 0 13px;
     border-color: #ffffff transparent transparent transparent; }
-  .minibearcal .prev_year:after {
+  .minibearcal .prev_year:after, .bearcal-wrapper .prev_year:after {
     position: absolute;
     content: "";
     width: 0px;
@@ -215,7 +220,7 @@ textarea {
     border-style: solid;
     border-width: 0 13px 12px 13px;
     border-color: transparent transparent #5E5E5E  transparent; }
-  .minibearcal .next_year:after {
+  .minibearcal .next_year:after, .bearcal-wrapper .next_year:after {
     position: absolute;
     content: "";
     width: 0px;
@@ -225,6 +230,9 @@ textarea {
     border-style: solid;
     border-width: 12px 13px 0 13px;
     border-color: #5E5E5E transparent transparent transparent; }
+
+.input-example {
+  text-align: center; }
 
 h2 {
   text-align: center; }
