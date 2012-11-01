@@ -192,7 +192,7 @@
     @element.find("."+@options.boxClass.fullDay).each -> #Loop through all day_box(es)
       
       #Logic group 1
-      if cursorPos < _this._options.stnext_yearartDate
+      if cursorPos < _this._options.startDate
         cursorAdj = $(that).attr("data-date") + "T00:00:00" #Adjusted cursor position required for logic testing
         each_box = $(@).attr("data-date") + "T00:00:00"
         
@@ -682,7 +682,14 @@
         # Watch for focus
         @inputElem.focusin =>
           @_placePopup(@inputElem, @element)
-          @element.show()
+          @element.fadeToggle('fast')
+
+        # Watch for clicks outside the calendar if it's toggled and close it
+        $(document).mousedown (event) =>
+          if @element.is(':visible')
+            if ($(event.target).attr('class') isnt 'bearcal-wrapper') and ($(event.target).parents('.bearcal-wrapper').length is 0)
+              @element.fadeToggle('fast')
+            
       else
         @element.append @_getCalendar()
 

@@ -202,7 +202,7 @@
         cursorPos = $(that).attr("data-date") + pos;
         return this.element.find("." + this.options.boxClass.fullDay).each(function() {
           var amChild, cursorAdj, each_box, pmChild;
-          if (cursorPos < _this._options.stnext_yearartDate) {
+          if (cursorPos < _this._options.startDate) {
             cursorAdj = $(that).attr("data-date") + "T00:00:00";
             each_box = $(this).attr("data-date") + "T00:00:00";
             if (_this._compareDates(each_box, cursorAdj, ">=") && _this._compareDates(each_box, _this._options.startDate, "<=")) {
@@ -618,7 +618,14 @@
             this.element = $.extend({}, this.inputElem.next('.bearcal-wrapper'));
             this.inputElem.focusin(function() {
               _this._placePopup(_this.inputElem, _this.element);
-              return _this.element.show();
+              return _this.element.fadeToggle('fast');
+            });
+            $(document).mousedown(function(event) {
+              if (_this.element.is(':visible')) {
+                if (($(event.target).attr('class') !== 'bearcal-wrapper') && ($(event.target).parents('.bearcal-wrapper').length === 0)) {
+                  return _this.element.fadeToggle('fast');
+                }
+              }
             });
             break;
           default:
