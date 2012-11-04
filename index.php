@@ -24,7 +24,7 @@
     <h2>Input Calendar with date space disabled</h2>
     <div class="input-example">
       <input type="text" name="startdate" class="inputbearcal">
-      <input type="text" name="enddate" class="inputbearcal">
+      <input type="text" name="enddate" class="inputbearcal-horizontal">
     </div>
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>

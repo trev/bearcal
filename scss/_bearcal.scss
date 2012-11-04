@@ -104,7 +104,9 @@
     overflow: hidden;
     height: 198px;
   }
+}
 
+.vertical-datepicker, .minibearcal {
   .prev_months, .next_months, .prev_year, .next_year {
     //Start IR
     border: 0;
@@ -171,6 +173,29 @@
     border-style: solid;
     border-width: 12px 13px 0 13px;
     border-color: #5E5E5E transparent transparent transparent;
+  }
+}
+.horizontal-datepicker {
+  .cal-nav { background: #e8e8e8; }
+  .next_months, .next_year, .prev_months, .prev_year  { 
+    text-decoration: none;
+    background: #e8e8e8;
+    padding: 4px 8px;
+    transition: all .25s ease-in-out;
+    -moz-transition: all .25s ease-in-out;
+    -webkit-transition: all .25s ease-in-out;
+    &:link, &:active, &:visited { color: #02A4D2; }
+    &:hover { background: #D1D1D1; color: #2b2b2b; }
+  }
+
+  .next_months, .next_year { float: right; }
+  .prev_months, .prev_year { float: left; }
+
+  .slider_container {
+    white-space: nowrap;
+  }
+  .month_box {
+    margin: 4px 0;
   }
 }
 .input-example {
@@ -255,7 +280,7 @@ h2 {
 
 .month_box {
   width: 162px; //.month_wrapper::width + 1
-  float: left;
+  display: inline-block;
   margin: 4px 4px 4px 0;
   border: 1px solid #E0E0E0;
   padding: 0 0 1px 0;

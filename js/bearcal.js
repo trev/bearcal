@@ -12,6 +12,8 @@
         days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
         nthMonth: 4,
         nthMonthClass: "endrow",
+        appendClass: "",
+        scrollDirection: "vertical",
         animateSpeed: 500,
         nextPeriodHtml: function() {
           return "<a href=\"#\" class=\"next_months\">Next " + this.monthScrollPeriod + " months</a><a href=\"#\" class=\"next_year\">Next " + this.yearScrollPeriod + " months</a>";
@@ -512,6 +514,9 @@
           calendarhtml += wrapperStart;
         }
         calendarhtml += this.options.prevPeriodHtml();
+        if (this.options.scrollDirection === "horizontal") {
+          calendarhtml += this.options.nextPeriodHtml();
+        }
         calendarhtml += "<div class=\"period_box clearfix\">\n  <div class=\"slider_container clearfix\">\n";
         year = this.options.startDate.getFullYear();
         month = this.options.startDate.getMonth();
@@ -526,7 +531,9 @@
           i++;
         }
         calendarhtml += "</div></div>";
-        calendarhtml += this.options.nextPeriodHtml();
+        if (this.options.scrollDirection === "vertical") {
+          calendarhtml += this.options.nextPeriodHtml();
+        }
         if (typeof wrapperEnd !== "undefined") {
           calendarhtml += wrapperEnd;
         }
@@ -574,39 +581,76 @@
         return date;
       },
       _getPrevMonths: function(period) {
-        var animatemargin, currentpos, date, html, rowheight, rows;
+        var animatemargin, cols, colwidth, currentpos, date, html, rowheight, rows;
+        console.log(this.options.scrollDirection);
         if (!this.element.find('.slider_container').is(':animated')) {
-          currentpos = parseFloat(this.element.find('.slider_container').css('marginTop'));
-          rowheight = this.element.find('.month_box').outerHeight(true);
-          rows = period / this.options.nthMonth;
-          animatemargin = currentpos + (rowheight * rows);
-          animatemargin = animatemargin === (rowheight * rows) ? 0 : animatemargin;
-          date = this._splitDate(0, this._options.displayedMonths);
-          html = this._getMonthsByPeriod(date[0], date[1], -period);
-          if (html.length > 0) {
-            return this.element.find('.slider_container').prepend(html).css({
-              "marginTop": (currentpos - (rowheight * rows)) + "px"
-            }).animate({
-              marginTop: animatemargin + "px"
-            }, this.options.animateSpeed);
-          } else {
-            return this.element.find('.slider_container').animate({
-              marginTop: animatemargin + "px"
-            }, this.options.animateSpeed);
+          switch (this.options.scrollDirection) {
+            case "vertical":
+              currentpos = parseFloat(this.element.find('.slider_container').css('marginTop'));
+              rowheight = this.element.find('.month_box').outerHeight(true);
+              rows = period / this.options.monthScrollPeriod;
+              animatemargin = currentpos + (rowheight * rows);
+              animatemargin = animatemargin === (rowheight * rows) || animatemargin > 0 ? 0 : animatemargin;
+              date = this._splitDate(0, this._options.displayedMonths);
+              html = this._getMonthsByPeriod(date[0], date[1], -period);
+              if (html.length > 0) {
+                return this.element.find('.slider_container').prepend(html).css({
+                  "marginTop": -(rowheight * rows) + "px"
+                }).animate({
+                  marginTop: animatemargin + "px"
+                }, this.options.animateSpeed);
+              } else {
+                return this.element.find('.slider_container').animate({
+                  marginTop: animatemargin + "px"
+                }, this.options.animateSpeed);
+              }
+              break;
+            default:
+              currentpos = parseFloat(this.element.find('.slider_container').css('marginLeft'));
+              colwidth = this.element.find('.month_box').outerWidth(true);
+              cols = period / this.options.monthScrollPeriod;
+              animatemargin = currentpos + (colwidth * cols);
+              animatemargin = animatemargin === (colwidth * cols) || animatemargin > 0 ? 0 : animatemargin;
+              date = this._splitDate(0, this._options.displayedMonths);
+              html = this._getMonthsByPeriod(date[0], date[1], -period);
+              if (html.length > 0) {
+                return this.element.find('.slider_container').prepend(html).css({
+                  "marginLeft": -(colwidth * cols) + "px"
+                }).animate({
+                  marginLeft: animatemargin + "px"
+                }, this.options.animateSpeed);
+              } else {
+                return this.element.find('.slider_container').animate({
+                  marginLeft: animatemargin + "px"
+                }, this.options.animateSpeed);
+              }
           }
         }
       },
       _getNextMonths: function(period) {
-        var animatemargin, currentpos, date, rowheight, rows;
+        var animatemargin, cols, colwidth, currentpos, date, rowheight, rows;
+        console.log(this.options.scrollDirection);
         if (!this.element.find('.slider_container').is(':animated')) {
-          currentpos = parseFloat(this.element.find('.slider_container').css('marginTop'));
-          rowheight = this.element.find('.month_box').outerHeight(true);
-          rows = period / this.options.nthMonth;
-          animatemargin = currentpos - (rowheight * rows);
-          date = this._splitDate(this._options.displayedMonths.length - 1, this._options.displayedMonths);
-          return this.element.find('.slider_container').append(this._getMonthsByPeriod(date[0], date[1], period)).animate({
-            marginTop: animatemargin + "px"
-          }, this.options.animateSpeed);
+          switch (this.options.scrollDirection) {
+            case "vertical":
+              currentpos = parseFloat(this.element.find('.slider_container').css('marginTop'));
+              rowheight = this.element.find('.month_box').outerHeight(true);
+              rows = period / this.options.monthScrollPeriod;
+              animatemargin = currentpos - (rowheight * rows);
+              date = this._splitDate(this._options.displayedMonths.length - 1, this._options.displayedMonths);
+              return this.element.find('.slider_container').append(this._getMonthsByPeriod(date[0], date[1], period)).animate({
+                marginTop: animatemargin + "px"
+              }, this.options.animateSpeed);
+            default:
+              currentpos = parseFloat(this.element.find('.slider_container').css('marginLeft'));
+              colwidth = this.element.find('.month_box').outerWidth(true);
+              cols = period / this.options.monthScrollPeriod;
+              animatemargin = currentpos - (colwidth * cols);
+              date = this._splitDate(this._options.displayedMonths.length - 1, this._options.displayedMonths);
+              return this.element.find('.slider_container').append(this._getMonthsByPeriod(date[0], date[1], period)).animate({
+                marginLeft: animatemargin + "px"
+              }, this.options.animateSpeed);
+          }
         }
       },
       _startup: function() {
@@ -614,7 +658,7 @@
         switch (this.options.mode) {
           case "datePicker":
             this.inputElem = $.extend({}, this.element);
-            this.inputElem.after(this._getCalendar("<div class=\"bearcal-wrapper\">", "</div>")).next().hide();
+            this.inputElem.after(this._getCalendar("<div class=\"bearcal-wrapper " + this.options.appendClass + "\">", "</div>")).next().hide();
             this.element = $.extend({}, this.inputElem.next('.bearcal-wrapper'));
             this.inputElem.focusin(function() {
               _this._placePopup(_this.inputElem, _this.element);
