@@ -1,7 +1,7 @@
 (function() {
 
   (function($, window, document) {
-    return $.widget("a07.BearCal", {
+    $.widget("a07.BearCal", {
       options: {
         startDate: new Date(),
         mode: "interactive",
@@ -660,14 +660,17 @@
             this.inputElem = $.extend({}, this.element);
             this.inputElem.after(this._getCalendar("<div class=\"bearcal-wrapper " + this.options.appendClass + "\">", "</div>")).next().hide();
             this.element = $.extend({}, this.inputElem.next('.bearcal-wrapper'));
-            this.inputElem.focusin(function() {
+            this.inputElem.on("focus", function() {
               _this._placePopup(_this.inputElem, _this.element);
-              return _this.element.fadeToggle('fast');
+              return _this.element.fadeIn('fast');
             });
-            $(document).mousedown(function(event) {
-              if (_this.element.is(':visible')) {
-                if (($(event.target).attr('class') !== 'bearcal-wrapper') && ($(event.target).parents('.bearcal-wrapper').length === 0)) {
-                  return _this.element.fadeToggle('fast');
+            this.inputElem.on("blur", function() {
+              return _this.element.fadeOut('fast');
+            });
+            $(document).off("click.a07").on("click.a07", function(event) {
+              if ($('.bearcal-wrapper').is(':visible')) {
+                if (($(event.target).attr('class') !== 'bearcal-wrapper') && ($(event.target).parents('.bearcal-wrapper').length === 0) && (!$.inArray($(event.target), $.a07.BearCal.instances))) {
+                  return $('.bearcal-wrapper').fadeOut('fast');
                 }
               }
             });
@@ -695,6 +698,7 @@
       },
       _create: function() {
         var _this;
+        $.a07.BearCal.instances.push(this.element);
         _this = this;
         this._options = $.extend(true, {}, this._options);
         if (this.options.json) {
@@ -711,6 +715,9 @@
       },
       destroy: function() {},
       _setOption: function(key, value) {}
+    });
+    return $.extend($.a07.BearCal, {
+      instances: []
     });
   })(jQuery, window, document);
 
