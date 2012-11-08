@@ -542,10 +542,8 @@
     """
     <div class="month_box #{if nth is 0 then @options.nthMonthClass else ""}">
       <div class="month_header">#{@options.monthFullName[month]} #{year}</div>
-      <div class="month_wrapper">
-        #{@_getWeekdaysHtml()}
-        #{@_getDaysHtml(year, month)}
-      </div>
+      #{@_getWeekdaysHtml()}
+      #{@_getDaysHtml(year, month)}
     </div>
     """
 

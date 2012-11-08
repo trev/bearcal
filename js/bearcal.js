@@ -483,7 +483,7 @@
           this._setDisplayedMonths(year, month);
         }
         nth = this._options.loadedMonths.length % this.options.nthMonth;
-        return "<div class=\"month_box " + (nth === 0 ? this.options.nthMonthClass : "") + "\">\n  <div class=\"month_header\">" + this.options.monthFullName[month] + " " + year + "</div>\n  <div class=\"month_wrapper\">\n    " + (this._getWeekdaysHtml()) + "\n    " + (this._getDaysHtml(year, month)) + "\n  </div>\n</div>";
+        return "<div class=\"month_box " + (nth === 0 ? this.options.nthMonthClass : "") + "\">\n  <div class=\"month_header\">" + this.options.monthFullName[month] + " " + year + "</div>\n  " + (this._getWeekdaysHtml()) + "\n  " + (this._getDaysHtml(year, month)) + "\n</div>";
       },
       _setLoadedMonths: function(year, month) {
         this._options.loadedMonths.push(year + "-" + month);
