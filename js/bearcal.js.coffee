@@ -79,30 +79,10 @@
           "delimiter"   : elem.find('.'+_this.options.boxClass.pm).attr('data-delimiter')
       JSON.stringify(json, null, '\t')
 
-    # Date comparisons
-    _compareDates : (s_date, e_date, operator) ->
-      s_date = @_parseDate(s_date)
-      e_date = @_parseDate(e_date)
-
-      switch operator
-        when "<" then new Date(s_date).getTime() < new Date(e_date).getTime()
-        when ">" then new Date(s_date).getTime() > new Date(e_date).getTime()
-        when ">=" then new Date(s_date).getTime() >= new Date(e_date).getTime()
-        when "<=" then new Date(s_date).getTime() <= new Date(e_date).getTime()
-        when "==" then new Date(s_date).getTime() is new Date(e_date).getTime()
-
-    # Convert from current format ISO 8601 to RFC2822 because IE8 doesn't support ES5
-    _parseDate : (d) ->
-      months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-      year   = d.slice(0,4)
-      month  = months[d.slice(5,7)-1]
-      day    = d.slice(8,10)
-      time   = d.slice(-8, d.length)
-      "#{month} #{day}, #{year} #{time}"
 
     # States not to track
     _trackable: (timeOfDay) ->
-      if $.inArray(timeOfDay.attr('data-status-type'), @options.dontTrackStates) is -1 then true else false 
+      $.inArray(timeOfDay.attr('data-status-type'), @options.dontTrackStates) is -1
 
     # Tracks the events relating to calendar interactivity
     _track: () ->
@@ -578,7 +558,7 @@
 
       calendarhtml += @options.prevPeriodHtml()
       calendarhtml += @options.nextPeriodHtml() if @options.scrollDirection is "horizontal"
-      calendarhtml += "<div class=\"period_box clearfix\">\n  <div class=\"slider_container clearfix\">\n"
+      calendarhtml += "<div class=\"period_box clearfix\">\n  <div class=\"slider_container clearfix\">"
       year = @options.startDate.getFullYear()
       month = @options.startDate.getMonth()
 
@@ -724,7 +704,6 @@
           # Watch for clicks outside the calendar if it's toggled and close it
           $(document).off("click.a07").on "click.a07", (event) =>
             if $('.bearcal-wrapper').is(':visible')
-              console.log($.inArray($(event.target).get(0), $.a07.BearCal.getDOMInstances()))
               if ($(event.target).attr('class') isnt 'bearcal-wrapper') and # The click isn't on the calendar
                  ($(event.target).parents('.bearcal-wrapper').length is 0) and # The click isn't on any element where the calendar is its parent
                  ($.inArray($(event.target).get(0), $.a07.BearCal.getDOMInstances()) < 0) # This click isn't on any DOM element that triggers the calendar (i.e an input field)

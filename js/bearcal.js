@@ -101,37 +101,8 @@
         });
         return JSON.stringify(json, null, '\t');
       },
-      _compareDates: function(s_date, e_date, operator) {
-        s_date = this._parseDate(s_date);
-        e_date = this._parseDate(e_date);
-        switch (operator) {
-          case "<":
-            return new Date(s_date).getTime() < new Date(e_date).getTime();
-          case ">":
-            return new Date(s_date).getTime() > new Date(e_date).getTime();
-          case ">=":
-            return new Date(s_date).getTime() >= new Date(e_date).getTime();
-          case "<=":
-            return new Date(s_date).getTime() <= new Date(e_date).getTime();
-          case "==":
-            return new Date(s_date).getTime() === new Date(e_date).getTime();
-        }
-      },
-      _parseDate: function(d) {
-        var day, month, months, time, year;
-        months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        year = d.slice(0, 4);
-        month = months[d.slice(5, 7) - 1];
-        day = d.slice(8, 10);
-        time = d.slice(-8, d.length);
-        return "" + month + " " + day + ", " + year + " " + time;
-      },
       _trackable: function(timeOfDay) {
-        if ($.inArray(timeOfDay.attr('data-status-type'), this.options.dontTrackStates) === -1) {
-          return true;
-        } else {
-          return false;
-        }
+        return $.inArray(timeOfDay.attr('data-status-type'), this.options.dontTrackStates) === -1;
       },
       _track: function() {
         var _this;
@@ -517,7 +488,7 @@
         if (this.options.scrollDirection === "horizontal") {
           calendarhtml += this.options.nextPeriodHtml();
         }
-        calendarhtml += "<div class=\"period_box clearfix\">\n  <div class=\"slider_container clearfix\">\n";
+        calendarhtml += "<div class=\"period_box clearfix\">\n  <div class=\"slider_container clearfix\">";
         year = this.options.startDate.getFullYear();
         month = this.options.startDate.getMonth();
         i = 0;
@@ -665,7 +636,6 @@
             });
             $(document).off("click.a07").on("click.a07", function(event) {
               if ($('.bearcal-wrapper').is(':visible')) {
-                console.log($.inArray($(event.target).get(0), $.a07.BearCal.getDOMInstances()));
                 if (($(event.target).attr('class') !== 'bearcal-wrapper') && ($(event.target).parents('.bearcal-wrapper').length === 0) && ($.inArray($(event.target).get(0), $.a07.BearCal.getDOMInstances()) < 0)) {
                   return $('.bearcal-wrapper').fadeOut('fast');
                 }
