@@ -582,7 +582,6 @@
       },
       _getPrevMonths: function(period) {
         var animatemargin, cols, colwidth, currentpos, date, html, rowheight, rows;
-        console.log(this.options.scrollDirection);
         if (!this.element.find('.slider_container').is(':animated')) {
           switch (this.options.scrollDirection) {
             case "vertical":
@@ -629,7 +628,6 @@
       },
       _getNextMonths: function(period) {
         var animatemargin, cols, colwidth, currentpos, date, rowheight, rows;
-        console.log(this.options.scrollDirection);
         if (!this.element.find('.slider_container').is(':animated')) {
           switch (this.options.scrollDirection) {
             case "vertical":
@@ -661,15 +659,14 @@
             this.inputElem.after(this._getCalendar("<div class=\"bearcal-wrapper " + this.options.appendClass + "\">", "</div>")).next().hide();
             this.element = $.extend({}, this.inputElem.next('.bearcal-wrapper'));
             this.inputElem.on("focus", function() {
+              $('.bearcal-wrapper').fadeOut('fast');
               _this._placePopup(_this.inputElem, _this.element);
               return _this.element.fadeIn('fast');
             });
-            this.inputElem.on("blur", function() {
-              return _this.element.fadeOut('fast');
-            });
             $(document).off("click.a07").on("click.a07", function(event) {
               if ($('.bearcal-wrapper').is(':visible')) {
-                if (($(event.target).attr('class') !== 'bearcal-wrapper') && ($(event.target).parents('.bearcal-wrapper').length === 0) && (!$.inArray($(event.target), $.a07.BearCal.instances))) {
+                console.log($.inArray($(event.target).get(0), $.a07.BearCal.getDOMInstances()));
+                if (($(event.target).attr('class') !== 'bearcal-wrapper') && ($(event.target).parents('.bearcal-wrapper').length === 0) && ($.inArray($(event.target).get(0), $.a07.BearCal.getDOMInstances()) < 0)) {
                   return $('.bearcal-wrapper').fadeOut('fast');
                 }
               }
@@ -717,7 +714,15 @@
       _setOption: function(key, value) {}
     });
     return $.extend($.a07.BearCal, {
-      instances: []
+      instances: [],
+      getDOMInstances: function() {
+        var t;
+        t = [];
+        $.each(this.instances, function(i, v) {
+          return t.push(v.get(0));
+        });
+        return t;
+      }
     });
   })(jQuery, window, document);
 

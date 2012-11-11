@@ -637,7 +637,6 @@
 
     # Gets previous months and adjusts the view accordingly
     _getPrevMonths: (period) ->
-      console.log(@options.scrollDirection)
       if !@element.find('.slider_container').is(':animated')
         switch @options.scrollDirection
           when "vertical"
@@ -676,7 +675,6 @@
 
     # Gets next months and adjusts the view accordingly
     _getNextMonths: (period) ->
-      console.log(@options.scrollDirection)
       if !@element.find('.slider_container').is(':animated')
         switch @options.scrollDirection
           when "vertical"
@@ -715,19 +713,21 @@
 
           # Watch for focus
           @inputElem.on "focus", =>
+            $('.bearcal-wrapper').fadeOut('fast')
             @_placePopup(@inputElem, @element)
             @element.fadeIn('fast')
 
           # Watch for loss of focus/blur
-          @inputElem.on "blur", =>
-            @element.fadeOut('fast')
+          #          @inputElem.on "blur", =>
+          #            @element.fadeOut('fast')
 
           # Watch for clicks outside the calendar if it's toggled and close it
           $(document).off("click.a07").on "click.a07", (event) =>
             if $('.bearcal-wrapper').is(':visible')
+              console.log($.inArray($(event.target).get(0), $.a07.BearCal.getDOMInstances()))
               if ($(event.target).attr('class') isnt 'bearcal-wrapper') and # The click isn't on the calendar
                  ($(event.target).parents('.bearcal-wrapper').length is 0) and # The click isn't on any element where the calendar is its parent
-                 (!$.inArray($(event.target), $.a07.BearCal.instances)) # This click isn't on any DOM element that triggers the calendar (i.e an input field)
+                 ($.inArray($(event.target).get(0), $.a07.BearCal.getDOMInstances()) < 0) # This click isn't on any DOM element that triggers the calendar (i.e an input field)
                    $('.bearcal-wrapper').fadeOut('fast')
               
         else
@@ -778,6 +778,11 @@
     _setOption: (key, value) ->
 
   $.extend $.a07.BearCal,
-    instances: []
+    instances       : []
+    getDOMInstances : ->
+      t = []
+      $.each @instances, (i,v) ->
+        t.push(v.get(0))
+      t
 
 ) jQuery, window, document
