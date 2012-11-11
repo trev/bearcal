@@ -79,6 +79,26 @@
           "delimiter"   : elem.find('.'+_this.options.boxClass.pm).attr('data-delimiter')
       JSON.stringify(json, null, '\t')
 
+    # Date comparisons
+    _compareDates : (s_date, e_date, operator) ->
+      s_date = @_parseDate(s_date)
+      e_date = @_parseDate(e_date)
+
+      switch operator
+        when "<" then new Date(s_date).getTime() < new Date(e_date).getTime()
+        when ">" then new Date(s_date).getTime() > new Date(e_date).getTime()
+        when ">=" then new Date(s_date).getTime() >= new Date(e_date).getTime()
+        when "<=" then new Date(s_date).getTime() <= new Date(e_date).getTime()
+        when "==" then new Date(s_date).getTime() is new Date(e_date).getTime()
+
+    # Convert from current format ISO 8601 to RFC2822 because IE8 doesn't support ES5
+    _parseDate : (d) ->
+      months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+      year   = d.slice(0,4)
+      month  = months[d.slice(5,7)-1]
+      day    = d.slice(8,10)
+      time   = d.slice(-8, d.length)
+      "#{month} #{day}, #{year} #{time}"
 
     # States not to track
     _trackable: (timeOfDay) ->
