@@ -640,7 +640,7 @@
       if !@element.find('.slider_container').is(':animated')
         switch @options.scrollDirection
           when "vertical"
-            currentpos = parseFloat(@element.find('.slider_container').css('marginTop'))
+            currentpos = @_parseMargin(@element.find('.slider_container').css('marginTop'))
             rowheight = @element.find('.month_box').outerHeight(true)
             rows = (period / @options.monthScrollPeriod)
             animatemargin = currentpos + (rowheight * rows) 
@@ -656,7 +656,7 @@
                       .animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
             else @element.find('.slider_container').animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
           else
-            currentpos = parseFloat(@element.find('.slider_container').css('marginLeft'))
+            currentpos = @_parseMargin(@element.find('.slider_container').css('marginLeft'))
             colwidth = @element.find('.month_box').outerWidth(true)
             cols = (period / @options.monthScrollPeriod)
             animatemargin = currentpos + (colwidth * cols) 
@@ -678,7 +678,7 @@
       if !@element.find('.slider_container').is(':animated')
         switch @options.scrollDirection
           when "vertical"
-            currentpos = parseFloat(@element.find('.slider_container').css('marginTop'))
+            currentpos = @_parseMargin(@element.find('.slider_container').css('marginTop'))
             rowheight = @element.find('.month_box').outerHeight(true)
             rows = (period / @options.monthScrollPeriod)
             animatemargin = currentpos - (rowheight * rows) 
@@ -688,7 +688,7 @@
                     .append(@_getMonthsByPeriod(date[0],date[1],period))
                     .animate({marginTop: animatemargin+"px"}, @options.animateSpeed)
           else
-            currentpos = parseFloat(@element.find('.slider_container').css('marginLeft'))
+            currentpos = @_parseMargin(@element.find('.slider_container').css('marginLeft'))
             colwidth = @element.find('.month_box').outerWidth(true)
             cols = (period / @options.monthScrollPeriod)
             animatemargin = currentpos - (colwidth * cols) 
@@ -698,28 +698,29 @@
                     .append(@_getMonthsByPeriod(date[0],date[1],period))
                     .animate({marginLeft: animatemargin+"px"}, @options.animateSpeed)
 
+    # Dealing with IE7/8 ridiculousness!!
+    _parseMargin: (elem) ->
+      elem = 0 if elem is "auto"
+      parseFloat(elem)
+
     _startup: ->
       # Check to see if it's an input and act accordingly
       switch @options.mode
         when "datePicker"
           # Place input element into it's own var
-          @inputElem = $.extend({}, @element)
+          @inputElem = $(@element[0])
 
           # Add the calendar and hide it
           @inputElem.after(@_getCalendar("<div class=\"bearcal-wrapper #{@options.appendClass}\">","</div>")).next().hide()
 
           # Overwrite the element with the calendar
-          @element = $.extend({}, @inputElem.next('.bearcal-wrapper'))
+          @element = @inputElem.next('.bearcal-wrapper')
 
           # Watch for focus
           @inputElem.on "focus", =>
             $('.bearcal-wrapper').fadeOut('fast')
             @_placePopup(@inputElem, @element)
             @element.fadeIn('fast')
-
-          # Watch for loss of focus/blur
-          #          @inputElem.on "blur", =>
-          #            @element.fadeOut('fast')
 
           # Watch for clicks outside the calendar if it's toggled and close it
           $(document).off("click.a07").on "click.a07", (event) =>

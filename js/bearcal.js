@@ -581,7 +581,7 @@
         if (!this.element.find('.slider_container').is(':animated')) {
           switch (this.options.scrollDirection) {
             case "vertical":
-              currentpos = parseFloat(this.element.find('.slider_container').css('marginTop'));
+              currentpos = this._parseMargin(this.element.find('.slider_container').css('marginTop'));
               rowheight = this.element.find('.month_box').outerHeight(true);
               rows = period / this.options.monthScrollPeriod;
               animatemargin = currentpos + (rowheight * rows);
@@ -601,7 +601,7 @@
               }
               break;
             default:
-              currentpos = parseFloat(this.element.find('.slider_container').css('marginLeft'));
+              currentpos = this._parseMargin(this.element.find('.slider_container').css('marginLeft'));
               colwidth = this.element.find('.month_box').outerWidth(true);
               cols = period / this.options.monthScrollPeriod;
               animatemargin = currentpos + (colwidth * cols);
@@ -627,7 +627,7 @@
         if (!this.element.find('.slider_container').is(':animated')) {
           switch (this.options.scrollDirection) {
             case "vertical":
-              currentpos = parseFloat(this.element.find('.slider_container').css('marginTop'));
+              currentpos = this._parseMargin(this.element.find('.slider_container').css('marginTop'));
               rowheight = this.element.find('.month_box').outerHeight(true);
               rows = period / this.options.monthScrollPeriod;
               animatemargin = currentpos - (rowheight * rows);
@@ -636,7 +636,7 @@
                 marginTop: animatemargin + "px"
               }, this.options.animateSpeed);
             default:
-              currentpos = parseFloat(this.element.find('.slider_container').css('marginLeft'));
+              currentpos = this._parseMargin(this.element.find('.slider_container').css('marginLeft'));
               colwidth = this.element.find('.month_box').outerWidth(true);
               cols = period / this.options.monthScrollPeriod;
               animatemargin = currentpos - (colwidth * cols);
@@ -647,13 +647,19 @@
           }
         }
       },
+      _parseMargin: function(elem) {
+        if (elem === "auto") {
+          elem = 0;
+        }
+        return parseFloat(elem);
+      },
       _startup: function() {
         var _this = this;
         switch (this.options.mode) {
           case "datePicker":
-            this.inputElem = $.extend({}, this.element);
+            this.inputElem = $(this.element[0]);
             this.inputElem.after(this._getCalendar("<div class=\"bearcal-wrapper " + this.options.appendClass + "\">", "</div>")).next().hide();
-            this.element = $.extend({}, this.inputElem.next('.bearcal-wrapper'));
+            this.element = this.inputElem.next('.bearcal-wrapper');
             this.inputElem.on("focus", function() {
               $('.bearcal-wrapper').fadeOut('fast');
               _this._placePopup(_this.inputElem, _this.element);
