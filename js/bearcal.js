@@ -482,8 +482,7 @@
         return "<div class=\"month_box " + (nth === 0 ? this.options.nthMonthClass : "") + "\">\n  <div class=\"month_header\">" + this.options.monthFullName[month] + " " + year + "</div>\n  " + (this._getWeekdaysHtml()) + "\n  " + (this._getDaysHtml(year, month)) + "\n</div>";
       },
       _setLoadedMonths: function(year, month) {
-        this._options.loadedMonths.push(year + "-" + month);
-        return this._options.loadedMonths.sort(this._dateCompare);
+        return this._options.loadedMonths.push(year + "-" + month);
       },
       _setDisplayedMonths: function(year, month, direction) {
         this._options.displayedMonths.push(year + "-" + month);

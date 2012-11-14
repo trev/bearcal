@@ -549,7 +549,6 @@
 
     _setLoadedMonths: (year, month) ->
       @_options.loadedMonths.push(year + "-" + month)
-      @_options.loadedMonths.sort(@_dateCompare)
 
     _setDisplayedMonths: (year, month, direction) ->
       # We want to store the displayed months so we can then call it on click to then tell if we need to load more months or just animate margin.

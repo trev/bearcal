@@ -3998,7 +3998,7 @@
 		{
 			"date": "2013-07-05T12:00:00",
 			"type": "booked",
-			"delimiter": "false"
+			"delimiter": "true"
 		},
 		{
 			"date": "2013-07-06T00:00:00",
