@@ -508,19 +508,21 @@
       currView['top'] = $(window).scrollTop() # Upper limit area of the viewport that's currently in view
       currView['bot'] = $(window).height() + currView['top'] # Bottom limit area of the viewport that's currently in view
       elemHeight = elem.outerHeight(true) # Element height
-      botPlace = base.offset().top + base.outerHeight(true) # Where to place the element if placing below the base
-      topPlace = base.offset().top - elemHeight # Where to place the element if placing above the base
+      baseTopOffset = base.offset().top - base.offsetParent().offset().top # Find nearest parent with an offset that'll influence absolute positioning and substract it
+      baseLeftOffset = base.offset().left - base.offsetParent().offset().left
+      botPlace = baseTopOffset + base.outerHeight(true) # Where to place the element if placing below the base
+      topPlace = baseTopOffset - elemHeight # Where to place the element if placing above the base
       botCalPos = botPlace + elemHeight # Coordinates required to place the element below the base
-      topCalPos = base.offset().top - elemHeight # Coordinates require to place the element above the base
+      topCalPos = baseTopOffset - elemHeight # Coordinates require to place the element above the base
 
       if (botCalPos <= currView['bot']) or (topCalPos < currView['top']) # Is there space to place the elememt below the base?
         elem.css
           top: botPlace + "px"
-          left: base.offset().left + "px" 
+          left: baseLeftOffset + "px" 
       else
         elem.css
           top: topPlace + "px"
-          left: base.offset().left + "px" 
+          left: baseLeftOffset + "px" 
 
     # Helper function to pad dates
     _pad: (num, places) ->

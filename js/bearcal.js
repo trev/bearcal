@@ -446,24 +446,26 @@
         return dayshtml;
       },
       _placePopup: function(base, elem) {
-        var botCalPos, botPlace, currView, elemHeight, topCalPos, topPlace;
+        var baseLeftOffset, baseTopOffset, botCalPos, botPlace, currView, elemHeight, topCalPos, topPlace;
         currView = new Array();
         currView['top'] = $(window).scrollTop();
         currView['bot'] = $(window).height() + currView['top'];
         elemHeight = elem.outerHeight(true);
-        botPlace = base.offset().top + base.outerHeight(true);
-        topPlace = base.offset().top - elemHeight;
+        baseTopOffset = base.offset().top - base.offsetParent().offset().top;
+        baseLeftOffset = base.offset().left - base.offsetParent().offset().left;
+        botPlace = baseTopOffset + base.outerHeight(true);
+        topPlace = baseTopOffset - elemHeight;
         botCalPos = botPlace + elemHeight;
-        topCalPos = base.offset().top - elemHeight;
+        topCalPos = baseTopOffset - elemHeight;
         if ((botCalPos <= currView['bot']) || (topCalPos < currView['top'])) {
           return elem.css({
             top: botPlace + "px",
-            left: base.offset().left + "px"
+            left: baseLeftOffset + "px"
           });
         } else {
           return elem.css({
             top: topPlace + "px",
-            left: base.offset().left + "px"
+            left: baseLeftOffset + "px"
           });
         }
       },
