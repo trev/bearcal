@@ -324,6 +324,8 @@
           #Is the start date set? YES
           if @_options.startDate
             @_options.endDate = $(that).attr("data-date") + pos #Set end date
+            place = "start" # Set the place variable to start
+            latest = [] # Used for tracking which DOM element was the latest to be processed
             
             # Trigger set end date event
             @_trigger("endDateSet", 0, @_options.endDate)
@@ -341,41 +343,90 @@
                 # This conditional block is only in charge of registering whether it's the start or end of the date range
                 if _this._compareDates(_this._options.startDate, $(@).attr('data-date') + startPos, '==')
                   if startPos is "T00:00:00"
-                    amChild.attr('data-range-place', 'start')
+                    amChild.attr('data-range-place', place)
                   else
-                    pmChild.attr('data-range-place', 'start')
-                else if _this._compareDates(_this._options.endDate, $(@).attr('data-date') + pos, '==')
-                  if pos is "T00:00:00"
-                    amChild.attr('data-range-place', 'end')
-                  else
-                    pmChild.attr('data-range-place', 'end')
+                    pmChild.attr('data-range-place', place)
+                  place = _this._togglePlace(place) # Toggle between values
 
-                # This conditional block assigns the rest of th stuff such as states, delimiters and classes
+                # if this value is more then half a day older then the previous value then we need to:
+                # Get that last value
+                # Update the data-range attribute for the previous and current date
+
+                # This conditional block assigns the rest of the stuff such as states, delimiters and classes
                 if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T12:00:00", "<") and _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T00:00:00", ">") 
 
                   if _this._trackable(amChild) # Only add class if it's trackable
+                    if latest.length isnt 0
+                      if Math.abs(_this._toDate(amChild.attr('data-date')) - _this._toDate(latest[latest.length-1].attr('data-date'))) > 43200000
+                        console.log("Do something am full")
+                        if latest[latest.length-1].attr('data-range-place') is "start"
+                          latest[latest.length-1].attr('data-range-place', "start-end")
+                        else
+                          latest[latest.length-1].attr('data-range-place', place)
+                        place = _this._togglePlace(place)
+                        amChild.attr('data-range-place', place)
+                        place = _this._togglePlace(place)
                     amChild.removeClass(_this._getAllClasses(_this.options.setStates))
                     .addClass(_this.options.setStates.am[_this._options.state]) 
                     .attr('data-status-type', _this._options.state)
+                    latest.push(amChild)
 
                   if _this._trackable(pmChild) # Only add class if it's trackable
+                    if latest isnt null
+                      if Math.abs(_this._toDate(pmChild.attr('data-date')) - _this._toDate(latest[latest.length-1].attr('data-date'))) > 43200000
+                        console.log("Do something pm full")
+                        console.log(latest.length)
+                        console.log(latest)
+                        console.log(pmChild)
+                        setTimeout ->
+                        latest[latest.length-1].attr('data-range-place', place)
+                        place = _this._togglePlace(place)
+                        pmChild.attr('data-range-place', place)
+                        place = _this._togglePlace(place)
                     pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
                     .addClass(_this.options.setStates.pm[_this._options.state]) 
                     .attr('data-status-type', _this._options.state)
+                    latest.push(pmChild)
 
                 else if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T12:00:00", "==")
                   if _this._trackable(pmChild) # Only add class if it's trackable
+                    if latest.length isnt 0
+                      if Math.abs(_this._toDate(pmChild.attr('data-date')) - _this._toDate(latest[latest.length-1].attr('data-date'))) > 43200000
+                        console.log("Do something pm")
                     pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
                     .addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]) 
                     .attr('data-status-type', _this._options.state)
                     .attr('data-delimiter', 'true')
+                    latest.push(pmChild)
 
                 else if _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T00:00:00", "==")
                   if _this._trackable(amChild) # Only add class if it's trackable
+                    if latest.length isnt 0
+                      if Math.abs(_this._toDate(amChild.attr('data-date')) - _this._toDate(latest[latest.length-1].attr('data-date'))) > 43200000
+                        console.log("Do something am")
+                        amChild.attr('data-range-place', "start-end")
+                        if latest.length < 3
+                          latest[latest.length-1].attr('data-range-place', "start-end")
+                        else
+                          latest[latest.length-1].attr('data-range-place', place)
+                          place = _this._togglePlace(place)
                     amChild.removeClass(_this._getAllClasses(_this.options.setStates))
                     .addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]) 
                     .attr('data-status-type', _this._options.state)
                     .attr('data-delimiter', 'true')
+                    latest.push(amChild)
+
+
+                if _this._compareDates(_this._options.endDate, $(@).attr('data-date') + pos, '==')
+                  if pos is "T00:00:00"
+                    if amChild.attr('data-range-place').length is 0
+                      console.log("in")
+                      amChild.attr('data-range-place', place)
+                  else
+                    if pmChild.attr('data-range-place').length is 0
+                      console.log("in")
+                      pmChild.attr('data-range-place', place)
+                  place = _this._togglePlace(place) # Toggle between values
 
               @_eraseHighlights()
               true #Return true to let know that an end date was set
@@ -467,6 +518,13 @@
             @_trigger("startDateSet", 0, @_options.startDate)
 
             false #Return false to let know that no end date was set
+
+    _togglePlace: (place) ->
+      if place is "start"
+        place = "end"
+      else
+        place = "start"
+      place
 
     # Recursively return all values within an object literal
     _getAllClasses: (obj) ->
