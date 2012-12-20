@@ -3,7 +3,7 @@
 
 ## Demo
 'cause reading comes later
-[BearCal demo](http//bearcal.a07.com.au)
+[BearCal demo](http://bearcal.a07.com.au)
 
 ## Description
 *BearCal* is a jQuery Widget Factory plugin that produces an interactive calendar.
