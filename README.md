@@ -90,7 +90,7 @@ HTML for the previous period DOM elements
 `prevMonthsHtml : function() { return "<a href=\"#\" class=\"prev_year\">Previous #{@yearScrollPeriod} months</a><a href=\"#\" class=\"prev_months\">Previous #{@monthScrollPeriod} months</a>" }`
 
 #### boxClass
-Object literal containing the classes to apply to the wrapper div of a single day and child divs: AM and PM 
+Object literal containing the classes to apply to the wrapper div of a single day and child divs: AM and PM  
 **Default:**   
 
     boxClass: {
@@ -110,7 +110,7 @@ The default status that is applied to the AM and PM div data-status-type attribu
 
 
 #### reverseTypes
-Object literal containing the reverse/opposite states. This is used to apply the right class when you're hovering over an element. I.e: If you hover over a period that is set to available, it'll know to apply the unavailable state. 
+Object literal containing the reverse/opposite states. This is used to apply the right class when you're hovering over an element. I.e: If you hover over a period that is set to available, it'll know to apply the unavailable state.  
 **Default:**   
 
     reverseTypes: {
@@ -119,7 +119,7 @@ Object literal containing the reverse/opposite states. This is used to apply the
     }
 
 #### hoverStates
-Object literal containing which class to apply on a per period and per state basis when the mouse is only hovering. 
+Object literal containing which class to apply on a per period and per state basis when the mouse is only hovering.  
 **Default:**   
 
     hoverStates: {
@@ -134,7 +134,7 @@ Object literal containing which class to apply on a per period and per state bas
     }
 
 #### highlightStates
-Object literal containing which class to apply on a per period and per state basis when we're highlighting a date span 
+Object literal containing which class to apply on a per period and per state basis when we're highlighting a date span  
 **Default:**   
 
     highlightStates: {
@@ -149,7 +149,7 @@ Object literal containing which class to apply on a per period and per state bas
     }
 
 #### setStates
-Object literal containing which class to apply on a per period and per state basis when we're saving a date span selection 
+Object literal containing which class to apply on a per period and per state basis when we're saving a date span selection  
 **Default:**   
 
     setStates: {
@@ -168,7 +168,7 @@ Object literal containing which class to apply on a per period and per state bas
     }
 
 #### json
-Object literal containing whether we should load data from JSON and how 
+Object literal containing whether we should load data from JSON and how  
 **Default:**   
 
     json: {
@@ -197,11 +197,11 @@ From the console (will return the unavailable and booked states grouped by date 
 
 ### Events
 #### beforebuild
-Triggers before the calendar gets generated 
+Triggers before the calendar gets generated  
 **Returns:** `event`
 
 #### datePicked
-Triggers when a date is picked (datePicker mode) 
+Triggers when a date is picked (datePicker mode)  
 **Returns:** `event` and `data` object:
 
     data.elem       // The actual clicked DOM element
@@ -211,11 +211,11 @@ Triggers when a date is picked (datePicker mode)
 
 
 #### startDateSet
-Trigger when an start date is set (Interactive mode) 
+Trigger when an start date is set (Interactive mode)  
 **Returns:** `event` and `startDate`
 
 #### endDateSet
-Trigger when an end date is set (Interactive mode) 
+Trigger when an end date is set (Interactive mode)  
 **Returns:** `event` and `endDate`
 
 
