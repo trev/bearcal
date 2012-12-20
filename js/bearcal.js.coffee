@@ -49,10 +49,10 @@
           unavailable   : "unavailable pm"
           booked        : "booked pm"
           delimiter     : "delimiter_pm"
-        json            :
-          enable        : false
-          type          : "all" # all or range
-          url           : ""
+      json              :
+        enable          : false
+        type            : "all" # all or range
+        url             : ""
       dontTrackStates   : ["booked"]
 
     _options            :

@@ -64,12 +64,12 @@
             unavailable: "unavailable pm",
             booked: "booked pm",
             delimiter: "delimiter_pm"
-          },
-          json: {
-            enable: false,
-            type: "all",
-            url: ""
           }
+        },
+        json: {
+          enable: false,
+          type: "all",
+          url: ""
         },
         dontTrackStates: ["booked"]
       },
