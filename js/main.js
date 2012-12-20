@@ -1,8 +1,11 @@
 $(function() {
   $('.bearcal').BearCal({
     monthScrollPeriod  : 4,
-    json          : true,
-    jsonUrl       : "/sample-data-large.json",
+    json : { 
+      enable: true,
+      type: "range",
+      url: "/sample-data-range.json",
+    },
     startDateSet  : function(event,startDate) {
       console.log(startDate);
     },
@@ -14,8 +17,10 @@ $(function() {
   $('.minibearcal').BearCal({
     period        : 1, //Preload only one month
     monthScrollPeriod  : 1, //How many months to scroll at once
-    json          : true,
-    jsonUrl       : "/sample-data-large.json",
+    json : { 
+      enable: true,
+      url: "/sample-data-large.json",
+    },
     startDateSet  : function(event,startDate) {
       console.log(startDate);
     },
@@ -29,8 +34,10 @@ $(function() {
     mode            : "datePicker", //Show calendar in datepicker mode
     dontTrackStates : ['booked', 'unavailable'], //Dont track dates with states listed in array
     appendClass     : "vertical-datepicker", //Append custom class to calendar
-    json            : true,
-    jsonUrl         : "/sample-data-large.json",
+    json : { 
+      enable: true,
+      url: "/sample-data-large.json",
+    },
     datePicked      : function(e,data) {
       data.inputElem.val(data.date);
       data.parentElem.hide();
@@ -41,8 +48,10 @@ $(function() {
     monthScrollPeriod: 1, //How many months to scroll at once
     mode            : "datePicker", //Show calendar in datepicker mode
     dontTrackStates : ['booked', 'unavailable'], //Dont track dates with states listed in array
-    json            : true,
-    jsonUrl         : "/sample-data-large.json",
+    json : { 
+      enable: true,
+      url: "/sample-data-large.json",
+    },
     appendClass     : "horizontal-datepicker", //Append custom class to calendar
     scrollDirection : "horizontal", //Set scroll direction
     datePicked      : function(e,data) {

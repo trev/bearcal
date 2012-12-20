@@ -21,7 +21,6 @@
         prevPeriodHtml: function() {
           return "<a href=\"#\" class=\"prev_year\">Previous " + this.yearScrollPeriod + " months</a><a href=\"#\" class=\"prev_months\">Previous " + this.monthScrollPeriod + " months</a>";
         },
-        highlightable: true,
         boxClass: {
           am: "am_box",
           pm: "pm_box",
@@ -65,10 +64,13 @@
             unavailable: "unavailable pm",
             booked: "booked pm",
             delimiter: "delimiter_pm"
+          },
+          json: {
+            enable: false,
+            type: "all",
+            url: ""
           }
         },
-        json: false,
-        jsonUrl: "",
         dontTrackStates: ["booked"]
       },
       _options: {
@@ -105,36 +107,70 @@
         return JSON.stringify(json, null, '\t');
       },
       getJSONByStates: function(states, range) {
-        var json, _this;
+        var json, nextArrayIndex, nextStatusType, _this;
         if (range == null) {
           range = false;
         }
         _this = this;
+        nextStatusType = [];
+        nextArrayIndex = [];
         json = {
           "availability": []
         };
         this.element.find('.' + this.options.boxClass.fullDay).each(function() {
-          var amElem, pmElem;
+          var amElem, pmElem, workingIndex;
           amElem = $(this).find('.' + _this.options.boxClass.am);
           pmElem = $(this).find('.' + _this.options.boxClass.pm);
           if ($.inArray(amElem.attr('data-status-type'), states) !== -1) {
             if ((range && $.inArray(amElem.attr('data-range-place'), ['start', 'end', 'start-end']) !== -1) || (!range)) {
-              json.availability.push({
-                "date": amElem.attr('data-date'),
-                "type": amElem.attr('data-status-type'),
-                "delimiter": amElem.attr('data-delimiter'),
-                "place": amElem.attr('data-range-place')
-              });
+              workingIndex = $.inArray(amElem.attr('data-status-type'), nextStatusType);
+              if (workingIndex !== -1 && amElem.attr('data-range-place') === 'end') {
+                json.availability[nextArrayIndex[workingIndex]] = {
+                  "date": amElem.attr('data-date'),
+                  "type": amElem.attr('data-status-type'),
+                  "delimiter": amElem.attr('data-delimiter'),
+                  "place": amElem.attr('data-range-place')
+                };
+                nextArrayIndex.splice([workingIndex], 1);
+                nextStatusType.splice([workingIndex], 1);
+              } else {
+                json.availability.push({
+                  "date": amElem.attr('data-date'),
+                  "type": amElem.attr('data-status-type'),
+                  "delimiter": amElem.attr('data-delimiter'),
+                  "place": amElem.attr('data-range-place')
+                });
+              }
+              if (amElem.attr('data-range-place') !== 'start-end' && amElem.attr('data-range-place') !== 'end') {
+                nextArrayIndex.push(json.availability.push(null) - 1);
+                nextStatusType.push(amElem.attr('data-status-type'));
+              }
             }
           }
           if ($.inArray(pmElem.attr('data-status-type'), states) !== -1) {
             if ((range && $.inArray(pmElem.attr('data-range-place'), ['start', 'end', 'start-end']) !== -1) || (!range)) {
-              return json.availability.push({
-                "date": pmElem.attr('data-date'),
-                "type": pmElem.attr('data-status-type'),
-                "delimiter": pmElem.attr('data-delimiter'),
-                "place": pmElem.attr('data-range-place')
-              });
+              workingIndex = $.inArray(pmElem.attr('data-status-type'), nextStatusType);
+              if (workingIndex !== -1 && pmElem.attr('data-range-place') === 'end') {
+                json.availability[nextArrayIndex[workingIndex]] = {
+                  "date": pmElem.attr('data-date'),
+                  "type": pmElem.attr('data-status-type'),
+                  "delimiter": pmElem.attr('data-delimiter'),
+                  "place": pmElem.attr('data-range-place')
+                };
+                nextArrayIndex.splice([workingIndex], 1);
+                nextStatusType.splice([workingIndex], 1);
+              } else {
+                json.availability.push({
+                  "date": pmElem.attr('data-date'),
+                  "type": pmElem.attr('data-status-type'),
+                  "delimiter": pmElem.attr('data-delimiter'),
+                  "place": pmElem.attr('data-range-place')
+                });
+              }
+              if (pmElem.attr('data-range-place') !== 'start-end' && pmElem.attr('data-range-place') !== 'end') {
+                nextArrayIndex.push(json.availability.push(null) - 1);
+                return nextStatusType.push(pmElem.attr('data-status-type'));
+              }
             }
           }
         });
@@ -306,127 +342,126 @@
       _setDates: function(that, pos) {
         var data, startPos, _this;
         _this = this;
-        switch (this.options.mode) {
-          case "datePicker":
-            data = {
-              elem: that,
-              date: $(that).attr("data-date") + pos,
-              parentElem: this.element,
-              inputElem: this.inputElem
-            };
-            return this._trigger("datePicked", 0, data);
-          default:
-            if (this._options.startDate && this._options.endDate) {
-              this._options.startDate = this._options.endDate = this._options.state = null;
-            }
-            if (this._options.startDate) {
-              this._options.endDate = $(that).attr("data-date") + pos;
-              this._trigger("endDateSet", 0, this._options.endDate);
-              startPos = _this._options.startDate.slice(10, 19);
-              if (this._compareDates(this._options.startDate, this._options.endDate, "<")) {
-                this.element.find("." + this.options.boxClass.fullDay).each(function() {
-                  var amChild, pmChild;
-                  amChild = $(this).find('.' + _this.options.boxClass.am);
-                  pmChild = $(this).find('.' + _this.options.boxClass.pm);
-                  if (_this._compareDates(_this._options.startDate, $(this).attr('data-date') + startPos, '==')) {
-                    if (startPos === "T00:00:00") {
-                      amChild.attr('data-range-place', 'start');
-                    } else {
-                      pmChild.attr('data-range-place', 'start');
-                    }
-                  } else if (_this._compareDates(_this._options.endDate, $(this).attr('data-date') + pos, '==')) {
-                    if (pos === "T00:00:00") {
-                      amChild.attr('data-range-place', 'end');
-                    } else {
-                      pmChild.attr('data-range-place', 'end');
-                    }
+        if (this.options.mode === "datePicker") {
+          data = {
+            elem: that,
+            date: $(that).attr("data-date") + pos,
+            parentElem: this.element,
+            inputElem: this.inputElem
+          };
+          return this._trigger("datePicked", 0, data);
+        } else {
+          if (this._options.startDate && this._options.endDate) {
+            this._options.startDate = this._options.endDate = this._options.state = null;
+          }
+          if (this._options.startDate) {
+            this._options.endDate = $(that).attr("data-date") + pos;
+            this._trigger("endDateSet", 0, this._options.endDate);
+            startPos = _this._options.startDate.slice(10, 19);
+            if (this._compareDates(this._options.startDate, this._options.endDate, "<")) {
+              this.element.find("." + this.options.boxClass.fullDay).each(function() {
+                var amChild, pmChild;
+                amChild = $(this).find('.' + _this.options.boxClass.am);
+                pmChild = $(this).find('.' + _this.options.boxClass.pm);
+                if (_this._compareDates(_this._options.startDate, $(this).attr('data-date') + startPos, '==')) {
+                  if (startPos === "T00:00:00") {
+                    amChild.attr('data-range-place', 'start');
+                  } else {
+                    pmChild.attr('data-range-place', 'start');
                   }
-                  if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T12:00:00", "<") && _this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T00:00:00", ">")) {
-                    if (_this._trackable(amChild)) {
-                      amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state);
-                    }
-                    if (_this._trackable(pmChild)) {
-                      return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state);
-                    }
-                  } else if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T12:00:00", "==")) {
-                    if (_this._trackable(pmChild)) {
-                      return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
-                    }
-                  } else if (_this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T00:00:00", "==")) {
-                    if (_this._trackable(amChild)) {
-                      return amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
-                    }
+                } else if (_this._compareDates(_this._options.endDate, $(this).attr('data-date') + pos, '==')) {
+                  if (pos === "T00:00:00") {
+                    amChild.attr('data-range-place', 'end');
+                  } else {
+                    pmChild.attr('data-range-place', 'end');
                   }
-                });
-                this._eraseHighlights();
-                return true;
-              } else if (this._compareDates(this._options.startDate, this._options.endDate, ">")) {
-                this.element.find("." + this.options.boxClass.fullDay).each(function() {
-                  var amChild, pmChild;
-                  amChild = $(this).find('.' + _this.options.boxClass.am);
-                  pmChild = $(this).find('.' + _this.options.boxClass.pm);
-                  if (_this._compareDates(_this._options.startDate, $(this).attr('data-date') + startPos, '==')) {
-                    if (startPos === "T00:00:00") {
-                      amChild.attr('data-range-place', 'end');
-                    } else {
-                      pmChild.attr('data-range-place', 'end');
-                    }
-                  } else if (_this._compareDates(_this._options.endDate, $(this).attr('data-date') + pos, '==')) {
-                    if (pos === "T00:00:00") {
-                      amChild.attr('data-range-place', 'start');
-                    } else {
-                      pmChild.attr('data-range-place', 'start');
-                    }
+                }
+                if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T12:00:00", "<") && _this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T00:00:00", ">")) {
+                  if (_this._trackable(amChild)) {
+                    amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state);
                   }
-                  if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", ">") && _this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T12:00:00", "<")) {
-                    if (_this._trackable(amChild)) {
-                      amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state);
-                    }
-                    if (_this._trackable(pmChild)) {
-                      return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state);
-                    }
-                  } else if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", "==")) {
-                    if (_this._trackable(amChild)) {
-                      return amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
-                    }
-                  } else if (_this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T12:00:00", "==")) {
-                    if (_this._trackable(pmChild)) {
-                      return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
-                    }
+                  if (_this._trackable(pmChild)) {
+                    return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state);
                   }
-                });
-                this._eraseHighlights();
-                return true;
-              } else {
-                this.element.find("." + this.options.boxClass.fullDay).each(function() {
-                  var amChild, pmChild;
-                  amChild = $(this).find('.' + _this.options.boxClass.am);
-                  pmChild = $(this).find('.' + _this.options.boxClass.pm);
-                  if (_this._compareDates(_this._options.startDate, $(this).attr('data-date') + startPos, '==')) {
-                    if (startPos === "T00:00:00") {
-                      amChild.attr('data-range-place', 'start-end');
-                    } else {
-                      pmChild.attr('data-range-place', 'start-end');
-                    }
+                } else if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T12:00:00", "==")) {
+                  if (_this._trackable(pmChild)) {
+                    return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
                   }
-                  if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", "==")) {
-                    if (_this._trackable(amChild)) {
-                      return amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
-                    }
-                  } else if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T12:00:00", "==")) {
-                    if (_this._trackable(pmChild)) {
-                      return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
-                    }
+                } else if (_this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T00:00:00", "==")) {
+                  if (_this._trackable(amChild)) {
+                    return amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
                   }
-                });
-                return true;
-              }
+                }
+              });
+              this._eraseHighlights();
+              return true;
+            } else if (this._compareDates(this._options.startDate, this._options.endDate, ">")) {
+              this.element.find("." + this.options.boxClass.fullDay).each(function() {
+                var amChild, pmChild;
+                amChild = $(this).find('.' + _this.options.boxClass.am);
+                pmChild = $(this).find('.' + _this.options.boxClass.pm);
+                if (_this._compareDates(_this._options.startDate, $(this).attr('data-date') + startPos, '==')) {
+                  if (startPos === "T00:00:00") {
+                    amChild.attr('data-range-place', 'end');
+                  } else {
+                    pmChild.attr('data-range-place', 'end');
+                  }
+                } else if (_this._compareDates(_this._options.endDate, $(this).attr('data-date') + pos, '==')) {
+                  if (pos === "T00:00:00") {
+                    amChild.attr('data-range-place', 'start');
+                  } else {
+                    pmChild.attr('data-range-place', 'start');
+                  }
+                }
+                if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", ">") && _this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T12:00:00", "<")) {
+                  if (_this._trackable(amChild)) {
+                    amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state);
+                  }
+                  if (_this._trackable(pmChild)) {
+                    return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state);
+                  }
+                } else if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", "==")) {
+                  if (_this._trackable(amChild)) {
+                    return amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
+                  }
+                } else if (_this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T12:00:00", "==")) {
+                  if (_this._trackable(pmChild)) {
+                    return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
+                  }
+                }
+              });
+              this._eraseHighlights();
+              return true;
             } else {
-              this._options.startDate = $(that).attr("data-date") + pos;
-              this._options.state = pos === "T00:00:00" ? _this._getReverseType($(that).find('.' + _this.options.boxClass.am)) : _this._getReverseType($(that).find('.' + _this.options.boxClass.pm));
-              this._trigger("startDateSet", 0, this._options.startDate);
-              return false;
+              this.element.find("." + this.options.boxClass.fullDay).each(function() {
+                var amChild, pmChild;
+                amChild = $(this).find('.' + _this.options.boxClass.am);
+                pmChild = $(this).find('.' + _this.options.boxClass.pm);
+                if (_this._compareDates(_this._options.startDate, $(this).attr('data-date') + startPos, '==')) {
+                  if (startPos === "T00:00:00") {
+                    amChild.attr('data-range-place', 'start-end');
+                  } else {
+                    pmChild.attr('data-range-place', 'start-end');
+                  }
+                }
+                if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", "==")) {
+                  if (_this._trackable(amChild)) {
+                    return amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
+                  }
+                } else if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T12:00:00", "==")) {
+                  if (_this._trackable(pmChild)) {
+                    return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
+                  }
+                }
+              });
+              return true;
             }
+          } else {
+            this._options.startDate = $(that).attr("data-date") + pos;
+            this._options.state = pos === "T00:00:00" ? _this._getReverseType($(that).find('.' + _this.options.boxClass.am)) : _this._getReverseType($(that).find('.' + _this.options.boxClass.pm));
+            this._trigger("startDateSet", 0, this._options.startDate);
+            return false;
+          }
         }
       },
       _getAllClasses: function(obj) {
@@ -733,26 +768,24 @@
       },
       _startup: function() {
         var _this = this;
-        switch (this.options.mode) {
-          case "datePicker":
-            this.inputElem = $(this.element[0]);
-            this.inputElem.after(this._getCalendar("<div class=\"bearcal-wrapper " + this.options.appendClass + "\">", "</div>")).next().hide();
-            this.element = this.inputElem.next('.bearcal-wrapper');
-            this.inputElem.on("focus", function() {
-              $('.bearcal-wrapper').fadeOut('fast');
-              _this._placePopup(_this.inputElem, _this.element);
-              return _this.element.fadeIn('fast');
-            });
-            $(document).off("click.a07").on("click.a07", function(event) {
-              if ($('.bearcal-wrapper').is(':visible')) {
-                if (($(event.target).attr('class') !== 'bearcal-wrapper') && ($(event.target).parents('.bearcal-wrapper').length === 0) && ($.inArray($(event.target).get(0), $.a07.BearCal.getDOMInstances()) < 0)) {
-                  return $('.bearcal-wrapper').fadeOut('fast');
-                }
+        if (this.options.mode === "datePicker") {
+          this.inputElem = $(this.element[0]);
+          this.inputElem.after(this._getCalendar("<div class=\"bearcal-wrapper " + this.options.appendClass + "\">", "</div>")).next().hide();
+          this.element = this.inputElem.next('.bearcal-wrapper');
+          this.inputElem.on("focus", function() {
+            $('.bearcal-wrapper').fadeOut('fast');
+            _this._placePopup(_this.inputElem, _this.element);
+            return _this.element.fadeIn('fast');
+          });
+          $(document).off("click.a07").on("click.a07", function(event) {
+            if ($('.bearcal-wrapper').is(':visible')) {
+              if (($(event.target).attr('class') !== 'bearcal-wrapper') && ($(event.target).parents('.bearcal-wrapper').length === 0) && ($.inArray($(event.target).get(0), $.a07.BearCal.getDOMInstances()) < 0)) {
+                return $('.bearcal-wrapper').fadeOut('fast');
               }
-            });
-            break;
-          default:
-            this.element.append(this._getCalendar());
+            }
+          });
+        } else {
+          this.element.append(this._getCalendar());
         }
         this.element.find('.prev_months').click(function() {
           _this._getPrevMonths(_this.options.monthScrollPeriod);
@@ -777,14 +810,63 @@
         $.a07.BearCal.instances.push(this.element);
         _this = this;
         this._options = $.extend(true, {}, this._options);
-        if (this.options.json) {
-          return $.getJSON(this.options.jsonUrl, function(data) {
-            $.extend(_this._options.loadedData, data);
+        if (this.options.json.enable) {
+          return $.getJSON(this.options.json.url, function(data) {
+            _this._prepareData(data);
             return _this._startup();
           });
         } else {
           return _this._startup();
         }
+      },
+      _prepareData: function(data) {
+        var date, day, endDate, startDate, tmp, _i, _len, _ref;
+        if (this.options.json.type === "range") {
+          tmp = {
+            availability: []
+          };
+          _ref = data.availability;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            day = _ref[_i];
+            if (day.place === "start" || day.place === "start-end") {
+              tmp.availability.push({
+                date: day.date,
+                delimiter: day.delimiter,
+                place: day.place,
+                type: day.type
+              });
+            } else if (day.place === "end") {
+              startDate = new Date(tmp.availability[tmp.availability.length - 1].date);
+              endDate = new Date(day.date);
+              while (endDate.getTime() > startDate.getTime()) {
+                startDate = new Date(startDate.getTime() + 43200000);
+                date = this._prepareDate(startDate);
+                tmp.availability.push({
+                  date: date,
+                  delimiter: "false",
+                  place: "",
+                  type: day.type
+                });
+              }
+              tmp.availability[tmp.availability.length - 1].delimiter = day.delimiter;
+              tmp.availability[tmp.availability.length - 1].place = day.place;
+            }
+          }
+          return $.extend(this._options.loadedData, tmp);
+        } else {
+          return $.extend(this._options.loadedData, data);
+        }
+      },
+      _prepareDate: function(date) {
+        var pad;
+        pad = function(n) {
+          if (n < 10) {
+            return "0" + n;
+          } else {
+            return n;
+          }
+        };
+        return date.getUTCFullYear() + "-" + pad(date.getUTCMonth() + 1) + "-" + pad(date.getUTCDate()) + "T" + pad(date.getUTCHours()) + ":" + pad(date.getUTCMinutes()) + ":" + pad(date.getUTCSeconds());
       },
       _init: function() {
         return this._setDate();

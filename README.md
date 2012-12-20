@@ -8,12 +8,20 @@
 Yes, too right, but this one is a bit different.
 
 * Half-day tracking functionality (AM/PM)
-* Interactive date range selection
+* 2 Built-in Calendar Modes
+    * Interactive date range selection
+    * Standard date picker
 * Next/Prev slide animation to view more months
+    * Vertical or horizontal
+* Popup calendar and placement
 * Reverse state highlighting (i.e: If a selection is available, the mouse hover & highlight will be the opposite: unavailable)
 * Do not track states (i.e: If a selection is a booking you might not want it to be overridden)
 * Prepopulate calendar with JSON
+    * By every half day
+    * By date range
 * Get current calendar state in JSON
+    * By every half day
+    * By date range
 * Highly customizeable
 * And more... I just don't feel like writting it all out just yet  
 
@@ -32,11 +40,15 @@ How many months to prepare initially
 **Default:** 12  
 `period : 12`
 
-#### scrollPeriod
-How many months to load/display each time next/prev is triggered  
+#### monthScrollPeriod
+How many months to load/display each time next/prev months is triggered  
 **Default:** 4  
-`scrollPeriod : 4`
+`monthScrollPeriod : 4`
 
+#### yearScrollPeriod
+How many months to load/display each time next/prev year is triggered  
+**Default:** 4  
+`yearScrollPeriod : 12`
 
 #### monthFullName
 Array of month names to use  
@@ -59,22 +71,23 @@ Name of the class to apply after *nthMonth*
 `nthMonthClass : "endrow"`
 
 #### animateSpeed
-Animate speed for the prev/next months action  
+Animate speed for the prev/next action  
 **Default:** 500ms  
 `animateSpeed : 500`
 
-#### nextMonthsHtml
-HTML for the next months DOM element  
+#### nextPeriodHtml
+HTML for the next period DOM elements  
 **Default:** A function returning an anchor element and *scrollPeriod* details  
-`nextMonthsHtml : function() { return "<a href=\"#\" class=\"next_months\">Next #{this.scrollPeriod} months</a>" }`
+`nextMonthsHtml : function() { return "<a href=\"#\" class=\"next_months\">Next #{@monthScrollPeriod} months</a><a href=\"#\" class=\"next_year\">Next #{@yearScrollPeriod} months</a>" }`
 
-#### prevMonthsHtml
-HTML for the previous months DOM element  
+#### prevPeriodHtml
+HTML for the previous period DOM elements  
 **Default:** A function returning an anchor element and *scrollPeriod* details  
-`prevMonthsHtml : function() { return "<a href=\"#\" class=\"prev_months\">Previous #{this.scrollPeriod} months</a>" }`
+`prevMonthsHtml : function() { return "<a href=\"#\" class=\"prev_year\">Previous #{@yearScrollPeriod} months</a><a href=\"#\" class=\"prev_months\">Previous #{@monthScrollPeriod} months</a>" }`
 
 #### boxClass
 Object literal containing the classes to apply to the wrapper div of a single day and child divs: AM and PM
+**Default:**   
 
     boxClass: {
       am: "am_box",
@@ -94,6 +107,7 @@ The default status that is applied to the AM and PM div data-status-type attribu
 
 #### reverseTypes
 Object literal containing the reverse/opposite states. This is used to apply the right class when you're hovering over an element. I.e: If you hover over a period that is set to available, it'll know to apply the unavailable state.
+**Default:**   
 
     reverseTypes: {
       available: "unavailable",
@@ -102,6 +116,7 @@ Object literal containing the reverse/opposite states. This is used to apply the
 
 #### hoverStates
 Object literal containing which class to apply on a per period and per state basis when the mouse is only hovering.
+**Default:**   
 
     hoverStates: {
       am: {
@@ -116,6 +131,7 @@ Object literal containing which class to apply on a per period and per state bas
 
 #### highlightStates
 Object literal containing which class to apply on a per period and per state basis when we're highlighting a date span
+**Default:**   
 
     highlightStates: {
       am: {
@@ -130,6 +146,7 @@ Object literal containing which class to apply on a per period and per state bas
 
 #### setStates
 Object literal containing which class to apply on a per period and per state basis when we're saving a date span selection
+**Default:**   
 
     setStates: {
       am: {
@@ -147,14 +164,14 @@ Object literal containing which class to apply on a per period and per state bas
     }
 
 #### json
-Boolean whether we're preloading data into the calendar using JSON  
-**Default:** false  
-`json : false`
+Object literal containing whether we should load data from JSON and how
+**Default:**   
 
-#### jsonUrl
-URL to json data to use for preloading the calendar  
-**Default:** ""  
-`jsonUrl : ""`
+    json: {
+      enable: false,
+      type: "all", //"all" or "range"
+      url: ""
+    }
 
 #### dontTrackStates
 Which states not to track. I.e: You may want to remove the ability to override DOM elements set to "booked"  
@@ -164,6 +181,16 @@ Which states not to track. I.e: You may want to remove the ability to override D
 ### Events
 #### beforebuild
 Triggers before the calendar gets generated
+
+#### datePicked
+Triggers when a date is picked (datePicker mode)
+
+#### startDateSet
+Trigger when an start date is set (Interactive mode)
+
+#### endDateSet
+Trigger when an end date is set (Interactive mode)
+
 
 ## Usage
 Create a DOM element to attach the plugin to:
