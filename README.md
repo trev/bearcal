@@ -1,5 +1,9 @@
 # BearCal
-![This is the Bear Dog](http://a07.com.au/github/bear-hair.jpg)
+![This is the Bear Dog](http://bearcal.a07.com.au/img/screenshot.jpg)
+
+## Demo
+'cause reading comes later
+[BearCal demo](http//bearcal.a07.com.au)
 
 ## Description
 *BearCal* is a jQuery Widget Factory plugin that produces an interactive calendar.
