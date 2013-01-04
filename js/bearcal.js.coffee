@@ -86,6 +86,38 @@
 
       JSON.stringify(json, null, '\t')
 
+    # Set dates on an already loaded calendar
+    # dates takes an the availability object which contains an array of halfdays
+    # range indicates whether halfday objects are provide in a range format
+    setLiveDates : (dates, range = false) ->
+      _this = @
+
+      # Prepare dates if it's in range format
+      if range is true
+        dates = @_prepareRange(dates)
+
+      $.each dates.availability, (index, value) ->
+
+        # Add the halfday to the loadedData object array
+        _this._options.loadedData.availability.push(value)
+
+        # Check to see if that specific halfday is already loaded to the DOM
+        matchedElement = _this.element.find("." + _this.options.boxClass.fullDay + " div[data-date='" + value.date + "']")
+
+        # If the array isn't empty, we have a successful match
+        if matchedElement.length is 1
+          # Store the time of day (am or pm)
+          tod = if value.date.slice(10,19) is "T00:00:00" then "am" else "pm"
+
+          # Update data attributes
+          matchedElement.attr
+            dataStatusType: value.type
+            dataDelimiter: value.delimiter
+            dataPlace: value.place
+
+          # Update classes
+          matchedElement.addClass(_this.options.setStates[tod][value.type] + " " + if value.delimiter is "true" then _this.options.setStates[tod].delimiter else "")
+
     # Get current calendar in JSON format filtered by states(array) and optional range grouping
     getJSONByStates : (states, range = false) ->
       _this = @
@@ -878,43 +910,47 @@
       # Check to see if we should load some JSON data
       if @options.json.enable
         $.getJSON @options.json.url, (data) ->
-          _this._prepareData(data)
+
+          # Check to see if the data needs to be prepared
+          if _this.options.json.type is "range"
+            data = _this._prepareRange(data)
+
+          $.extend(_this._options.loadedData, data)
+
           _this._startup() #This needs to be here, in the successful callback since it's asynchronous
       else
         _this._startup()
 
-    _prepareData: (data) ->
-      if @options.json.type is "range"
-        tmp = { availability: [] }
-        
-        for day in data.availability
-          if day.place is "start" or day.place is "start-end"
+    # Take a date range an explode it into a halfday by halfday 
+    _prepareRange: (data) ->
+      tmp = { availability: [] }
+      
+      for day in data.availability
+        if day.place is "start" or day.place is "start-end"
+          tmp.availability.push({
+            date      : day.date
+            delimiter : day.delimiter
+            place     : day.place
+            type      : day.type
+          })
+        else if day.place is "end"
+          startDate = new Date (tmp.availability[tmp.availability.length-1].date)
+          endDate = new Date (day.date)
+
+          while endDate.getTime() > startDate.getTime()
+            startDate = new Date(startDate.getTime() + 43200000)
+            date = @_prepareDate(startDate)
             tmp.availability.push({
-              date      : day.date
-              delimiter : day.delimiter
-              place     : day.place
+              date      : date
+              delimiter : "false"
+              place     : ""
               type      : day.type
             })
-          else if day.place is "end"
-            startDate = new Date (tmp.availability[tmp.availability.length-1].date)
-            endDate = new Date (day.date)
 
-            while endDate.getTime() > startDate.getTime()
-              startDate = new Date(startDate.getTime() + 43200000)
-              date = @_prepareDate(startDate)
-              tmp.availability.push({
-                date      : date
-                delimiter : "false"
-                place     : ""
-                type      : day.type
-              })
+          tmp.availability[tmp.availability.length-1].delimiter = day.delimiter
+          tmp.availability[tmp.availability.length-1].place = day.place
 
-            tmp.availability[tmp.availability.length-1].delimiter = day.delimiter
-            tmp.availability[tmp.availability.length-1].place = day.place
-
-        $.extend(@_options.loadedData, tmp)
-      else
-        $.extend(@_options.loadedData, data)
+      tmp # Return prepared range
 
     # Convert date object to our date string standard
     _prepareDate: (date) ->

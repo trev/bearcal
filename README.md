@@ -189,11 +189,33 @@ Returns the current calendar start in JSON format. Each half day of the currentl
 #### getJSONByStates(states, range=false)
 Accepts 2 arguments: 
 `states` must be of type Array containing strings matching the states you want to get 
-`range` is an optional argument. If set to true, getJSONbyStates will return the start and end of each range ignoring the inbetween dates. 
+`range` is an optional boolean. If set to true, getJSONbyStates will return the start and end of each range ignoring the inbetween dates. 
  
 From the console (will return the unavailable and booked states grouped by date range): 
 
     $('.bearcal').data('BearCal').getJSONByStates(['unavailable', 'booked'], true);
+
+#### setLiveDates(dates, range=false)
+Accepts 2 arguments:  
+`dates` is an object as defined below  
+`range` is an optional boolean. If set to true, BearCal will take the dates object and parse it looking for ranges  
+  
+`dates` object format is:  
+
+    dates = {
+      availability: [{
+        date: "yyyy-mm-ddTxx:xx:xx",
+        delimiter: "false",
+        place: "start",
+        type: "unavailable"
+      }, {
+        ...
+      }]
+    }
+  
+Example setting a date range from console:  
+
+    $('.bearcal').data('BearCal').setLiveDates({availability: [{date: "2015-05-01T00:00:00", delimiter: "false", place: "start", type: "unavailable"}, {date: "2015-05-10T00:00:00", delimiter: "true", place: "end", type: "unavailable"}]}, true);
 
 ### Events
 #### beforebuild

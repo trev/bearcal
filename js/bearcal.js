@@ -106,6 +106,30 @@
         });
         return JSON.stringify(json, null, '\t');
       },
+      setLiveDates: function(dates, range) {
+        var _this;
+        if (range == null) {
+          range = false;
+        }
+        _this = this;
+        if (range === true) {
+          dates = this._prepareRange(dates);
+        }
+        return $.each(dates.availability, function(index, value) {
+          var matchedElement, tod;
+          _this._options.loadedData.availability.push(value);
+          matchedElement = _this.element.find("." + _this.options.boxClass.fullDay + " div[data-date='" + value.date + "']");
+          if (matchedElement.length === 1) {
+            tod = value.date.slice(10, 19) === "T00:00:00" ? "am" : "pm";
+            matchedElement.attr({
+              dataStatusType: value.type,
+              dataDelimiter: value.delimiter,
+              dataPlace: value.place
+            });
+            return matchedElement.addClass(_this.options.setStates[tod][value.type] + " " + (value.delimiter === "true" ? _this.options.setStates[tod].delimiter : ""));
+          }
+        });
+      },
       getJSONByStates: function(states, range) {
         var json, nextArrayIndex, nextStatusType, _this;
         if (range == null) {
@@ -812,50 +836,49 @@
         this._options = $.extend(true, {}, this._options);
         if (this.options.json.enable) {
           return $.getJSON(this.options.json.url, function(data) {
-            _this._prepareData(data);
+            if (_this.options.json.type === "range") {
+              data = _this._prepareRange(data);
+            }
+            $.extend(_this._options.loadedData, data);
             return _this._startup();
           });
         } else {
           return _this._startup();
         }
       },
-      _prepareData: function(data) {
+      _prepareRange: function(data) {
         var date, day, endDate, startDate, tmp, _i, _len, _ref;
-        if (this.options.json.type === "range") {
-          tmp = {
-            availability: []
-          };
-          _ref = data.availability;
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            day = _ref[_i];
-            if (day.place === "start" || day.place === "start-end") {
+        tmp = {
+          availability: []
+        };
+        _ref = data.availability;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          day = _ref[_i];
+          if (day.place === "start" || day.place === "start-end") {
+            tmp.availability.push({
+              date: day.date,
+              delimiter: day.delimiter,
+              place: day.place,
+              type: day.type
+            });
+          } else if (day.place === "end") {
+            startDate = new Date(tmp.availability[tmp.availability.length - 1].date);
+            endDate = new Date(day.date);
+            while (endDate.getTime() > startDate.getTime()) {
+              startDate = new Date(startDate.getTime() + 43200000);
+              date = this._prepareDate(startDate);
               tmp.availability.push({
-                date: day.date,
-                delimiter: day.delimiter,
-                place: day.place,
+                date: date,
+                delimiter: "false",
+                place: "",
                 type: day.type
               });
-            } else if (day.place === "end") {
-              startDate = new Date(tmp.availability[tmp.availability.length - 1].date);
-              endDate = new Date(day.date);
-              while (endDate.getTime() > startDate.getTime()) {
-                startDate = new Date(startDate.getTime() + 43200000);
-                date = this._prepareDate(startDate);
-                tmp.availability.push({
-                  date: date,
-                  delimiter: "false",
-                  place: "",
-                  type: day.type
-                });
-              }
-              tmp.availability[tmp.availability.length - 1].delimiter = day.delimiter;
-              tmp.availability[tmp.availability.length - 1].place = day.place;
             }
+            tmp.availability[tmp.availability.length - 1].delimiter = day.delimiter;
+            tmp.availability[tmp.availability.length - 1].place = day.place;
           }
-          return $.extend(this._options.loadedData, tmp);
-        } else {
-          return $.extend(this._options.loadedData, data);
         }
+        return tmp;
       },
       _prepareDate: function(date) {
         var pad;
