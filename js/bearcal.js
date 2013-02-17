@@ -1145,6 +1145,17 @@
           return _this._startup();
         }
       },
+      _UTCify: function(date) {
+        var day, hour, min, month, sec, year;
+        year = date.slice(0, 4);
+        month = date.slice(5, 7);
+        month--;
+        day = date.slice(8, 10);
+        hour = date.slice(11, 13);
+        min = date.slice(14, 16);
+        sec = date.slice(17, 19);
+        return Date.UTC(year, month, day, hour, min, sec);
+      },
       _prepareRange: function(data) {
         var date, day, endDate, startDate, tmp, _i, _len, _ref;
         tmp = {
@@ -1161,8 +1172,8 @@
               type: day.type
             });
           } else if (day.place === "end") {
-            startDate = new Date(tmp.availability[tmp.availability.length - 1].date);
-            endDate = new Date(day.date);
+            startDate = new Date(this._UTCify(tmp.availability[tmp.availability.length - 1].date));
+            endDate = new Date(this._UTCify(day.date));
             while (endDate.getTime() > startDate.getTime()) {
               startDate = new Date(startDate.getTime() + 43200000);
               date = this._prepareDate(startDate);

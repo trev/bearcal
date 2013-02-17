@@ -1228,6 +1228,17 @@
       else
         _this._startup()
 
+    _UTCify : (date) ->
+      year = date.slice(0,4)
+      month = date.slice(5,7)
+      month--
+      day = date.slice(8,10)
+      hour = date.slice(11,13)
+      min = date.slice(14,16)
+      sec = date.slice(17,19)
+
+      Date.UTC(year, month, day, hour, min, sec)
+
     # Take a date range an explode it into a halfday by halfday 
     _prepareRange: (data) ->
       tmp = { availability: [] }
@@ -1241,11 +1252,11 @@
             type      : day.type
           })
         else if day.place is "end"
-          startDate = new Date (tmp.availability[tmp.availability.length-1].date)
-          endDate = new Date (day.date)
+          startDate = new Date ( @_UTCify(tmp.availability[tmp.availability.length-1].date) )
+          endDate = new Date ( @_UTCify(day.date) )
 
           while endDate.getTime() > startDate.getTime()
-            startDate = new Date(startDate.getTime() + 43200000)
+            startDate = new Date( startDate.getTime() + 43200000)
             date = @_prepareDate(startDate)
             tmp.availability.push({
               date      : date
