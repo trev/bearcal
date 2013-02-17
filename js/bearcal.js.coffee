@@ -144,7 +144,7 @@
       while @element.find('.'+@options.boxClass.fullDay+' .'+@options.boxClass.am).eq(0).attr('data-range-place') is 'in-between'
         @_loadPrevMonths(@options.monthScrollPeriod)
 
-      while @element.find('.'+@options.boxClass.fullDay+' .'+@options.boxClass.am).reverse().eq(0).attr('data-range-place') is 'in-between'
+      while @element.find('.'+@options.boxClass.fullDay+' .'+@options.boxClass.pm).reverse().eq(0).attr('data-range-place') is 'in-between'
         @_loadNextMonths(@options.monthScrollPeriod)
 
       @element.find('.'+@options.boxClass.fullDay).each () ->
@@ -1060,7 +1060,7 @@
           rowheight = @element.find('.month_box').outerHeight(true)
           rows = (period / @options.monthScrollPeriod)
           
-          date = @_splitDate(0, @_options.displayedMonths)
+          date = @_splitDate(0, @_options.loadedMonths)
           html = @_getMonthsByPeriod(date[0],date[1],-period, false)
           if html.length > 0
             @element.find('.slider_container')
@@ -1071,22 +1071,35 @@
           colwidth = @element.find('.month_box').outerWidth(true)
           cols = (period / @options.monthScrollPeriod)
           
-          date = @_splitDate(0, @_options.displayedMonths)
+          date = @_splitDate(0, @_options.loadedMonths)
           html = @_getMonthsByPeriod(date[0],date[1],-period, false)
           if html.length > 0
             @element.find('.slider_container')
                     .prepend(html)
                     .css("marginLeft" : -(colwidth * cols)+"px")
 
+    _getBiggestDate : (array) ->
+      transformed = []
+      for date in array
+        date = date.split('-')
+        transformed.push( new Date( Date.UTC(date[0], date[1]) ).getTime() )
+      
+      result = Math.max.apply( Math, transformed )
+      new Date(result).getUTCFullYear() + "-" + new Date(result).getUTCMonth()
+
     # Load next months into DOM
     _loadNextMonths: (period) ->
       switch @options.scrollDirection
         when "vertical"
-          date = @_splitDate(@_options.displayedMonths.length-1, @_options.displayedMonths)
+          # get largest date
+          date = @_splitDate(0, [@_getBiggestDate(@_options.loadedMonths)])
+
           @element.find('.slider_container')
                   .append(@_getMonthsByPeriod(date[0],date[1],period, false))
         else
-          date = @_splitDate(@_options.displayedMonths.length-1, @_options.displayedMonths)
+
+          # get largest date
+          date = @_splitDate(0, [@_getBiggestDate(@_options.loadedMonths)])
           @element.find('.slider_container')
                   .append(@_getMonthsByPeriod(date[0],date[1],period, false))
 
