@@ -139,6 +139,14 @@
       nextArrayIndex = []
 
       json = { "availability" : [] }
+
+      # Make sure we have complete ranges
+      while @element.find('.'+@options.boxClass.fullDay+' .'+@options.boxClass.am).eq(0).attr('data-range-place') is 'in-between'
+        @_loadPrevMonths(@options.monthScrollPeriod)
+
+      while @element.find('.'+@options.boxClass.fullDay+' .'+@options.boxClass.am).reverse().eq(0).attr('data-range-place') is 'in-between'
+        @_loadNextMonths(@options.monthScrollPeriod)
+
       @element.find('.'+@options.boxClass.fullDay).each () ->
         amElem = $(@).find('.'+_this.options.boxClass.am)
         pmElem = $(@).find('.'+_this.options.boxClass.pm)
@@ -401,6 +409,7 @@
 
       # Scenario: The start date DOM object currently has no data-range-place applied to it
       if domElement.attr('data-range-place') is ''
+
         domElement.attr('data-range-place', defaultPlace)
         # These are overwrite tokens, so we don't overwrite the data-range-place on the day we just set
         # when we go through the logic on whether to apply 'in-betewen' states below
@@ -1009,7 +1018,7 @@
 
       calendarhtml
 
-    _getMonthsByPeriod: (year, month, period) -> 
+    _getMonthsByPeriod: (year, month, period, display = true) -> 
       movement = if period < 0 then -1 else 1
       i = Math.abs(period)
       results = []
@@ -1031,7 +1040,7 @@
       for result in results
         date = result.split("-")
         html += @_getMonth(date[0], date[1]) if ~$.inArray(result, @_options.loadedMonths) is 0
-        @_setDisplayedMonths(date[0], date[1], movement)
+        @_setDisplayedMonths(date[0], date[1], movement) if display
 
       html
 
@@ -1042,6 +1051,44 @@
         date[i] = parseInt(date[i])
         i++
       date
+
+    # Load previous months into the DOM
+    _loadPrevMonths: (period) ->
+      switch @options.scrollDirection
+        when "vertical"
+          currentpos = @_parseMargin(@element.find('.slider_container').css('marginTop'))
+          rowheight = @element.find('.month_box').outerHeight(true)
+          rows = (period / @options.monthScrollPeriod)
+          
+          date = @_splitDate(0, @_options.displayedMonths)
+          html = @_getMonthsByPeriod(date[0],date[1],-period, false)
+          if html.length > 0
+            @element.find('.slider_container')
+                    .prepend(html)
+                    .css("marginTop" : -(rowheight * rows)+"px")
+        else
+          currentpos = @_parseMargin(@element.find('.slider_container').css('marginLeft'))
+          colwidth = @element.find('.month_box').outerWidth(true)
+          cols = (period / @options.monthScrollPeriod)
+          
+          date = @_splitDate(0, @_options.displayedMonths)
+          html = @_getMonthsByPeriod(date[0],date[1],-period, false)
+          if html.length > 0
+            @element.find('.slider_container')
+                    .prepend(html)
+                    .css("marginLeft" : -(colwidth * cols)+"px")
+
+    # Load next months into DOM
+    _loadNextMonths: (period) ->
+      switch @options.scrollDirection
+        when "vertical"
+          date = @_splitDate(@_options.displayedMonths.length-1, @_options.displayedMonths)
+          @element.find('.slider_container')
+                  .append(@_getMonthsByPeriod(date[0],date[1],period, false))
+        else
+          date = @_splitDate(@_options.displayedMonths.length-1, @_options.displayedMonths)
+          @element.find('.slider_container')
+                  .append(@_getMonthsByPeriod(date[0],date[1],period, false))
 
     # Gets previous months and adjusts the view accordingly
     _getPrevMonths: (period) ->
