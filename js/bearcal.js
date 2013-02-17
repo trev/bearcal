@@ -130,6 +130,16 @@
           }
         });
       },
+      _getLastIndex: function(arr, needle) {
+        var idx, indices;
+        idx = $.inArray(needle, arr);
+        indices = [];
+        while (idx !== -1) {
+          indices.push(idx);
+          idx = $.inArray(needle, arr, idx + 1);
+        }
+        return indices[indices.length - 1];
+      },
       getJSONByStates: function(states, range) {
         var json, nextArrayIndex, nextStatusType, _this;
         if (range == null) {
@@ -142,21 +152,23 @@
           "availability": []
         };
         this.element.find('.' + this.options.boxClass.fullDay).each(function() {
-          var amElem, pmElem, workingIndex;
+          var amElem, lastIndex, pmElem, pushPosition, workingIndex;
           amElem = $(this).find('.' + _this.options.boxClass.am);
           pmElem = $(this).find('.' + _this.options.boxClass.pm);
           if ($.inArray(amElem.attr('data-status-type'), states) !== -1) {
             if ((range && $.inArray(amElem.attr('data-range-place'), ['start', 'end', 'start-end']) !== -1) || (!range)) {
               workingIndex = $.inArray(amElem.attr('data-status-type'), nextStatusType);
               if (workingIndex !== -1 && amElem.attr('data-range-place') === 'end') {
-                json.availability[nextArrayIndex[workingIndex]] = {
+                lastIndex = _this._getLastIndex(nextStatusType, amElem.attr('data-status-type'));
+                pushPosition = nextArrayIndex[lastIndex];
+                json.availability[pushPosition] = {
                   "date": amElem.attr('data-date'),
                   "type": amElem.attr('data-status-type'),
                   "delimiter": amElem.attr('data-delimiter'),
                   "place": amElem.attr('data-range-place')
                 };
-                nextArrayIndex.splice([workingIndex], 1);
-                nextStatusType.splice([workingIndex], 1);
+                nextArrayIndex.splice(lastIndex, 1);
+                nextStatusType.splice(lastIndex, 1);
               } else {
                 json.availability.push({
                   "date": amElem.attr('data-date'),
@@ -175,14 +187,16 @@
             if ((range && $.inArray(pmElem.attr('data-range-place'), ['start', 'end', 'start-end']) !== -1) || (!range)) {
               workingIndex = $.inArray(pmElem.attr('data-status-type'), nextStatusType);
               if (workingIndex !== -1 && pmElem.attr('data-range-place') === 'end') {
-                json.availability[nextArrayIndex[workingIndex]] = {
+                lastIndex = _this._getLastIndex(nextStatusType, pmElem.attr('data-status-type'));
+                pushPosition = nextArrayIndex[lastIndex];
+                json.availability[pushPosition] = {
                   "date": pmElem.attr('data-date'),
                   "type": pmElem.attr('data-status-type'),
                   "delimiter": pmElem.attr('data-delimiter'),
                   "place": pmElem.attr('data-range-place')
                 };
-                nextArrayIndex.splice([workingIndex], 1);
-                nextStatusType.splice([workingIndex], 1);
+                nextArrayIndex.splice(lastIndex, 1);
+                nextStatusType.splice(lastIndex, 1);
               } else {
                 json.availability.push({
                   "date": pmElem.attr('data-date'),
@@ -363,6 +377,189 @@
           }
         });
       },
+      _startRangeLogic: function(domElement, defaultPlace) {
+        var oToken, prevDate;
+        if (defaultPlace == null) {
+          defaultPlace = 'start';
+        }
+        oToken = false;
+        prevDate = this._getPrevDateDOMObj(domElement.attr('data-date'));
+        if (domElement.attr('data-range-place') === '') {
+          domElement.attr('data-range-place', defaultPlace);
+          oToken = true;
+        }
+        if (this._options.state === domElement.attr('data-status-type')) {
+          domElement.attr('data-range-place', 'in-between');
+        } else {
+          if (domElement.attr('data-range-place') === 'in-between') {
+            if (prevDate.attr('data-range-place') === 'in-between') {
+              prevDate.attr('data-range-place', 'end');
+            }
+            if (prevDate.attr('data-range-place') === 'start') {
+              prevDate.attr('data-range-place', 'start-end');
+            }
+            if (prevDate.attr('data-status-type') === 'booked') {
+              this._spreadRangeLogic(domElement, 'reverse');
+            }
+          }
+        }
+        if (this._options.state === this.options.defaultStatusType) {
+          domElement.attr('data-range-place', '');
+        }
+        return oToken;
+      },
+      _endRangeLogic: function(domElement, defaultPlace) {
+        var nextDate, oToken;
+        if (defaultPlace == null) {
+          defaultPlace = 'end';
+        }
+        oToken = false;
+        nextDate = this._getNextDateDOMObj(domElement.attr('data-date'));
+        if (domElement.attr('data-range-place') === '') {
+          domElement.attr('data-range-place', defaultPlace);
+          oToken = true;
+        }
+        if (this._options.state === domElement.attr('data-status-type')) {
+          domElement.attr('data-range-place', 'in-between');
+        } else {
+          if (domElement.attr('data-range-place') === 'in-between') {
+            if (nextDate.attr('data-range-place') === 'in-between') {
+              nextDate.attr('data-range-place', 'start');
+            }
+            if (nextDate.attr('data-range-place') === 'end') {
+              nextDate.attr('data-range-place', 'start-end');
+            }
+            if (nextDate.attr('data-status-type') === 'booked') {
+              this._spreadRangeLogic(domElement);
+            }
+          }
+        }
+        if (this._options.state === this.options.defaultStatusType) {
+          domElement.attr('data-range-place', '');
+        }
+        return oToken;
+      },
+      _startEndRangeLogic: function(domElement, defaultPlace) {
+        var nextDate, oToken, prevDate, _this;
+        if (defaultPlace == null) {
+          defaultPlace = 'start-end';
+        }
+        oToken = false;
+        _this = this;
+        nextDate = this._getNextDateDOMObj(domElement.attr('data-date'));
+        prevDate = this._getPrevDateDOMObj(domElement.attr('data-date'));
+        if (domElement.attr('data-range-place') === '') {
+          domElement.attr('data-range-place', defaultPlace);
+          oToken = true;
+        } else {
+          if (domElement.attr('data-range-place') === 'start') {
+            if (nextDate.attr('data-range-place') === 'in-between') {
+              nextDate.attr('data-range-place', 'start');
+            }
+            if (nextDate.attr('data-range-place') === 'end') {
+              nextDate.attr('data-range-place', 'start-end');
+            }
+            if (nextDate.attr('data-status-type') === 'booked') {
+              this._spreadRangeLogic(domElement);
+            }
+          }
+          if (domElement.attr('data-range-place') === 'in-between') {
+            if (nextDate.attr('data-range-place') === 'in-between') {
+              nextDate.attr('data-range-place', 'start');
+            }
+            if (nextDate.attr('data-range-place') === 'end') {
+              nextDate.attr('data-range-place', 'start-end');
+            }
+            if (nextDate.attr('data-status-type') === 'booked') {
+              this._spreadRangeLogic(domElement);
+            }
+            if (prevDate.attr('data-range-place') === 'in-between') {
+              prevDate.attr('data-range-place', 'end');
+            }
+            if (prevDate.attr('data-range-place') === 'start') {
+              prevDate.attr('data-range-place', 'start-end');
+            }
+            if (prevDate.attr('data-status-type') === 'booked') {
+              this._spreadRangeLogic(domElement, 'reverse');
+            }
+          }
+          if (domElement.attr('data-range-place') === 'end') {
+            if (prevDate.attr('data-range-place') === 'in-between') {
+              prevDate.attr('data-range-place', 'end');
+            }
+            if (prevDate.attr('data-range-place') === 'start') {
+              prevDate.attr('data-range-place', 'start-end');
+            }
+            if (prevDate.attr('data-status-type') === 'booked') {
+              this._spreadRangeLogic(domElement, 'reverse');
+            }
+          }
+          if (this._options.state === this.options.defaultStatusType) {
+            domElement.attr('data-range-place', '');
+          }
+        }
+        return oToken;
+      },
+      _spreadRangeLogic: function(domElement, direction) {
+        var domElementDate, domElementType, found, _this;
+        if (direction == null) {
+          direction = "forward";
+        }
+        _this = this;
+        domElementDate = domElement.attr('data-date');
+        domElementType = domElement.attr('data-status-type');
+        found = false;
+        if (direction === 'forward') {
+          this.element.find("." + this.options.boxClass.fullDay).each(function() {
+            var amChild, pmChild;
+            amChild = $(this).find('.' + _this.options.boxClass.am);
+            pmChild = $(this).find('.' + _this.options.boxClass.pm);
+            if ((_this._compareDates(amChild.attr('data-date'), domElementDate, '>')) && (amChild.attr('data-status-type') === domElementType) && (found !== true)) {
+              if (amChild.attr('data-range-place') === 'in-between') {
+                amChild.attr('data-range-place', 'start');
+              }
+              if (amChild.attr('data-range-place') === 'end') {
+                amChild.attr('data-range-place', 'start-end');
+              }
+              found = true;
+            }
+            if ((_this._compareDates(pmChild.attr('data-date'), domElementDate, '>')) && (pmChild.attr('data-status-type') === domElementType) && (found !== true)) {
+              if (pmChild.attr('data-range-place') === 'in-between') {
+                pmChild.attr('data-range-place', 'start');
+              }
+              if (pmChild.attr('data-range-place') === 'end') {
+                pmChild.attr('data-range-place', 'start-end');
+              }
+              return found = true;
+            }
+          });
+        }
+        if (direction === 'reverse') {
+          return this.element.find("." + this.options.boxClass.fullDay).reverse().each(function() {
+            var amChild, pmChild;
+            amChild = $(this).find('.' + _this.options.boxClass.am);
+            pmChild = $(this).find('.' + _this.options.boxClass.pm);
+            if ((_this._compareDates(pmChild.attr('data-date'), domElementDate, '<')) && (pmChild.attr('data-status-type') === domElementType) && (found !== true)) {
+              if (pmChild.attr('data-range-place') === 'in-between') {
+                pmChild.attr('data-range-place', 'end');
+              }
+              if (pmChild.attr('data-range-place') === 'start') {
+                pmChild.attr('data-range-place', 'start-end');
+              }
+              found = true;
+            }
+            if ((_this._compareDates(amChild.attr('data-date'), domElementDate, '<')) && (amChild.attr('data-status-type') === domElementType) && (found !== true)) {
+              if (amChild.attr('data-range-place') === 'in-between') {
+                amChild.attr('data-range-place', 'end');
+              }
+              if (amChild.attr('data-range-place') === 'start') {
+                amChild.attr('data-range-place', 'start-end');
+              }
+              return found = true;
+            }
+          });
+        }
+      },
       _setDates: function(that, pos) {
         var data, startPos, _this;
         _this = this;
@@ -384,36 +581,63 @@
             startPos = _this._options.startDate.slice(10, 19);
             if (this._compareDates(this._options.startDate, this._options.endDate, "<")) {
               this.element.find("." + this.options.boxClass.fullDay).each(function() {
-                var amChild, pmChild;
+                var amChild, amOToken, pmChild, pmOToken;
                 amChild = $(this).find('.' + _this.options.boxClass.am);
                 pmChild = $(this).find('.' + _this.options.boxClass.pm);
                 if (_this._compareDates(_this._options.startDate, $(this).attr('data-date') + startPos, '==')) {
                   if (startPos === "T00:00:00") {
-                    amChild.attr('data-range-place', 'start');
+                    amOToken = _this._startRangeLogic(amChild);
                   } else {
-                    pmChild.attr('data-range-place', 'start');
+                    pmOToken = _this._startRangeLogic(pmChild);
                   }
-                } else if (_this._compareDates(_this._options.endDate, $(this).attr('data-date') + pos, '==')) {
+                }
+                if (_this._compareDates(_this._options.endDate, $(this).attr('data-date') + pos, '==')) {
                   if (pos === "T00:00:00") {
-                    amChild.attr('data-range-place', 'end');
+                    amOToken = _this._endRangeLogic(amChild);
                   } else {
-                    pmChild.attr('data-range-place', 'end');
+                    pmOToken = _this._endRangeLogic(pmChild);
                   }
                 }
                 if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T12:00:00", "<") && _this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T00:00:00", ">")) {
                   if (_this._trackable(amChild)) {
-                    amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state);
+                    amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am[_this._options.state]).attr({
+                      'data-status-type': _this._options.state,
+                      'data-delimiter': "false"
+                    });
+                    if (_this._options.state === _this.options.defaultStatusType) {
+                      amChild.attr('data-range-place', '');
+                    } else {
+                      if (!amOToken) {
+                        amChild.attr('data-range-place', 'in-between');
+                      }
+                    }
                   }
                   if (_this._trackable(pmChild)) {
-                    return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state);
+                    pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm[_this._options.state]).attr({
+                      'data-status-type': _this._options.state,
+                      'data-delimiter': "false"
+                    });
+                    if (_this._options.state === _this.options.defaultStatusType) {
+                      return pmChild.attr('data-range-place', '');
+                    } else {
+                      if (!pmOToken) {
+                        return pmChild.attr('data-range-place', 'in-between');
+                      }
+                    }
                   }
                 } else if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T12:00:00", "==")) {
                   if (_this._trackable(pmChild)) {
-                    return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
+                    return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]).attr({
+                      'data-status-type': _this._options.state,
+                      'data-delimiter': 'true'
+                    });
                   }
                 } else if (_this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T00:00:00", "==")) {
                   if (_this._trackable(amChild)) {
-                    return amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
+                    return amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]).attr({
+                      'data-status-type': _this._options.state,
+                      'data-delimiter': 'true'
+                    });
                   }
                 }
               });
@@ -421,36 +645,55 @@
               return true;
             } else if (this._compareDates(this._options.startDate, this._options.endDate, ">")) {
               this.element.find("." + this.options.boxClass.fullDay).each(function() {
-                var amChild, pmChild;
+                var amChild, amOToken, pmChild, pmOToken;
                 amChild = $(this).find('.' + _this.options.boxClass.am);
                 pmChild = $(this).find('.' + _this.options.boxClass.pm);
+                if (_this._compareDates(_this._options.endDate, $(this).attr('data-date') + pos, '==')) {
+                  if (pos === "T00:00:00") {
+                    amOToken = _this._startRangeLogic(amChild, 'start');
+                  } else {
+                    pmOToken = _this._startRangeLogic(pmChild, 'start');
+                  }
+                }
                 if (_this._compareDates(_this._options.startDate, $(this).attr('data-date') + startPos, '==')) {
                   if (startPos === "T00:00:00") {
-                    amChild.attr('data-range-place', 'end');
+                    amOToken = _this._endRangeLogic(amChild, 'end');
                   } else {
-                    pmChild.attr('data-range-place', 'end');
-                  }
-                } else if (_this._compareDates(_this._options.endDate, $(this).attr('data-date') + pos, '==')) {
-                  if (pos === "T00:00:00") {
-                    amChild.attr('data-range-place', 'start');
-                  } else {
-                    pmChild.attr('data-range-place', 'start');
+                    pmOToken = _this._endRangeLogic(pmChild, 'end');
                   }
                 }
                 if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", ">") && _this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T12:00:00", "<")) {
                   if (_this._trackable(amChild)) {
-                    amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state);
+                    amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am[_this._options.state]).attr({
+                      'data-status-type': _this._options.state,
+                      'data-delimiter': 'false'
+                    });
+                    if (!amOToken) {
+                      amChild.attr('data-range-place', 'in-between');
+                    }
                   }
                   if (_this._trackable(pmChild)) {
-                    return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state);
+                    pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm[_this._options.state]).attr({
+                      'data-status-type': _this._options.state,
+                      'data-delimiter': 'false'
+                    });
+                    if (!pmOToken) {
+                      return pmChild.attr('data-range-place', 'in-between');
+                    }
                   }
                 } else if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", "==")) {
                   if (_this._trackable(amChild)) {
-                    return amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
+                    return amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]).attr({
+                      'data-status-type': _this._options.state,
+                      'data-delimiter': 'true'
+                    });
                   }
                 } else if (_this._compareDates(_this._options.endDate, $(this).attr("data-date") + "T12:00:00", "==")) {
                   if (_this._trackable(pmChild)) {
-                    return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
+                    return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]).attr({
+                      'data-status-type': _this._options.state,
+                      'data-delimiter': 'true'
+                    });
                   }
                 }
               });
@@ -463,18 +706,24 @@
                 pmChild = $(this).find('.' + _this.options.boxClass.pm);
                 if (_this._compareDates(_this._options.startDate, $(this).attr('data-date') + startPos, '==')) {
                   if (startPos === "T00:00:00") {
-                    amChild.attr('data-range-place', 'start-end');
+                    _this._startEndRangeLogic(amChild);
                   } else {
-                    pmChild.attr('data-range-place', 'start-end');
+                    _this._startEndRangeLogic(pmChild);
                   }
                 }
                 if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T00:00:00", "==")) {
                   if (_this._trackable(amChild)) {
-                    return amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
+                    return amChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]).attr({
+                      'data-status-type': _this._options.state,
+                      'data-delimiter': 'true'
+                    });
                   }
                 } else if (_this._compareDates(_this._options.startDate, $(this).attr("data-date") + "T12:00:00", "==")) {
                   if (_this._trackable(pmChild)) {
-                    return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]).attr('data-status-type', _this._options.state).attr('data-delimiter', 'true');
+                    return pmChild.removeClass(_this._getAllClasses(_this.options.setStates)).addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]).attr({
+                      'data-status-type': _this._options.state,
+                      'data-delimiter': 'true'
+                    });
                   }
                 }
               });
@@ -870,7 +1119,7 @@
               tmp.availability.push({
                 date: date,
                 delimiter: "false",
-                place: "",
+                place: "in-between",
                 type: day.type
               });
             }
@@ -891,13 +1140,25 @@
         };
         return date.getUTCFullYear() + "-" + pad(date.getUTCMonth() + 1) + "-" + pad(date.getUTCDate()) + "T" + pad(date.getUTCHours()) + ":" + pad(date.getUTCMinutes()) + ":" + pad(date.getUTCSeconds());
       },
+      _getNextDateDOMObj: function(date) {
+        var newDate, time;
+        time = new Date(date).getTime();
+        newDate = this._prepareDate(new Date(time + 43200000));
+        return $('.' + this.options.trackClass + ' div[data-date="' + newDate + '"]');
+      },
+      _getPrevDateDOMObj: function(date) {
+        var newDate, time;
+        time = new Date(date).getTime();
+        newDate = this._prepareDate(new Date(time - 43200000));
+        return $('.' + this.options.trackClass + ' div[data-date="' + newDate + '"]');
+      },
       _init: function() {
         return this._setDate();
       },
       destroy: function() {},
       _setOption: function(key, value) {}
     });
-    return $.extend($.a07.BearCal, {
+    $.extend($.a07.BearCal, {
       instances: [],
       getDOMInstances: function() {
         var t;
@@ -908,6 +1169,7 @@
         return t;
       }
     });
+    return $.fn.reverse = [].reverse;
   })(jQuery, window, document);
 
 }).call(this);

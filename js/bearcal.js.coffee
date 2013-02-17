@@ -118,6 +118,18 @@
           # Update classes
           matchedElement.addClass(_this.options.setStates[tod][value.type] + " " + if value.delimiter is "true" then _this.options.setStates[tod].delimiter else "")
 
+
+    # Get last occurence index of value in an array
+    _getLastIndex : (arr, needle) ->
+      idx = $.inArray(needle, arr)
+      indices = []
+
+      while ( idx isnt -1 ) 
+        indices.push(idx)
+        idx = $.inArray(needle, arr, idx+1)
+      
+      indices[indices.length-1]
+
     # Get current calendar in JSON format filtered by states(array) and optional range grouping
     getJSONByStates : (states, range = false) ->
       _this = @
@@ -136,15 +148,20 @@
             # If it's the end of a range and it matches a stored status type, we need to place it somewhere specific in the array
             workingIndex = $.inArray(amElem.attr('data-status-type'), nextStatusType) 
             if workingIndex isnt -1 and amElem.attr('data-range-place') is 'end'
-              json.availability[nextArrayIndex[workingIndex]] =
+              # Get last index of this type of booking
+              lastIndex = _this._getLastIndex(nextStatusType, amElem.attr('data-status-type'))
+              # Get the array position to know where to push the booking info
+              pushPosition = nextArrayIndex[lastIndex]
+              # Push the booking onto the array space
+              json.availability[pushPosition] =
                 "date"        : amElem.attr('data-date')
                 "type"        : amElem.attr('data-status-type')
                 "delimiter"   : amElem.attr('data-delimiter')
                 "place"       : amElem.attr('data-range-place')
 
               # We no longer need to track these from the array 
-              nextArrayIndex.splice([workingIndex],1)
-              nextStatusType.splice([workingIndex],1)
+              nextArrayIndex.splice(lastIndex,1)
+              nextStatusType.splice(lastIndex,1)
             else
               json.availability.push
                 "date"        : amElem.attr('data-date')
@@ -156,22 +173,29 @@
             if amElem.attr('data-range-place') isnt 'start-end' and amElem.attr('data-range-place') isnt 'end'
               # Make a space for the end of the range and get the index for it
               nextArrayIndex.push(json.availability.push(null) - 1)
+
               # Store the status type
               nextStatusType.push(amElem.attr('data-status-type'))
+              
 
         if $.inArray(pmElem.attr('data-status-type'), states) isnt -1
           if (range and $.inArray(pmElem.attr('data-range-place'), ['start','end','start-end']) isnt -1) or (!range)
             workingIndex = $.inArray(pmElem.attr('data-status-type'), nextStatusType) 
             if workingIndex isnt -1 and pmElem.attr('data-range-place') is 'end'
-              json.availability[nextArrayIndex[workingIndex]] =
+              # Get last index of this type of booking
+              lastIndex = _this._getLastIndex(nextStatusType, pmElem.attr('data-status-type'))
+              # Get the array position to know where to push the booking info
+              pushPosition = nextArrayIndex[lastIndex]
+              # Push the booking onto the array space
+              json.availability[pushPosition] =
                 "date"        : pmElem.attr('data-date')
                 "type"        : pmElem.attr('data-status-type')
                 "delimiter"   : pmElem.attr('data-delimiter')
                 "place"       : pmElem.attr('data-range-place')
 
               # We no longer need to track these from the array 
-              nextArrayIndex.splice([workingIndex],1)
-              nextStatusType.splice([workingIndex],1)
+              nextArrayIndex.splice(lastIndex,1)
+              nextStatusType.splice(lastIndex,1)
             else
               json.availability.push
                 "date"        : pmElem.attr('data-date')
@@ -370,6 +394,191 @@
               $(@).find("."+_this.options.boxClass.pm).addClass _this.options.highlightStates.pm[_this._options.state] 
 
 
+    _startRangeLogic : (domElement, defaultPlace = 'start') ->
+      oToken = false
+      # Get the previous halfday DOM Object
+      prevDate = @_getPrevDateDOMObj(domElement.attr('data-date'))
+
+      # Scenario: The start date DOM object currently has no data-range-place applied to it
+      if domElement.attr('data-range-place') is ''
+        domElement.attr('data-range-place', defaultPlace)
+        # These are overwrite tokens, so we don't overwrite the data-range-place on the day we just set
+        # when we go through the logic on whether to apply 'in-betewen' states below
+        oToken = true 
+
+      if @_options.state is domElement.attr('data-status-type') 
+        domElement.attr('data-range-place', 'in-between')
+      else
+        # Scenario: The start date DOM object currently has a data-range-place applied to it of 'in-between'
+        # The start date could only ever be in-between if we're changing a status to the default status (available)
+        # For example, clicking within an unavailable range to make some or all of it available
+        if domElement.attr('data-range-place') is 'in-between'
+          # Sub-scenario: Is the previous halfday DOM object data-range-place value 'in-between'?
+          if prevDate.attr('data-range-place') is 'in-between'
+            prevDate.attr('data-range-place', 'end')
+          # Sub-scenario: Is the previous halfday DOM object data-range-place value 'start'?
+          if prevDate.attr('data-range-place') is 'start'
+            prevDate.attr('data-range-place', 'start-end')
+          if prevDate.attr('data-status-type') is 'booked'
+            @_spreadRangeLogic(domElement, 'reverse')
+
+      # Scenario: If the start date needs to be set for the defaultStatusType we don't set data-range-place
+      if @_options.state is @options.defaultStatusType
+        domElement.attr('data-range-place', '')
+
+      oToken
+
+    _endRangeLogic : (domElement, defaultPlace = 'end') ->
+      oToken = false
+      nextDate = @_getNextDateDOMObj(domElement.attr('data-date'))
+
+      if domElement.attr('data-range-place') is ''
+        domElement.attr('data-range-place', defaultPlace)
+        oToken = true
+        
+      if @_options.state is domElement.attr('data-status-type') 
+        domElement.attr('data-range-place', 'in-between')
+      else
+        if domElement.attr('data-range-place') is 'in-between'
+          if nextDate.attr('data-range-place') is 'in-between'
+            nextDate.attr('data-range-place', 'start')
+          if nextDate.attr('data-range-place') is 'end'
+            nextDate.attr('data-range-place', 'start-end')
+          if nextDate.attr('data-status-type') is 'booked'
+            @_spreadRangeLogic(domElement)
+
+      if @_options.state is @options.defaultStatusType
+        domElement.attr('data-range-place', '')
+
+      oToken
+
+    _startEndRangeLogic : (domElement, defaultPlace = 'start-end') ->
+      oToken = false
+      _this = @
+
+      # Get the next and previous halfday DOM Object
+      nextDate = @_getNextDateDOMObj(domElement.attr('data-date'))
+      prevDate = @_getPrevDateDOMObj(domElement.attr('data-date'))
+
+      if (domElement.attr('data-range-place') is '')
+        domElement.attr('data-range-place', defaultPlace)
+        oToken = true
+
+      else
+
+        if domElement.attr('data-range-place') is 'start'
+
+          # Deal with next DOM object first
+          if nextDate.attr('data-range-place') is 'in-between'
+            nextDate.attr('data-range-place', 'start')
+          if nextDate.attr('data-range-place') is 'end'
+            nextDate.attr('data-range-place', 'start-end')
+          if nextDate.attr('data-status-type') is 'booked'
+            @_spreadRangeLogic(domElement)
+
+        if domElement.attr('data-range-place') is 'in-between'
+
+          # Deal with next DOM object first
+          if nextDate.attr('data-range-place') is 'in-between'
+            nextDate.attr('data-range-place', 'start')
+          if nextDate.attr('data-range-place') is 'end'
+            nextDate.attr('data-range-place', 'start-end')
+          if nextDate.attr('data-status-type') is 'booked'
+            @_spreadRangeLogic(domElement)
+
+          # Deal with prev DOM object next
+          if prevDate.attr('data-range-place') is 'in-between'
+            prevDate.attr('data-range-place', 'end')
+          # Sub-scenario: Is the previous halfday DOM object data-range-place value 'start'?
+          if prevDate.attr('data-range-place') is 'start'
+            prevDate.attr('data-range-place', 'start-end')
+          if prevDate.attr('data-status-type') is 'booked'
+            @_spreadRangeLogic(domElement, 'reverse')
+
+        if domElement.attr('data-range-place') is 'end'
+
+          # Deal with prev DOM object only
+          if prevDate.attr('data-range-place') is 'in-between'
+            prevDate.attr('data-range-place', 'end')
+          # Sub-scenario: Is the previous halfday DOM object data-range-place value 'start'?
+          if prevDate.attr('data-range-place') is 'start'
+            prevDate.attr('data-range-place', 'start-end')
+          if prevDate.attr('data-status-type') is 'booked'
+            @_spreadRangeLogic(domElement, 'reverse')
+
+        if @_options.state is @options.defaultStatusType
+          domElement.attr('data-range-place', '')
+
+      oToken
+
+    # This logic is required for the following situation:
+    # Given these preexisting ranges are in the same month
+    # booked [ 14.PM - 20.AM ]
+    # unavailable [ 1.AM - 31.PM ]
+    #
+    # You then perform these sequence of events
+    # 1. start-click on [1.AM] thereby changing it to available
+    # 2. end-click on [14.AM] thereby closing the available range right before the booked range 
+    #
+    # The above action will remove the 'start' from the 'unavailable' range which is desired
+    # but now we have the 'end' of the 'unavailable' range just floating without a 'start'
+    #
+    # Therefore, given what the data-range-place value is on then end-click, the below logic will
+    # find the next halfday of the same status-type and apply a 'start' or 'start-end' data-range-place
+    # to it. This will effectively keep create a valid 'unavailable' range again.
+    #
+    # Note: This logic can go both forward and reverse through the calendar
+    _spreadRangeLogic : (domElement, direction = "forward") ->
+      _this = @
+      domElementDate = domElement.attr('data-date')
+      domElementType = domElement.attr('data-status-type')
+      found = false
+
+      if direction is 'forward'
+        # Seek out the next unavailable and apply
+        @element.find("."+@options.boxClass.fullDay).each -> 
+          amChild = $(@).find('.'+_this.options.boxClass.am)
+          pmChild = $(@).find('.'+_this.options.boxClass.pm)
+          # if the date is bigger then domElement and is of the same status-type
+          # then that's our target.
+          if (_this._compareDates(amChild.attr('data-date'), domElementDate, '>')) and (amChild.attr('data-status-type') is domElementType) and (found isnt true)
+
+            if amChild.attr('data-range-place') is 'in-between'
+              amChild.attr('data-range-place', 'start')
+            if amChild.attr('data-range-place') is 'end'
+              amChild.attr('data-range-place', 'start-end')
+            found = true
+
+          if (_this._compareDates(pmChild.attr('data-date'), domElementDate, '>')) and (pmChild.attr('data-status-type') is domElementType) and (found isnt true)
+            if pmChild.attr('data-range-place') is 'in-between'
+              pmChild.attr('data-range-place', 'start')
+            if pmChild.attr('data-range-place') is 'end'
+              pmChild.attr('data-range-place', 'start-end')
+            found = true
+      
+      if direction is 'reverse'
+        # Seek out the next unavailable and apply
+        @element.find("."+@options.boxClass.fullDay).reverse().each -> 
+          amChild = $(@).find('.'+_this.options.boxClass.am)
+          pmChild = $(@).find('.'+_this.options.boxClass.pm)
+          # if the date is smaller then domElement and is of the same status-type
+          # then that's our target.
+          if (_this._compareDates(pmChild.attr('data-date'), domElementDate, '<')) and (pmChild.attr('data-status-type') is domElementType) and (found isnt true)
+            if pmChild.attr('data-range-place') is 'in-between'
+              pmChild.attr('data-range-place', 'end')
+            if pmChild.attr('data-range-place') is 'start'
+              pmChild.attr('data-range-place', 'start-end')
+            found = true
+
+          if (_this._compareDates(amChild.attr('data-date'), domElementDate, '<')) and (amChild.attr('data-status-type') is domElementType) and (found isnt true)
+
+            if amChild.attr('data-range-place') is 'in-between'
+              amChild.attr('data-range-place', 'end')
+            if amChild.attr('data-range-place') is 'start'
+              amChild.attr('data-range-place', 'start-end')
+            found = true
+
+
     # Logic behind whether states should be applied to date selection
     #
     # There are 3 logic groups - each group requires slight logic variations
@@ -414,43 +623,70 @@
               pmChild = $(@).find('.'+_this.options.boxClass.pm)
 
               # This conditional block is only in charge of registering whether it's the start or end of the date range
+              # SET START DATE
               if _this._compareDates(_this._options.startDate, $(@).attr('data-date') + startPos, '==')
+                # AM START
                 if startPos is "T00:00:00"
-                  amChild.attr('data-range-place', 'start')
+                  amOToken = _this._startRangeLogic(amChild)
+                
+                # PM START
                 else
-                  pmChild.attr('data-range-place', 'start')
-              else if _this._compareDates(_this._options.endDate, $(@).attr('data-date') + pos, '==')
-                if pos is "T00:00:00"
-                  amChild.attr('data-range-place', 'end')
-                else
-                  pmChild.attr('data-range-place', 'end')
+                  pmOToken = _this._startRangeLogic(pmChild)
 
-              # This conditional block assigns the rest of th stuff such as states, delimiters and classes
+              # SET END DATE
+              if _this._compareDates(_this._options.endDate, $(@).attr('data-date') + pos, '==')
+                # AM END
+                if pos is "T00:00:00"
+                  amOToken = _this._endRangeLogic(amChild)
+
+                # PM END
+                else
+                  pmOToken = _this._endRangeLogic(pmChild)
+
+              # This conditional block assigns the rest of the stuff such as states, delimiters and classes
               if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T12:00:00", "<") and _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T00:00:00", ">") 
 
                 if _this._trackable(amChild) # Only add class if it's trackable
                   amChild.removeClass(_this._getAllClasses(_this.options.setStates))
                   .addClass(_this.options.setStates.am[_this._options.state]) 
-                  .attr('data-status-type', _this._options.state)
+                  .attr
+                    'data-status-type'  : _this._options.state
+                    'data-delimiter'    : "false"
+                  
+                  if _this._options.state is _this.options.defaultStatusType
+                    amChild.attr('data-range-place', '')
+                  else
+                    amChild.attr('data-range-place', 'in-between') unless amOToken
+                      
 
                 if _this._trackable(pmChild) # Only add class if it's trackable
                   pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
                   .addClass(_this.options.setStates.pm[_this._options.state]) 
-                  .attr('data-status-type', _this._options.state)
+                  .attr
+                    'data-status-type'  : _this._options.state
+                    'data-delimiter'    : "false"
+                  
+                  if _this._options.state is _this.options.defaultStatusType
+                    pmChild.attr('data-range-place', '')
+                  else
+                    pmChild.attr('data-range-place', 'in-between') unless pmOToken
+                      
 
               else if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T12:00:00", "==")
                 if _this._trackable(pmChild) # Only add class if it's trackable
                   pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
                   .addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]) 
-                  .attr('data-status-type', _this._options.state)
-                  .attr('data-delimiter', 'true')
+                  .attr
+                    'data-status-type'  : _this._options.state
+                    'data-delimiter'    : 'true'
 
               else if _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T00:00:00", "==")
                 if _this._trackable(amChild) # Only add class if it's trackable
                   amChild.removeClass(_this._getAllClasses(_this.options.setStates))
                   .addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]) 
-                  .attr('data-status-type', _this._options.state)
-                  .attr('data-delimiter', 'true')
+                  .attr
+                    'data-status-type'  :  _this._options.state
+                    'data-delimiter'    : 'true'
 
             @_eraseHighlights()
             true #Return true to let know that an end date was set
@@ -462,41 +698,60 @@
               pmChild = $(@).find('.'+_this.options.boxClass.pm)
 
               # This conditional block is only in charge of registering whether it's the start or end of the date range
-              if _this._compareDates(_this._options.startDate, $(@).attr('data-date') + startPos, '==')
-                if startPos is "T00:00:00"
-                  amChild.attr('data-range-place', 'end')
-                else
-                  pmChild.attr('data-range-place', 'end')
-              else if _this._compareDates(_this._options.endDate, $(@).attr('data-date') + pos, '==')
+              # SET START DATE WHICH IS REALLY THE SECOND CLICK
+              if _this._compareDates(_this._options.endDate, $(@).attr('data-date') + pos, '==')
+                # AM END
                 if pos is "T00:00:00"
-                  amChild.attr('data-range-place', 'start')
+                  amOToken = _this._startRangeLogic(amChild, 'start')
+
+                # PM END
                 else
-                  pmChild.attr('data-range-place', 'start')
+                  pmOToken = _this._startRangeLogic(pmChild, 'start')
+
+              # SET END DATE WHICH IS REALLY THE FIRST CLICK
+              if _this._compareDates(_this._options.startDate, $(@).attr('data-date') + startPos, '==')
+                # AM START
+                if startPos is "T00:00:00"
+                  amOToken = _this._endRangeLogic(amChild, 'end')
+                
+                # PM START
+                else
+                  pmOToken = _this._endRangeLogic(pmChild, 'end')
 
               if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T00:00:00", ">") and _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T12:00:00", "<")
                 if _this._trackable(amChild) # Only add class if it's trackable
                   amChild.removeClass(_this._getAllClasses(_this.options.setStates))
                   .addClass(_this.options.setStates.am[_this._options.state]) 
-                  .attr('data-status-type', _this._options.state)
+                  .attr
+                    'data-status-type'  : _this._options.state
+                    'data-delimiter'    : 'false'
+
+                  amChild.attr('data-range-place', 'in-between') unless amOToken
 
                 if _this._trackable(pmChild) # Only add class if it's trackable
                   pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
                   .addClass(_this.options.setStates.pm[_this._options.state]) 
-                  .attr('data-status-type', _this._options.state)
+                  .attr
+                    'data-status-type'  : _this._options.state
+                    'data-delimiter'    : 'false'
+                    
+                  pmChild.attr('data-range-place', 'in-between') unless pmOToken
 
               else if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T00:00:00", "==")
                 if _this._trackable(amChild) # Only add class if it's trackable
                   amChild.removeClass(_this._getAllClasses(_this.options.setStates))
                   .addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]) 
-                  .attr('data-status-type', _this._options.state)
-                  .attr('data-delimiter', 'true')
+                  .attr
+                    'data-status-type'  : _this._options.state
+                    'data-delimiter'    : 'true'
 
               else if _this._compareDates(_this._options.endDate, $(@).attr("data-date") + "T12:00:00", "==")
                 if _this._trackable(pmChild) # Only add class if it's trackable
                   pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
                   .addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]) 
-                  .attr('data-status-type', _this._options.state)
-                  .attr('data-delimiter', 'true')
+                  .attr
+                    'data-status-type'  : _this._options.state
+                    'data-delimiter'    : 'true'
 
             @_eraseHighlights()
             true #Return true to let know that an end date was set
@@ -509,24 +764,29 @@
 
               # This conditional block is only in charge of registering whether it's the start or end of the date range
               if _this._compareDates(_this._options.startDate, $(@).attr('data-date') + startPos, '==')
+                # AM DATE
                 if startPos is "T00:00:00"
-                  amChild.attr('data-range-place', 'start-end')
+                  _this._startEndRangeLogic(amChild)
+
+                # PM DATE
                 else
-                  pmChild.attr('data-range-place', 'start-end')
+                  _this._startEndRangeLogic(pmChild)
 
               if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T00:00:00", "==")
                 if _this._trackable(amChild) # Only add class if it's trackable
                   amChild.removeClass(_this._getAllClasses(_this.options.setStates))
                   .addClass(_this.options.setStates.am.delimiter + " " + _this.options.setStates.am[_this._options.state]) 
-                  .attr('data-status-type', _this._options.state)
-                  .attr('data-delimiter', 'true')
+                  .attr
+                    'data-status-type'  : _this._options.state
+                    'data-delimiter'    : 'true'
 
               else if _this._compareDates(_this._options.startDate, $(@).attr("data-date") + "T12:00:00", "==")
                 if _this._trackable(pmChild) # Only add class if it's trackable
                   pmChild.removeClass(_this._getAllClasses(_this.options.setStates))
                   .addClass(_this.options.setStates.pm.delimiter + " " + _this.options.setStates.pm[_this._options.state]) 
-                  .attr('data-status-type', _this._options.state)
-                  .attr('data-delimiter', 'true')
+                  .attr
+                    'data-status-type'  : _this._options.state
+                    'data-delimiter'    : 'true'
           
             true #Return true to let know that an end date was set
     
@@ -943,7 +1203,7 @@
             tmp.availability.push({
               date      : date
               delimiter : "false"
-              place     : ""
+              place     : "in-between"
               type      : day.type
             })
 
@@ -957,6 +1217,16 @@
       pad = (n) ->
         (if n < 10 then "0" + n else n)
       date.getUTCFullYear() + "-" + pad(date.getUTCMonth() + 1) + "-" + pad(date.getUTCDate()) + "T" + pad(date.getUTCHours()) + ":" + pad(date.getUTCMinutes()) + ":" + pad(date.getUTCSeconds())
+
+    _getNextDateDOMObj: (date) ->
+      time = new Date(date).getTime()
+      newDate = @_prepareDate(new Date(time + 43200000))
+      $('.'+@options.trackClass+' div[data-date="'+newDate+'"]')
+
+    _getPrevDateDOMObj: (date) ->
+      time = new Date(date).getTime()
+      newDate = @_prepareDate(new Date(time - 43200000))
+      $('.'+@options.trackClass+' div[data-date="'+newDate+'"]')
 
     _init: ->
       # We call set date to ensure a Date object is passed as the options.startDate value
@@ -973,5 +1243,7 @@
       $.each @instances, (i,v) ->
         t.push(v.get(0))
       t
+
+  $.fn.reverse = [].reverse
 
 ) jQuery, window, document
