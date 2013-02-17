@@ -1290,12 +1290,12 @@
       date.getUTCFullYear() + "-" + pad(date.getUTCMonth() + 1) + "-" + pad(date.getUTCDate()) + "T" + pad(date.getUTCHours()) + ":" + pad(date.getUTCMinutes()) + ":" + pad(date.getUTCSeconds())
 
     _getNextDateDOMObj: (date) ->
-      time = new Date(date).getTime()
+      time = new Date( @_UTCify(date) ).getTime()
       newDate = @_prepareDate(new Date(time + 43200000))
       $('.'+@options.trackClass+' div[data-date="'+newDate+'"]')
 
     _getPrevDateDOMObj: (date) ->
-      time = new Date(date).getTime()
+      time = new Date( @_UTCify(date) ).getTime()
       newDate = @_prepareDate(new Date(time - 43200000))
       $('.'+@options.trackClass+' div[data-date="'+newDate+'"]')
 

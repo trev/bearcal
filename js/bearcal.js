@@ -1214,13 +1214,13 @@
       },
       _getNextDateDOMObj: function(date) {
         var newDate, time;
-        time = new Date(date).getTime();
+        time = new Date(this._UTCify(date)).getTime();
         newDate = this._prepareDate(new Date(time + 43200000));
         return $('.' + this.options.trackClass + ' div[data-date="' + newDate + '"]');
       },
       _getPrevDateDOMObj: function(date) {
         var newDate, time;
-        time = new Date(date).getTime();
+        time = new Date(this._UTCify(date)).getTime();
         newDate = this._prepareDate(new Date(time - 43200000));
         return $('.' + this.options.trackClass + ' div[data-date="' + newDate + '"]');
       },
