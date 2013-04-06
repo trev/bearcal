@@ -98,6 +98,11 @@ Object literal containing the classes to apply to the wrapper div of a single da
       pm: "pm_box",
       fullDay: "day_box"
 
+#### track
+Whether to track mouse events or not
+**Default:** true  
+`track : true`
+
 #### trackClass
 Class to add to each single day wrapper div. This class is used solely for attaching events.  
 **Default:** track  

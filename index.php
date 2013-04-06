@@ -17,7 +17,7 @@
     <div class="bearcal">
     </div>
 
-    <h2>Single Month Calendar</h2>
+    <h2>Single Month Calendar (tracking disabled)</h2>
     <div class="minibearcal">
     </div>
 

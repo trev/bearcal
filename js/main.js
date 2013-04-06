@@ -17,6 +17,7 @@ $(function() {
   $('.minibearcal').BearCal({
     period        : 1, //Preload only one month
     monthScrollPeriod  : 1, //How many months to scroll at once
+    track: false,
     json : { 
       enable: true,
       url: "/sample-data-large.json",

@@ -19,6 +19,7 @@
         am              : "am_box"
         pm              : "pm_box"
         fullDay         : "day_box"
+      track             : true
       trackClass        : "track"
       defaultStatusType : "available"
       reverseTypes      :
@@ -1216,7 +1217,7 @@
         @_getNextMonths(@options.yearScrollPeriod)
         return false
 
-      @_track()
+      @_track() if @options.track
       
     _create: ->
       # Store widget instance in array

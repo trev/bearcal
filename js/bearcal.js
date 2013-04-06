@@ -26,6 +26,7 @@
           pm: "pm_box",
           fullDay: "day_box"
         },
+        track: true,
         trackClass: "track",
         defaultStatusType: "available",
         reverseTypes: {
@@ -1137,7 +1138,9 @@
           _this._getNextMonths(_this.options.yearScrollPeriod);
           return false;
         });
-        return this._track();
+        if (this.options.track) {
+          return this._track();
+        }
       },
       _create: function() {
         var _this;
